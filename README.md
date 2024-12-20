@@ -1,4 +1,4 @@
-<img src="./static/image/logo.png" width=80>
+<img src="https://nanomd.pardn.io/static/image/logo.png" width=80>
 
 # NanoMD
 
@@ -7,11 +7,11 @@
 > A pure JavaScript-based Markdown editor, built with native APIs, supports standard Markdown syntax with various extended features, including real-time preview, scroll synchronization, automatic detection of YouTube videos, and more.<br>
 > Additionally, with its built-in virtual DOM technology, it updates only the modified parts, ensuring efficient rendering and smooth editing experiences, making it ideal for online editing scenarios.
 
-![](https://img.shields.io/badge/tag-JavaScript%20Library-bb4444) 
-![](https://img.shields.io/github/size/pardnchiu/NanoMD/dist%2FNanoMD.js)<br>
-[![](https://img.shields.io/github/v/release/pardnchiu/NanoMD)](https://github.com/pardnchiu/NanoMD) 
-[![](https://img.shields.io/npm/v/@pardnchiu/nanomd)](https://www.npmjs.com/package/@pardnchiu/nanomd) 
-[![](https://img.shields.io/jsdelivr/npm/hw/@pardnchiu/nanomd)](https://www.jsdelivr.com/package/npm/@pardnchiu/nanomd)<br>
+![tag](https://img.shields.io/badge/tag-JavaScript%20Library-bb4444) 
+![size](https://img.shields.io/github/size/pardnchiu/NanoMD/dist%2FNanoMD.js)<br>
+[![npm](https://img.shields.io/npm/v/@pardnchiu/nanomd)](https://www.npmjs.com/package/@pardnchiu/nanomd)
+[![download](https://img.shields.io/npm/dm/@pardnchiu/nanomd)](https://www.npmjs.com/package/@pardnchiu/nanomd)
+[![jsdeliver](https://img.shields.io/jsdelivr/npm/hm/@pardnchiu/nanomd)](https://www.jsdelivr.com/package/npm/@pardnchiu/nanomd)<br>
 [![](https://img.shields.io/badge/查閱-中文版本-ffffff)](https://github.com/pardnchiu/NanoMD/blob/main/README.zh.md)
 
 ## Features
@@ -22,7 +22,12 @@
 - Includes undo/redo functions, multiple hotkeys, and supports importing/exporting files in Markdown and HTML formats.
 - Implements virtual DOM concepts for efficient rendering by updating the page on-demand.
 - Integrated [Google Icon](https://fonts.google.com/icons) and [code-prettify](https://github.com/googlearchive/code-prettify) for syntax highlighting.
-- Click here for a [preview](https://nanomd.pardn.io/)。
+
+## Documentation & Demo
+
+- **Documentation**: [nanomd.pardn.io/doc.html](https://nanomd.pardn.io/doc.html)
+- **Demo**: [nanomd.pardn.io/live.html](https://nanomd.pardn.io/live.html)
+- **Website**: [nanomd.pardn.io](https://nanomd.pardn.io)
 
 ## Installation
 
@@ -109,361 +114,16 @@
     (...).appendChild(domEditor.body);
     (...).appendChild(domViewer.body);
 
-    ```
+    ``` 
 
-## Markdown Syntax Support
+## License
 
-Supports standard Markdown syntax, including text styling, links, images, lists, tables, code blocks, and blockquotes. Additionally, extended features enhance functionality.
+Similar to MIT License but provides obfuscated code only:
+- Same as MIT: Free to use, modify and redistribute, including commercial use 
+- Main difference: Provides obfuscated code by default, source code available for purchase
+- License terms: Must retain original copyright notice (same as MIT)
 
-### Text Styling
-
-<details>
-<summary><strong>Standard Syntax</strong></summary>
-
-| Syntax | Output |
-| - | - |
-| `# H1`<br>`H1\n===`<br>`<h1>H1</h1>`  | <h1>H1</h1> |
-| `## H2`<br>`H2\n---`<br>`<h2>H2</h2>` | <h2>H2</h2> |
-| `### H3`<br>`<h3>H3</h3>` | <h3>H3</h3> |
-| `#### H4`<br>`<h4>H4</h4>` | <h4>H4</h4> |
-| `##### H5`<br>`<h5>H5</h5>` | <h5>H5</h5> |
-| `###### H6`<br>`<h6>H6</h6>` | <h6>H6</h6> |
-| `**Bold**`<br>`__Bold__`<br>`<b>Bold</b>`<br>`<strong>Bold</strong>` | <b>Bold</b> |
-| `*Italic*`<br>`_Italic_`<br>`<i>Italic</i>`<br>`<em>Italic</em>` | <i>Italic</i> |
-| `~~Strikethrough~~`<br>`<s>Strikethrough</s>` | <s>Strikethrough</s> |
-| `<u>Underline</u>` | <u>Underline</u> |
-| `<mark>Highlight</mark>` | <mark>Highlight</mark> |
-| `x<sup>2</sup>` | x<sup>2</sup> |
-| `H<sub>2</sub>O` | H<sub>2</sub>O |
-
-</details>
-
-<details>
-<summary><strong>Extensions</strong></summary>
-
-| Syntax | Output |
-| - | - |
-| `==Highlight==` | ==Highlight== |
-| `x^2^` | x^2^ |
-| `H~2~O` | H~2~O |
-
-</details>
-
-### Links
-
-<details>
-<summary><strong>Standard Syntax</strong></summary>
-
-- Plain link: https://github.com/pardnchiu/NanoMD/
-    ```
-    https://github.com/pardnchiu/NanoMD/
-    ```
-- Link with custom text: [Display text](https://github.com/pardnchiu/NanoMD/)
-    ```
-    [Display text](https://github.com/pardnchiu/NanoMD/)
-    ```
-- Link with custom title: [Display text](https://github.com/pardnchiu/NanoMD/ "Link title")
-    ```
-    [Display text](https://github.com/pardnchiu/NanoMD/ "Link title")
-    ```
-
-</details>
-
-<details>
-<summary><strong>Extensions</strong></summary>
-
-- Auto-detect Email: dev@pardn.io
-- Auto-detect YouTube videos: https://www.youtube.com/watch?v=O5O3yK8DJCc
-- Auto-detect Vimeo videos: https://vimeo.com/458695734
-
-</details>
-
-### Images
-
-<details>
-<summary><strong>Standard Syntax</strong></summary>
-
-- Image: [Image Source](https://pixabay.com/photos/corn-harvest-fall-thanksgiving-9135131/)
-    ```
-    ![](./static/image/corn-9135131_640.jpg)
-    ```
-    ![](./static/image/corn-9135131_640.jpg)
-- Image with description: [Image Source](https://pixabay.com/photos/dog-irish-setter-mischievous-7128749/)
-    ```
-    ![Example image from Pixabay](./static/image/dog-7128749_640.jpg)
-    ```
-    ![Example image from Pixabay](./static/image/dog-7128749_640.jpg)
-- Image with title: [Image Source](https://pixabay.com/photos/stilt-bird-animal-feathers-plumage-8593487/)
-    ```
-    ![](./static/image/stilt-8593487_640.jpg "Example image from Pixabay")
-    ```
-    ![](./static/image/stilt-8593487_640.jpg "Example image from Pixabay")
-- Linked image: [Image Source](https://pixabay.com/photos/hippopotamus-hippo-baby-hippo-9147023/)
-    ```
-    [![](./static/image/hippopotamus-9147023_640.jpg)](https://pixabay.com/photos/hippopotamus-hippo-baby-hippo-9147023/)
-    ```
-    [![](./static/image/hippopotamus-9147023_640.jpg)](https://pixabay.com/photos/hippopotamus-hippo-baby-hippo-9147023/)
-
-</details>
-
-<details>
-<summary><strong>Extensions</strong></summary>
-
-- Video: [Video Source](https://pixabay.com/videos/ocean-sea-wave-water-sunset-233867/)
-    ```
-    ![](./static/image/233867_tiny.mp4)
-    ```
-    ![](./static/image/233867_tiny.mp4)
-- Image with size (width: 50%): [Image Source](https://pixabay.com/photos/flamingo-nature-bird-wildlife-9190160/)
-    ```
-    ![](./static/image/flamingo-9190160_640.jpg)(50%*)
-    ```
-    ![](./static/image/flamingo-9190160_640.jpg)(50%*)
-
-</details>
-
-### Lists
-
-
-<details>
-<summary><strong>Ordered List</strong></summary>
-
-1. ol List 0
-2. ol List 0
-3. ol List 0
-    1. ol List 1
-        1. ol List 2
-            1. ol List 3
-                1. ol List 4
-
-```
-1. ol List 0
-2. ol List 0
-3. ol List 0
-    1. ol List 1
-        1. ol List 2
-            1. ol List 3
-                1. ol List 4
-```
-
-</details> 
-
-<details>
-<summary><strong>Unordered List</strong></summary>
-
-- ul List 0
-- ul List 0
-- ul List 0
-    - ul List 1
-        - ul List 2
-            - ul List 3
-                - ul List 4
-
-```
-- ul List 0
-- ul List 0
-- ul List 0
-    - ul List 1
-        - ul List 2
-            - ul List 3
-                - ul List 4
-```
-
-</details> 
-
-<details>
-<summary><strong>Mixed List</strong></summary>
-
-- ul List 0
-- ul List 0
-- ul List 0
-    1. ol List 1
-    1. ol List 1
-    1. ol List 1
-        - ul List 2
-        - ul List 2
-        - ul List 2
-            1. ol List 3
-                - ul List 4
-
-```
-- ul List 0
-- ul List 0
-- ul List 0
-    1. ol List 1
-    1. ol List 1
-    1. ol List 1
-        - ul List 2
-        - ul List 2
-        - ul List 2
-            1. ol List 3
-                - ul List 4
-```
-
-</details> 
-
-<details>
-<summary><strong>Todo List</strong></summary>
-
-- [ ] Item 1
-- [x] Item 2
-    - [ ] Item 2-1
-    - [x] Item 2-2
-
-```
-- [ ] Item 1
-- [x] Item 2
-    - [ ] Item 2-1
-    - [x] Item 2-2
-```
-
-</details> 
-
-### Code Blocks
-
-<details>
-<summary><strong>Standard Syntax</strong></summary>
-
-- Single line: `#Code-1`
-- Multi-line
-    ```Language
-    #Code-2
-    #Code-2
-    #Code-2
-    ```
-
-</details>
-
-<details>
-<summary><strong>Extensions</strong></summary>
-
-- Four spaces indentation
-
-    #Code-3
-    #Code-3
-    #Code-3
-
-</details> 
-
-
-### Blockquotes
-
-<details>
-<summary><strong>Standard Syntax</strong></summary>
-
-> Quote level 1<br>
-> <br>
->> Quote level 2
->>> Quote level 3
-
-```
-> Quote level 1<br>
-> <br>
->> Quote level 2
->>> Quote level 3
-```
-
-</details> 
-
-<details>
-<summary><strong>Extensions</strong></summary>
-
-> [!NOTE]
-> This is a NOTE
-
-```
-> [!NOTE]
-> This is a NOTE
-```
-
-> [!TIP]
-> This is a TIP
-
-```
-> [!TIP]
-> This is a TIP
-```
-
-> [!IMPORTANT]
-> This is IMPORTANT
-
-```
-> [!IMPORTANT]
-> This is IMPORTANT
-```
-
-> [!WARNING]
-> This is a WARNING
-
-```
-> [!WARNING]
-> This is a WARNING
-```
-
-> [!CAUTION]
-> This is a CAUTION
-
-```
-> [!CAUTION]
-> This is a CAUTION
-```
-
-</details> 
-
-### Tables
-
-<details>
-<summary><strong>Standard Syntax</strong></summary>
-
-- Table 1
-    | Left Align | Center Align | Right Align |
-    | :- | :-: | -: |
-    | Value | Value | Value |
-    | Value | Value | Value |
-    | Value | Value | Value |
-    | Value | Value | Value |
-- Table 2
-    Left Align | Center Align | Right Align
-    :- | :-: | -:
-    Value | Value | Value
-    Value | Value | Value
-    Value | Value | Value
-    Value | Value | Value
-    
-</details> 
-
-### Horizontal Rules
-
-`---` or `***`
-
-<hr>
-
-### Hashtag
-
-```
-#test1 #test2 #test3
-```
-
-#test1 #test2 #test3
-
-## Shortcut
-
-- Supported
-    - Copy: `cmd/ctrl` + `c`
-    - Cut: `cmd/ctrl` + `x`
-    - Paste: `cmd/ctrl` + `v`
-    - Undo: `cmd/ctrl` + `z`
-    - Redo: `cmd/ctrl` + `shift` + `z`
-    - Bold: `cmd/ctrl` + `b`
-    - Italic: `cmd/ctrl` + `i`
-    - Strikethrough: `cmd/ctrl` + `s`
-    - Underline: `cmd/ctrl` + `u`
-    - Highlight: `cmd/ctrl` + `m`
-    - Superscript: `cmd/ctrl` + `ArrowUp`
-    - Subscript: `cmd/ctrl` + `ArrowDown`
-    - Code block: `cmd/ctrl` + `k`
-- Disabled
-    - Refresh: `cmd/ctrl` + `r` or `F5`
+For detailed terms and conditions, please see the [Software Usage Agreement](https://github.com/pardnchiu/NanoMD/blob/main/LICENSE).
 
 
 ## Creator
@@ -472,23 +132,9 @@ Supports standard Markdown syntax, including text styling, links, images, lists,
 
 <h4 style="padding-top: 0">邱敬幃 Pardn Chiu</h4>
 
-[![](https://pardn.io/image/mail.svg)](mailto:dev@pardn.io) [![](https://skillicons.dev/icons?i=linkedin)](https://linkedin.com/in/pardnchiu) 
-
-## License
-
-This project is licensed under a **Proprietary License**.  
-You may use, install, and run this software only under the terms specified in the [End-User License Agreement (EULA)](https://github.com/pardnchiu/NanoMD/blob/main/LICENSE).
-
-## Obtain Complete Source Code
-
-[Contact me](mailto:dev@pardn.io) for the complete unobfuscated source code.<br>
-Feel free to modify and use for commercial purposes with the following licensing options:
-- Must retain `Powered by @pardnchiu/nanomd` copyright notice: $7,500.
-- Fully autonomous, no copyright notice required: $10,000.
+[![](https://skillicons.dev/icons?i=linkedin)](https://linkedin.com/in/pardnchiu)
 
 ***
 
 ©️ 2023 [邱敬幃 Pardn Chiu](https://www.linkedin.com/in/pardnchiu)
-
-***
 

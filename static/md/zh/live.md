@@ -1,4 +1,4 @@
-<img src="./static/image/logo.png" width=80>
+<img src="https://nanomd.pardn.io/static/image/logo.png" width=80>
 
 # NanoMD：極簡高效的 Markdown 編輯器
 

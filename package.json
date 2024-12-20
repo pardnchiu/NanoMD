@@ -1,7 +1,7 @@
 {
     "name": "@pardnchiu/nanomd",
     "version": "1.8.5",
-    "description": "NanoMD is a free, open-source, lightweight Markdown editor based on JavaScript. It supports real-time rendering, split-screen preview, code highlighting, and export features, making it an ideal Markdown tool.",
+    "description": "NanoMD is a lightweight Markdown editor based on pure JavaScript and native APIs, supporting real-time rendering, split-screen preview, code highlighting and export functions, making it an ideal Markdown tool.",
     "main": "dist/NanoMD.js",
     "module": "dist/NanoMD.esm.js",
     "types": "src/interface.ts",
