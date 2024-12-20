@@ -20,12 +20,12 @@
     </url>
 
     <url>
-        <loc>https://nanomd.pardn.io/license.html</loc>
+        <loc>https://nanomd.pardn.io/agreement.html</loc>
         <lastmod>2024-12-20</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/license.html?lang=zh"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/license.html?lang=en"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/agreement.html?lang=zh"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/agreement.html?lang=en"/>
     </url>
 
     <!-- Documentation pages -->
