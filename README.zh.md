@@ -132,5 +132,5 @@
 
 ***
 
-©️ 2023 [邱敬幃 Pardn Chiu](https://www.linkedin.com/in/pardnchiu)
+©️ 2023 [邱敬幃 Pardn Chiu](https://pardn.io)
 

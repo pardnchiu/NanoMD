@@ -306,7 +306,12 @@
                 justify-content: center;
                 align-items: center;
                 flex-flow: row wrap;
-                gap: $_16;
+                gap: $_8 $_16;
+
+                >span {
+                    display: block;
+                    width: 100%;
+                }
 
                 a {
                     display: flex;
@@ -358,14 +363,8 @@
                         }
                     }
 
-                    &:nth-child(3) {
-
-                        @media (hover: hover) {
-
-                            &:hover {
-                                border: 1px solid #000;
-                            }
-                        }
+                    &:last-child {
+                        border: none;
                     }
                 }
             }
@@ -688,6 +687,10 @@
             border-radius: $_16 $_16 0 0;
             overflow: hidden;
 
+            &:not(:has(section.tab)) {
+                max-width: $_800;
+            }
+
             >* {
                 flex-shrink: 0;
             }
@@ -780,11 +783,12 @@
                 background-color: #fff;
                 box-shadow: -$_4 0 $_8 #0000000d;
 
-                width: 100%;
+                flex-grow: 1;
+                // width: 100%;
 
-                @media screen and (min-width: 800px) {
-                    width: calc(100% - $_256);
-                }
+                // @media screen and (min-width: 800px) {
+                //     width: calc(100% - $_256);
+                // }
 
                 >button {
                     z-index: 1;

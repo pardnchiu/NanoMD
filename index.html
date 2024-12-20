@@ -77,6 +77,8 @@
         {
             "@context": "https://schema.org",
             "@type": "WebPage",
+            "datePublished": "2024-11-29",
+            "dateModified": "2024-12-20",
             "inLanguage": "zh-TW",
             "name": {
                 "@language": "zh-TW",
@@ -111,7 +113,11 @@
                         "@value": "Pardn Chiu"
                     }
                 ],
-                "url": "https://pardn.io/"
+                "url": "https://pardn.io/",
+                "sameAs": [
+                    "https://github.com/pardnchiu"
+                ],
+                "email": "dev@pardn.io"
             },
             "image": "https://nanomd.pardn.io/static/image/website.jpg"
         }
@@ -166,6 +172,11 @@
                         <i class="fa-brands fa-npm"></i>
                         npm
                     </a>
+                    <span></span>
+                    <a :href="./license.html?lang={{ lang }}">
+                        <i class="fa-solid fa-scale-balanced"></i>
+                        LICENSE
+                    </a>
                 </section>
                 <img :src="i18n.cover" alt="">
                 <a :href="./live.html?lang={{ lang }}" title="前往體驗 NanoMD">
@@ -213,6 +224,7 @@
         <footer>
             <p>Created by <a href="https://github.com/pardnchiu" target="_blank">邱敬幃</a></p>
             <p><a href="https://github.com/pardnchiu/NanoMD" target="_blank">NanoMD on GitHub</a></p>
+            <p>Render by <a href="https://quickui.pardn.io" target="_blank">QuickUI</a></p>
             <p>&copy; 2024</p>
         </footer>
         <!--  -->
