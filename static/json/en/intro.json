@@ -1,0 +1,27 @@
+{
+    "lightweight & powerful": {
+        "title": "A lightweight and powerful editor",
+        "description": "Developed with pure JavaScript and native APIs.<br> Provides an efficient, stable, and lightweight editing experience.",
+        "href": ""
+    },
+    "standard syntax": {
+        "title": "Supports standard Markdown syntax",
+        "description": "Fully supports standard features such as fonts, links, images, lists, tables, code blocks, and quotes,<br> with additional extensions to enhance the user experience.",
+        "href": ""
+    },
+    "live preview": {
+        "title": "WYSIWYG live preview",
+        "description": "Provides live preview with scroll synchronization.<br> Allows you to see both editing and results clearly for easy visual editing.",
+        "href": ""
+    },
+    "auto detection": {
+        "title": "Automatic detection and embedding features",
+        "description": "Automatically detects links and embeds related content,<br> currently supports multiple services such as YouTube and Vimeo.",
+        "href": ""
+    },
+    "easy embedding": {
+        "title": "Modular design for easy embedding",
+        "description": "Simply add a few lines of code to quickly integrate the editor into your website,<br> flexible configuration and easy operation.",
+        "href": ""
+    }
+}

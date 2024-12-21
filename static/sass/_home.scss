@@ -115,6 +115,22 @@
                     right: calc(-100% - $_32);
                     padding: 0 $_8;
 
+                    &:has(img) {
+                        padding: 0;
+
+                        @media (hover: hover) {
+
+                            &:hover {
+                                top: 0;
+                                box-shadow: 0 0 0 transparent;
+                            }
+                        }
+
+                        img {
+                            background-color: #fff;
+                        }
+                    }
+
                     i {
                         font-size: $_16;
                         transition: 0.3s;
@@ -401,7 +417,7 @@
                 }
 
                 @media (hover: hover) {
-                    
+
                     &:hover i:last-child {
                         right: -$_8;
                     }
@@ -860,10 +876,44 @@
         background-color: #000;
         color: #fff;
 
-        p,
+        // p,
+        // a {
+        //     text-decoration: none;
+        //     color: #fff;
+        // }
+
         a {
-            text-decoration: none;
+            padding: 0.125rem 0;
             color: #fff;
+            text-decoration: none;
+            border-bottom: 0.5px solid #fff;
         }
+
+        p {
+            color: #ffffffcc;
+        }
+
+        p:last-child {
+            color: #ffffff;
+        }
+    }
+
+    >a.lang {
+        z-index: 1000;
+        position: fixed;
+        right: 1.5rem;
+        bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0 1rem;
+        line-height: 2.5rem;
+        text-decoration: none;
+        color: #000;
+        background-color: #ffffffcc;
+        backdrop-filter: blur(1rem);
+        -webkit-backdrop-filter: blur(1rem);
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 8px #0000001a;
     }
 }

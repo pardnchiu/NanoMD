@@ -119,24 +119,30 @@
                     "sameAs": [
                         "https://github.com/pardnchiu"
                     ],
-                    "email": "dev@pardn.io"
+                    "email": "dev@pardn.io",
                 },
+                "image": "https://nanomd.pardn.io/static/image/website.jpg",
             }
         </script>
     </head>
 
     <body id="app" class="home" :animation="fade-in">
+        <!--  -->
         <nav>
             <section>
+                <!--  -->
                 <section>
-                    <img src="./static/image/logo.svg" alt="">
+                    <a :href="./index.html?lang={{ lang }}">
+                        <img src="./static/image/logo.svg" alt="">
+                    </a>
                 </section>
-                <section class="center" data-index="1">
+                <!--  -->
+                <section class="center" data-index="">
                     <a :href="./index.html?lang={{ lang }}">
                         <i class="fa-solid fa-house"></i>
                         HOME
                     </a>
-                    <a>
+                    <a :href="./doc.html?lang={{ lang }}">
                         <i class="fa-brands fa-readme"></i>
                         DOC
                     </a>
@@ -145,34 +151,34 @@
                         VERSION
                     </a>
                 </section>
-                <section>
-                    <a :href="./doc.html?lang={{ change }}">
-                        <i class="fa-solid fa-globe"></i>
-                        <span>{{ change }}</span>
-                    </a>
-                </section>
+                <!--  -->
+                <section></section>
             </section>
         </nav>
+        <!--  -->
         <section class="doc-body">
             <section>
-                <section id="doc-body-content" class="content">
-                    <button @click="showTab">
-                        <i class="fa-solid fa-bars-staggered"></i>
-                    </button>
-                </section>
+                <section id="doc-body-content" class="content"></section>
             </section>
         </section>
+        <!--  -->
+        <a :href="./agreement.html?lang={{ change }}" class="lang">
+            <i class="fa-solid fa-globe"></i>
+            <span>{{ change }}</span>
+        </a>
         <!--  -->
         <script>
             document.addEventListener("DOMContentLoaded", _ => {
                 const url = new URL(location.href);
                 const currentLanguage = navigator.language || navigator.userLanguage;
-                const lang = url.searchParams.get("lang");
+                let lang = url.searchParams.get("lang");
                 let isZh = /^zh/i.test(currentLanguage);
 
                 if (lang != null) {
                     isZh = /^zh/i.test(lang);
                 };
+
+                lang = isZh ? "zh" : "en";
 
                 let editor;
 
@@ -182,16 +188,16 @@
                         zh: "./static/i18n/doc/zh.json",
                         en: "./static/i18n/doc/en.json",
                     },
-                    i18nLang: isZh ? "zh" : "en",
+                    i18nLang: lang,
                     data: {
-                        lang: isZh ? "zh" : "en",
+                        lang: lang,
                         change: isZh ? "en" : "zh"
                     },
                     when: {
                         rendered: async _ => {
                             let pre = "";
 
-                            await fetch("./static/md/" + (isZh ? "zh" : "en") + "/license.md")
+                            await fetch("./static/md/" + lang + "/license.md")
                                 .then(response => response.text())
                                 .then(data => {
                                     pre = data;

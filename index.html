@@ -125,11 +125,16 @@
     </head>
 
     <body id="app" class="home" :animation="fade-in">
+        <!--  -->
         <nav>
             <section>
+                <!--  -->
                 <section>
-                    <img src="./static/image/logo.svg" alt="">
+                    <a>
+                        <img src="./static/image/logo.svg" alt="">
+                    </a>
                 </section>
+                <!--  -->
                 <section class="center" data-index="0">
                     <a>
                         <i class="fa-solid fa-house"></i>
@@ -144,16 +149,8 @@
                         VERSION
                     </a>
                 </section>
-                <section>
-                    <a :href="./?lang={{ change }}">
-                        <i class="fa-solid fa-globe"></i>
-                        <span>{{ change }}</span>
-                    </a>
-                    <!-- <div data-show="0" data-index="0" onclick="this.dataset.show=Math.abs(parseInt(this.dataset.show || 0) - 1)">
-                        <p onclick="this.parentElement.dataset.index=0">{{ i18n.zh }}</p>
-                        <p onclick="this.parentElement.dataset.index=1">{{ i18n.en }}</p>
-                    </div> -->
-                </section>
+                <!--  -->
+                <section></section>
             </section>
         </nav>
         <!--  -->
@@ -191,8 +188,6 @@
             <section>
                 <i class="fa-solid fa-quote-left"></i>
                 <p :html="i18n.quote"></p>
-                <!-- <p>
-                </p> -->
                 <i class="fa-solid fa-quote-right"></i>
             </section>
         </section>
@@ -210,7 +205,7 @@
                         <img src="" alt="">
                         <figcaption>{{ i18n.photo }}</figcaption>
                     </figure>
-                    <section :data-index="introIndex">
+                    <section data-index="0">
                         <button @click="changeIntro">{{ i18n.button_0 }}</button>
                         <button @click="changeIntro">{{ i18n.button_1 }}</button>
                         <button @click="changeIntro">{{ i18n.button_2 }}</button>
@@ -223,78 +218,39 @@
         <!--  -->
         <footer>
             <p>Created by <a href="https://github.com/pardnchiu" target="_blank">邱敬幃</a></p>
-            <p><a href="https://github.com/pardnchiu/NanoMD" target="_blank">NanoMD on GitHub</a></p>
+            <p><a href="https://github.com/pardnchiu/NanoMD" target="_blank">NanoMD</a> on GitHub</p>
             <p>Render by <a href="https://quickui.pardn.io" target="_blank">QuickUI</a></p>
             <p>&copy; 2024</p>
         </footer>
         <!--  -->
+        <a :href="./index.html?lang={{ change }}" class="lang">
+            <i class="fa-solid fa-globe"></i>
+            <span>{{ change }}</span>
+        </a>
+        <!--  -->
         <script>
-            document.addEventListener("DOMContentLoaded", _ => {
+            document.addEventListener("DOMContentLoaded", async _ => {
                 const url = new URL(location.href);
                 const currentLanguage = navigator.language || navigator.userLanguage;
-                const lang = url.searchParams.get("lang");
+
+                let lang = url.searchParams.get("lang");
                 let isZh = /^zh/i.test(currentLanguage);
 
                 if (lang != null) {
                     isZh = /^zh/i.test(lang);
                 };
 
-                const introRecord = {
-                    zh: {
-                        "輕量強大": {
-                            title: "輕量且功能強大的編輯器",
-                            description: "基於純 JavaScript 和原生 API 所開發。<br>實現高效、穩定且無負擔的編輯體驗。",
-                            href: ""
-                        },
-                        "標準語法": {
-                            title: "支持標準 Markdown 語法",
-                            description: "完整支持字體、連結、圖片、列表、表格、代碼塊與引用等標準功能，<br>並提供額外擴展以提升使用體驗。",
-                            href: ""
-                        },
-                        "即時預覽": {
-                            title: "所見即所得的即時預覽",
-                            description: "提供即時預覽，與滾動同步功能。<br>讓編輯和結果一目了然，輕鬆實現可視化編輯。",
-                            href: ""
-                        },
-                        "自動偵測": {
-                            title: "自動偵測並嵌入的功能",
-                            description: "自動檢測連結並嵌入相關內容，<br>目前已支持 Youtube、Vimeo 多種服務。",
-                            href: ""
-                        },
-                        "方便嵌入": {
-                            title: "輕鬆嵌入的模組化設計",
-                            description: "只需添加幾行代碼，即可快速將編輯器整合至網站，<br>配置靈活，操作簡單。",
-                            href: ""
-                        }
-                    },
-                    en: {
-                        "lightweight & powerful": {
-                            title: "A lightweight and powerful editor",
-                            description: "Developed with pure JavaScript and native APIs.<br> Provides an efficient, stable, and lightweight editing experience.",
-                            href: ""
-                        },
-                        "standard syntax": {
-                            title: "Supports standard Markdown syntax",
-                            description: "Fully supports standard features such as fonts, links, images, lists, tables, code blocks, and quotes,<br> with additional extensions to enhance the user experience.",
-                            href: ""
-                        },
-                        "live preview": {
-                            title: "WYSIWYG live preview",
-                            description: "Provides live preview with scroll synchronization.<br> Allows you to see both editing and results clearly for easy visual editing.",
-                            href: ""
-                        },
-                        "auto detection": {
-                            title: "Automatic detection and embedding features",
-                            description: "Automatically detects links and embeds related content,<br> currently supports multiple services such as YouTube and Vimeo.",
-                            href: ""
-                        },
-                        "easy embedding": {
-                            title: "Modular design for easy embedding",
-                            description: "Simply add a few lines of code to quickly integrate the editor into your website,<br> flexible configuration and easy operation.",
-                            href: ""
-                        }
-                    }
-                };
+                lang = isZh ? "zh" : "en";
+
+                let intro;
+                await fetch("./static/json/" + lang + "/intro.json")
+                    .then(response => response.text())
+                    .then(data => {
+                        intro = JSON.parse(data);
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    });
 
                 const app = new QUI({
                     id: "app",
@@ -302,7 +258,7 @@
                         zh: "./static/i18n/index/zh.json",
                         en: "./static/i18n/index/en.json",
                     },
-                    i18nLang: isZh ? "zh" : "en",
+                    i18nLang: lang,
                     event: {
                         changeIntro: e => {
                             const _this = e.target;
@@ -311,7 +267,7 @@
 
                             parent.dataset.index = index;
 
-                            const data = introRecord[isZh ? "zh" : "en"][Object.keys(introRecord[isZh ? "zh" : "en"])[index]];
+                            const data = intro[Object.keys(intro)[index]];
                             const dom = document.getElementById("intro-block");
 
                             dom.children[0].innerText = data.title;
@@ -320,9 +276,8 @@
                         }
                     },
                     data: {
-                        intro: introRecord[isZh ? "zh" : "en"][Object.keys(introRecord[isZh ? "zh" : "en"])[0]],
-                        introIndex: 0,
-                        lang: isZh ? "zh" : "en",
+                        intro: intro[Object.keys(intro)[0]],
+                        lang: lang,
                         change: isZh ? "en" : "zh"
                     }
                 });

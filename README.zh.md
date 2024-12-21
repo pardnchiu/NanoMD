@@ -1,9 +1,11 @@
-# NanoMD
+<img src="https://nanomd.pardn.io/static/image/logo.png" width=80>
 
-*(原名：PDMarkdownKit，自 `1.8.0` 版本起更名為 NanoMD)*
+# NanoMD: 輕量化 Markdown 編輯器
 
-> 一個純 JavaScript 實現的 Markdown 編輯器，使用原生 API，支援標準 Markdown 語法並擴展多種功能，包括即時預覽、滾動同步、自動檢測 YouTube 視頻等功能。<br>
-> 同時，內建虛擬 DOM 技術，僅更新變動部分，確保即時編輯中的高效渲染與流暢體驗，適合在線編輯場景。
+> [!NOTE]
+> (原名：PDMarkdownKit，自 `1.8.0` 版本起更名為 NanoMD)
+
+> 純 JavaScript 打造的現代化 Markdown 編輯器，專注效能與使用體驗。採用虛擬 DOM 技術，提供流暢的即時預覽與編輯體驗。
 
 ![tag](https://img.shields.io/badge/tag-JavaScript%20Library-bb4444) 
 ![size](https://img.shields.io/github/size/pardnchiu/NanoMD/dist%2FNanoMD.js)<br>
@@ -12,106 +14,130 @@
 [![jsdeliver](https://img.shields.io/jsdelivr/npm/hm/@pardnchiu/nanomd)](https://www.jsdelivr.com/package/npm/@pardnchiu/nanomd)<br>
 [![](https://img.shields.io/badge/read-English%20Version-ffffff)](https://github.com/pardnchiu/NanoMD/blob/main/README.md)
 
-## 特點
+## 核心特色
 
-- 提供獨立的編輯與顯示模組，支持即時預覽和滾動同步。
-- 支持標準的 Markdown 語法，包括標題、粗體、斜體、連結、圖片、代碼區塊等。
-- 擴展功能如增加上下標語法，調整圖片大小、對齊，與偵測 Youtube / Vimeo 連結與影片插入。
-- 提供撤銷與重做功能，以及多項快捷鍵，並支持 Markdown 和 HTML 格式的檔案匯入與匯出。
-- 引入虛擬 DOM 概念，按需更新頁面，減少渲染所需資源。
-- 集成 [Google Icon](https://fonts.google.com/icons) 圖示與 [code-prettify](https://github.com/googlearchive/code-prettify) 語法高亮。
+### 極速編輯體驗
+- 虛擬 DOM 智能更新，確保卓越效能
+- 即時分屏預覽，所見即所得
+- 智能滾動同步，無縫對應定位
+- 針對大型文件優化，順暢零延遲
 
-## 文件與展示
+### Markdown 進階支援
+- 完整標準語法支援
+- 擴展功能支援：
+    - 程式碼格式化與高亮
+    - 數學公式即時渲染
+    - 自動表格格式化
+    - 可勾選任務清單
+    - 快速引用區塊
 
-說明文件: [nanomd.pardn.io/doc.html](https://nanomd.pardn.io/doc.html)
-線上編輯器: [nanomd.pardn.io/live.html](https://nanomd.pardn.io/live.html)
-網站: [nanomd.pardn.io](https://nanomd.pardn.io)
+### 多媒體整合能力
+- YouTube、Vimeo 影片自動嵌入與預覽
+- 智能圖片處理：
+    - 自動縮圖預覽
+    - 靈活的尺寸控制
+    - 多樣的對齊選項
+- 響應式媒體支援
+
+### 技術優勢
+- 純 JavaScript 實現，無外部依賴
+- 高效虛擬 DOM 實作
+- 模組化架構設計
+- 完整 ES Module 支援
+
+## 文件
+
+- 網站: [nanomd.pardn.io](https://nanomd.pardn.io)
+- 說明文件: [nanomd.pardn.io/doc.html](https://nanomd.pardn.io/doc.html)
+- 線上編輯器: [nanomd.pardn.io/live.html](https://nanomd.pardn.io/live.html)
 
 ## 安裝方式
 
-- **從 npm 安裝**
-    ```bash
-    npm i @pardnchiu/nanomd
-    ```
+### 從 npm 安裝
+```bash
+npm i @pardnchiu/nanomd
+```
 
-- **從 CDN 引入**
-    - **引入 `NanoMD` 套件**
-        ```html
-        <!-- 1.8.0 版本以上 -->
-        <script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@[VERSION]/dist/NanoMD.js"></script>
+### 從 CDN 引入
 
-        <!-- 1.6.0-1.7.1 版本 -->
-        <script src="https://cdn.jsdelivr.net/npm/pdmarkdownkit@[VERSION]/dist/PDMarkdownKit.js"></script>
-        ```
-    - **Module 版本**
-        ```javascript
-        // 1.8.0 版本以上
-        import { MDEditor, MDViewer } from "https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@[VERSION]/dist/NanoMD.esm.js";
+#### 引入 `NanoMD` 套件
+```html
+<!-- 1.8.0 版本以上 -->
+<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@[VERSION]/dist/NanoMD.js"></script>
 
-        // 1.6.0-1.7.1 版本
-        import { editor, viewer } from "https://cdn.jsdelivr.net/npm/pdmarkdownkit@[VERSION]/dist/PDMarkdownKit.module.js";
+<!-- 1.6.0-1.7.1 版本 -->
+<script src="https://cdn.jsdelivr.net/npm/pdmarkdownkit@[VERSION]/dist/PDMarkdownKit.js"></script>
+```
 
-        // 1.5.2 版本以下
-        import { editor, viewer } from "https://cdn.jsdelivr.net/npm/pdmarkdownkit@[VERSION]/dist/PDMarkdownKit.js";
-        ```
+#### Module 版本
+```javascript
+// 1.8.0 版本以上
+import { MDEditor, MDViewer } from "https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@[VERSION]/dist/NanoMD.esm.js";
+
+// 1.6.0-1.7.1 版本
+import { editor, viewer } from "https://cdn.jsdelivr.net/npm/pdmarkdownkit@[VERSION]/dist/PDMarkdownKit.module.js";
+
+// 1.5.2 版本以下
+import { editor, viewer } from "https://cdn.jsdelivr.net/npm/pdmarkdownkit@[VERSION]/dist/PDMarkdownKit.js";
+```
 
 ## 使用方法
 
-- **初始化 `MDEditor` 和 `MDViewer`**
-    ```Javascript
-    // 1.8.0 版本以上
-    // 統一使用: MDEditor, MDViewer
+### 初始化 `MDEditor` 和 `MDViewer`
+```Javascript
+// 1.8.0 版本以上
+// 統一使用: MDEditor, MDViewer
 
-    // 1.7.1 版本以下
-    // IIFE: PDMarkdownEditor, PDMarkdownViewer
-    // ESM: editor, viewer
+// 1.7.1 版本以下
+// IIFE: PDMarkdownEditor, PDMarkdownViewer
+// ESM: editor, viewer
 
-    const domEditor = new MDEditor({
-        id: "",                                 // 指定元素取代元件
-        defaultContent: "",                     // 預設內容，初始顯示
-        hotKey: 1,                              // 啟用快捷鍵，預設為 1
-        preventRefresh: 0,                      // 防止頁面重整，預設值：0
-        tabPin: 0,                              // 1 | 0 | true | false
-        wrap: 1,                                // 1 | 0 | true | false
-        style: {
-            mode: "",                           // auto | light | dark, 預設： auto
-            fill: 1,                            // 隨父元素大小調整，預設值：1
-            fontFamily: "",                     // 預設：'Noto Sans TC', sans-serif
-            showRow: 0,                         // 顯示行數，預設：1
-            placeholder: {
-                text: "Content",                // 預設：Type here ...
-                color: "#ff000080"              // 預設：#0000ff1a
-            },
-            focus: {
-                backgroundColor: "#ff00001a",   // 預設：#0000ffff
-                color: "#ff0000"                // 預設：#bfbfbf
-            }
-        }
-    });
-
-    const domViewer = new MDViewer({
-        id: "",                 // 指定元素取代元件
-        emptyContent: "",       // 預設內容，當編輯器為空時顯示
-        style: {
-            mode: "",           // auto | light | dark, 預設： auto
-            fill: "",           // 隨父元素大小調整，預設值：1 | true
-            fontFamily: "",     // 預設：'Noto Sans TC', sans-serif
+const domEditor = new MDEditor({
+    id: "",                                 // 指定元素取代元件
+    defaultContent: "",                     // 預設內容，初始顯示
+    hotKey: 1,                              // 啟用快捷鍵，預設為 1
+    preventRefresh: 0,                      // 防止頁面重整，預設值：0
+    tabPin: 0,                              // 1 | 0 | true | false
+    wrap: 1,                                // 1 | 0 | true | false
+    style: {
+        mode: "",                           // auto | light | dark, 預設： auto
+        fill: 1,                            // 隨父元素大小調整，預設值：1
+        fontFamily: "",                     // 預設：'Noto Sans TC', sans-serif
+        showRow: 0,                         // 顯示行數，預設：1
+        placeholder: {
+            text: "Content",                // 預設：Type here ...
+            color: "#ff000080"              // 預設：#0000ff1a
         },
-        sync: {
-            editor: domEditor, // 關聯的編輯器
-            delay: 50,          // 更新延遲，單位ms，預設 300
-            scrollSync: 1,      // 與編輯器同步滾動，預設值：0 | false
-        },
-        hashtag: {
-            path: "?keyword=",  // 標籤路徑，用於檢測 # 並轉換為Link
-            target: "_blank"    // 標籤打開方式，預設 _blank
+        focus: {
+            backgroundColor: "#ff00001a",   // 預設：#0000ffff
+            color: "#ff0000"                // 預設：#bfbfbf
         }
-    });
+    }
+});
 
-    // 若無指定元件，需手動將播放器加入至 DOM 中
-    (...).appendChild(domEditor.body);
-    (...).appendChild(domViewer.body);
-    ```
+const domViewer = new MDViewer({
+    id: "",                 // 指定元素取代元件
+    emptyContent: "",       // 預設內容，當編輯器為空時顯示
+    style: {
+        mode: "",           // auto | light | dark, 預設： auto
+        fill: "",           // 隨父元素大小調整，預設值：1 | true
+        fontFamily: "",     // 預設：'Noto Sans TC', sans-serif
+    },
+    sync: {
+        editor: domEditor,  // 關聯的編輯器
+        delay: 50,          // 更新延遲，單位ms，預設 300
+        scrollSync: 1,      // 與編輯器同步滾動，預設值：0 | false
+    },
+    hashtag: {
+        path: "?keyword=",  // 標籤路徑，用於檢測 # 並轉換為Link
+        target: "_blank"    // 標籤打開方式，預設 _blank
+    }
+});
+
+// 若無指定元件，需手動將播放器加入至 DOM 中
+(...).appendChild(domEditor.body);
+(...).appendChild(domViewer.body);
+```
 
 ## 授權條款
 
@@ -124,11 +150,15 @@
 
 ## 開發者
 
-<img src="https://avatars.githubusercontent.com/u/25631760" align="left" width="96" height="96" style="margin-right: 0.5rem;" />
+<img src="https://avatars.githubusercontent.com/u/25631760" align="left" width="96" height="96" style="margin-right: 0.5rem;">
 
 <h4 style="padding-top: 0">邱敬幃 Pardn Chiu</h4>
 
-[![](https://skillicons.dev/icons?i=linkedin)](https://linkedin.com/in/pardnchiu)
+<a href="mailto:dev@pardn.io" target="_blank">
+    <img src="https://pardn.io/image/email.svg" width="48" height="48">
+</a> <a href="https://linkedin.com/in/pardnchiu" target="_blank">
+    <img src="https://pardn.io/image/linkedin.svg" width="48" height="48">
+</a>
 
 ***
 
