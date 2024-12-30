@@ -1,6 +1,6 @@
 {
     "name": "@pardnchiu/nanomd",
-    "version": "1.8.5",
+    "version": "1.8.6",
     "description": "NanoMD is a lightweight Markdown editor based on pure JavaScript and native APIs, supporting real-time rendering, split-screen preview, code highlighting and export functions, making it an ideal Markdown tool.",
     "main": "dist/NanoMD.js",
     "module": "dist/NanoMD.esm.js",
@@ -29,8 +29,8 @@
         "markdown-viewer",
         "markdown-parser",
         "javascript-library",
-        "real-time",
-        "lightweight"
+        "邱敬幃",
+        "pardnchiu"
     ],
     "author": {
         "name": "邱敬幃 Pardn Chiu",
