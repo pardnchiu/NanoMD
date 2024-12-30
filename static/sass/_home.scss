@@ -117,7 +117,12 @@
 
                     &:has(img) {
                         padding: 0;
+                        left: calc(-100% - $_32);
 
+                        @media screen and (min-width: 480px) {
+                            left: 0;
+                        }
+                        
                         @media (hover: hover) {
 
                             &:hover {
