@@ -5,7 +5,7 @@
 > [!NOTE]
 > (Formerly known as PDMarkdownKit, renamed to NanoMD starting from version `1.8.0`)
 
-> A modern Markdown editor built with pure JavaScript, focusing on performance and user experience. Leveraging virtual DOM technology to provide smooth real-time preview and editing experience.
+> NanoMD is a lightweight Markdown editing and viewing library built on pure JavaScript and native APIs. Can be easily embedded into websites, offers rich features, and supports real-time previewing.
 
 ![tag](https://img.shields.io/badge/tag-JavaScript%20Library-bb4444) 
 ![size](https://img.shields.io/github/size/pardnchiu/NanoMD/dist%2FNanoMD.js)<br>
@@ -48,8 +48,8 @@
 ## Documentation
 
 - Website: [nanomd.pardn.io](https://nanomd.pardn.io)
-- Documentation: [nanomd.pardn.io/doc.html](https://nanomd.pardn.io/doc.html)
-- Demo: [nanomd.pardn.io/live.html](https://nanomd.pardn.io/live.html)
+- Documentation: [nanomd.pardn.io/page/doc](https://nanomd.pardn.io/page/doc.html)
+- Demo: [nanomd.pardn.io/page/live](https://nanomd.pardn.io/page/live.html)
 
 ## Installation
 

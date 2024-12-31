@@ -16,16 +16,17 @@ src/
 
 # 忽略介紹用 html
 static/
+page/
 index.html
-doc.html
-version.html
-live.html
 
-# 忽略其他
-reset.sh
-memo.md
+# 忽略 npm 套件資料夾和相關檔案
+node_modules/
 terser.cache.json
 terser.config.json
+
+# 忽略其他
+.reset.sh
+.memo.md
 
 # 保留編譯後的 dist
 !dist/

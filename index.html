@@ -70,7 +70,7 @@
         <link href="https://fonts.googleapis.com/css2?family=Saira+Stencil+One&display=swap" rel="stylesheet">
 
         <!-- Local Resources -->
-        <link rel="stylesheet" href="./static/css/index.css">
+        <link rel="stylesheet" href="/static/css/index.css">
 
         <!-- JSON-LD Schema -->
         <script type="application/ld+json">
@@ -131,7 +131,7 @@
                 <!--  -->
                 <section>
                     <a>
-                        <img src="./static/image/logo.svg" alt="">
+                        <img src="/static/image/logo.svg" alt="">
                     </a>
                 </section>
                 <!--  -->
@@ -140,7 +140,7 @@
                         <i class="fa-solid fa-house"></i>
                         HOME
                     </a>
-                    <a :href="./doc.html?lang={{ lang }}">
+                    <a :href="/page/doc.html?lang={{ lang }}">
                         <i class="fa-brands fa-readme"></i>
                         DOC
                     </a>
@@ -157,7 +157,7 @@
         <header>
             <section>
                 <section class="logo">
-                    <img src="./static//image/logo.svg" alt="">
+                    <img src="/static//image/logo.svg" alt="">
                     <strong>NanoMD<span>{{ i18n.title }}</span></strong>
                 </section>
                 <section class="button">
@@ -170,13 +170,13 @@
                         npm
                     </a>
                     <span></span>
-                    <a :href="./agreement.html?lang={{ lang }}">
+                    <a :href="/page/agreement.html?lang={{ lang }}">
                         <i class="fa-solid fa-scale-balanced"></i>
                         LICENSE
                     </a>
                 </section>
                 <img :src="i18n.cover" alt="">
-                <a :href="./live.html?lang={{ lang }}" title="前往體驗 NanoMD">
+                <a :href="/page/live.html?lang={{ lang }}" title="前往體驗 NanoMD">
                     <i class="fa-brands fa-markdown"></i>
                     Online Editor
                     <i class="fa-solid fa-angles-right"></i>
@@ -223,7 +223,7 @@
             <p>&copy; 2024</p>
         </footer>
         <!--  -->
-        <a :href="./index.html?lang={{ change }}" class="lang">
+        <a :href="/index.html?lang={{ change }}" class="lang">
             <i class="fa-solid fa-globe"></i>
             <span>{{ change }}</span>
         </a>
@@ -243,7 +243,7 @@
                 lang = isZh ? "zh" : "en";
 
                 let intro;
-                await fetch("./static/json/" + lang + "/intro.json")
+                await fetch("/static/json/" + lang + "/intro.json")
                     .then(response => response.text())
                     .then(data => {
                         intro = JSON.parse(data);
@@ -255,8 +255,8 @@
                 const app = new QUI({
                     id: "app",
                     i18n: {
-                        zh: "./static/i18n/index/zh.json",
-                        en: "./static/i18n/index/en.json",
+                        zh: "/static/i18n/index/zh.json",
+                        en: "/static/i18n/index/en.json",
                     },
                     i18nLang: lang,
                     event: {

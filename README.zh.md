@@ -5,7 +5,7 @@
 > [!NOTE]
 > (原名：PDMarkdownKit，自 `1.8.0` 版本起更名為 NanoMD)
 
-> 純 JavaScript 打造的現代化 Markdown 編輯器，專注效能與使用體驗。採用虛擬 DOM 技術，提供流暢的即時預覽與編輯體驗。
+> NanoMD 是一個基於純 JavaScript 和原生 API 的輕量級 Markdown 編輯和預覽庫。可輕鬆嵌入網站，提供豐富功能，並支持實時預覽。
 
 ![tag](https://img.shields.io/badge/tag-JavaScript%20Library-bb4444) 
 ![size](https://img.shields.io/github/size/pardnchiu/NanoMD/dist%2FNanoMD.js)<br>
@@ -48,8 +48,8 @@
 ## 文件
 
 - 網站: [nanomd.pardn.io](https://nanomd.pardn.io)
-- 說明文件: [nanomd.pardn.io/doc.html](https://nanomd.pardn.io/doc.html)
-- 線上編輯器: [nanomd.pardn.io/live.html](https://nanomd.pardn.io/live.html)
+- 說明文件: [nanomd.pardn.io/page/doc](https://nanomd.pardn.io/page/doc.html)
+- 線上編輯器: [nanomd.pardn.io/page/live](https://nanomd.pardn.io/page/live.html)
 
 ## 安裝方式
 

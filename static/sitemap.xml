@@ -11,110 +11,110 @@
     </url>
 
     <url>
-        <loc>https://nanomd.pardn.io/live.html</loc>
+        <loc>https://nanomd.pardn.io/page/live.html</loc>
         <lastmod>2024-12-20</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/live.html?lang=zh"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/live.html?lang=en"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/page/live.html?lang=zh"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/page/live.html?lang=en"/>
     </url>
 
     <url>
-        <loc>https://nanomd.pardn.io/agreement.html</loc>
+        <loc>https://nanomd.pardn.io/page/agreement.html</loc>
         <lastmod>2024-12-20</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/agreement.html?lang=zh"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/agreement.html?lang=en"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/page/agreement.html?lang=zh"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/page/agreement.html?lang=en"/>
     </url>
 
     <!-- Documentation pages -->
     <url>
-        <loc>https://nanomd.pardn.io/doc.html?tag=installation</loc>
+        <loc>https://nanomd.pardn.io/page/doc.html?tag=installation</loc>
         <lastmod>2024-12-20</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
-        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/doc.html?tag=installation&amp;lang=en"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/doc.html?tag=installation&amp;lang=zh"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/page/doc.html?tag=installation&amp;lang=en"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/page/doc.html?tag=installation&amp;lang=zh"/>
     </url>
     <url>
-        <loc>https://nanomd.pardn.io/doc.html?tag=font</loc>
+        <loc>https://nanomd.pardn.io/page/doc.html?tag=font</loc>
         <lastmod>2024-12-20</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
-        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/doc.html?tag=font&amp;lang=en"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/doc.html?tag=font&amp;lang=zh"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/page/doc.html?tag=font&amp;lang=en"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/page/doc.html?tag=font&amp;lang=zh"/>
     </url>
     <url>
-        <loc>https://nanomd.pardn.io/doc.html?tag=link</loc>
+        <loc>https://nanomd.pardn.io/page/doc.html?tag=link</loc>
         <lastmod>2024-12-20</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
-        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/doc.html?tag=link&amp;lang=en"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/doc.html?tag=link&amp;lang=zh"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/page/doc.html?tag=link&amp;lang=en"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/page/doc.html?tag=link&amp;lang=zh"/>
     </url>
     <url>
-        <loc>https://nanomd.pardn.io/doc.html?tag=image</loc>
+        <loc>https://nanomd.pardn.io/page/doc.html?tag=image</loc>
         <lastmod>2024-12-20</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
-        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/doc.html?tag=image&amp;lang=en"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/doc.html?tag=image&amp;lang=zh"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/page/doc.html?tag=image&amp;lang=en"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/page/doc.html?tag=image&amp;lang=zh"/>
     </url>
     <url>
-        <loc>https://nanomd.pardn.io/doc.html?tag=list</loc>
+        <loc>https://nanomd.pardn.io/page/doc.html?tag=list</loc>
         <lastmod>2024-12-20</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
-        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/doc.html?tag=list&amp;lang=en"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/doc.html?tag=list&amp;lang=zh"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/page/doc.html?tag=list&amp;lang=en"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/page/doc.html?tag=list&amp;lang=zh"/>
     </url>
     <url>
-        <loc>https://nanomd.pardn.io/doc.html?tag=code</loc>
+        <loc>https://nanomd.pardn.io/page/doc.html?tag=code</loc>
         <lastmod>2024-12-20</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
-        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/doc.html?tag=code&amp;lang=en"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/doc.html?tag=code&amp;lang=zh"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/page/doc.html?tag=code&amp;lang=en"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/page/doc.html?tag=code&amp;lang=zh"/>
     </url>
     <url>
-        <loc>https://nanomd.pardn.io/doc.html?tag=blockquote</loc>
+        <loc>https://nanomd.pardn.io/page/doc.html?tag=blockquote</loc>
         <lastmod>2024-12-20</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
-        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/doc.html?tag=blockquote&amp;lang=en"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/doc.html?tag=blockquote&amp;lang=zh"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/page/doc.html?tag=blockquote&amp;lang=en"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/page/doc.html?tag=blockquote&amp;lang=zh"/>
     </url>
     <url>
-        <loc>https://nanomd.pardn.io/doc.html?tag=table</loc>
+        <loc>https://nanomd.pardn.io/page/doc.html?tag=table</loc>
         <lastmod>2024-12-20</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
-        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/doc.html?tag=table&amp;lang=en"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/doc.html?tag=table&amp;lang=zh"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/page/doc.html?tag=table&amp;lang=en"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/page/doc.html?tag=table&amp;lang=zh"/>
     </url>
     <url>
-        <loc>https://nanomd.pardn.io/doc.html?tag=more</loc>
+        <loc>https://nanomd.pardn.io/page/doc.html?tag=more</loc>
         <lastmod>2024-12-20</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
-        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/doc.html?tag=more&amp;lang=en"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/doc.html?tag=more&amp;lang=zh"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/page/doc.html?tag=more&amp;lang=en"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/page/doc.html?tag=more&amp;lang=zh"/>
     </url>
     <url>
-        <loc>https://nanomd.pardn.io/doc.html?tag=shortcut</loc>
+        <loc>https://nanomd.pardn.io/page/doc.html?tag=shortcut</loc>
         <lastmod>2024-12-20</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
-        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/doc.html?tag=shortcut&amp;lang=en"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/doc.html?tag=shortcut&amp;lang=zh"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/page/doc.html?tag=shortcut&amp;lang=en"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/page/doc.html?tag=shortcut&amp;lang=zh"/>
     </url>
     <url>
-        <loc>https://nanomd.pardn.io/doc.html?tag=DEPRECATION</loc>
+        <loc>https://nanomd.pardn.io/page/doc.html?tag=DEPRECATION</loc>
         <lastmod>2024-12-20</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
-        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/doc.html?tag=DEPRECATION&amp;lang=en"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/doc.html?tag=DEPRECATION&amp;lang=zh"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/page/doc.html?tag=DEPRECATION&amp;lang=en"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/page/doc.html?tag=DEPRECATION&amp;lang=zh"/>
     </url>
 </urlset>

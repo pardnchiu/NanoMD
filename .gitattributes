@@ -1,12 +1,11 @@
 src/** filter=git-crypt diff=git-crypt
 src/interface.ts filter=git-crypt diff=git-crypt !filter !diff
 
-# 指定文件的語言，並將 .min.js 文件計入語言統計
-*.ts linguist-language=JavaScript
+# 指定文件的語言
+*.ts linguist-language=TypeScript
 *.js linguist-language=JavaScript
-*.min.js linguist-generated=false
 
-# 將目錄下的所有文件與檔案視為第三方代碼，不計入語言統計
+# 將以下的所有文件與檔案視為第三方代碼，不計入語言統計
 static/** linguist-vendored
 *.html linguist-vendored
 

@@ -10,8 +10,8 @@ node_modules
 terser.cache.json
 
 # 忽略其他
-reset.sh
-memo.md
+.reset.sh
+.memo.md
 
-# 保留編譯結果資料夾
+# 保留編譯後的 dist
 !dist/
