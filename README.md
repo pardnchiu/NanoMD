@@ -60,7 +60,7 @@ npm i @pardnchiu/nanomd
 
 ### Include via CDN
 
-#### Include the `NanoMD` library
+#### UMD version
 ```html
 <!-- Version 1.8.0 and above -->
 <script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@[VERSION]/dist/NanoMD.js"></script>
@@ -69,7 +69,7 @@ npm i @pardnchiu/nanomd
 <script src="https://cdn.jsdelivr.net/npm/pdmarkdownkit@[VERSION]/dist/PDMarkdownKit.js"></script>
 ```
 
-#### Module version
+#### ES Module version
 ```javascript
 // Version 1.8.0 and above
 import { MDEditor, MDViewer } from "https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@[VERSION]/dist/NanoMD.esm.js";
@@ -93,27 +93,34 @@ import { editor, viewer } from "https://cdn.jsdelivr.net/npm/pdmarkdownkit@[VERS
 // ESM: editor, viewer
 
 const domEditor = new MDEditor({
-    id: "",                                 // Element to replace
-    defaultContent: "",                     // Default content to display initially
-    hotKey: 1,                              // Enable hotkeys, default: 1
-    preventRefresh: 0,                      // Prevent page refresh, default: 0
-    tabPin: 0,                              // 1 | 0 | true | false
-    wrap: 1,                                // 1 | 0 | true | false
+    id: "",                                 // Specify the target element to replace
+    defaultContent: "",                     // Initial content to display
+    hotKey: 1,                              // Enable keyboard shortcuts, default: 1 (enabled)
+    preventRefresh: 0,                      // Prevent page refresh, default: 0 (disabled)
+    tabPin: 0,                              // Enable Tab indentation, default: 0 (disabled)
+    wrap: 1,                                // Enable word wrapping, default: 1 (enabled)
+    autoSave: 1,                            // Auto-save feature, default: 1 (enabled)
+    event: {
+        save: result => {                   // Custom save event
+            console.log(result);            // Output current Markdown content
+        }
+    },
     style: {
-        mode: "",                           // auto | light | dark, default: auto
-        fill: 1,                            // Adjust size to parent element, default: 1
-        fontFamily: "",                     // Default: 'Noto Sans TC', sans-serif
-        showRow: 0,                         // Show line numbers, default: 1
+        mode: "",                           // Theme mode: auto | light | dark, default: auto
+        fill: 1,                            // Adjust size based on parent element, default: 1 (enabled)
+        fontFamily: "",                     // Font settings, default: 'Noto Sans TC', sans-serif
+        showRow: 0,                         // Show line numbers, default: 0 (disabled)
         placeholder: {
-            text: "Content",                // Default: Type here ...
-            color: "#ff000080"              // Default: #0000ff1a
+            text: "Content",                // Placeholder text, default: "Type here..."
+            color: "#ff000080"              // Placeholder color, default: #0000ff1a
         },
         focus: {
-            backgroundColor: "#ff00001a",   // Default: #0000ffff
-            color: "#ff0000"                // Default: #bfbfbf
+            backgroundColor: "#ff00001a",   // Focus background color, default: #0000ffff
+            color: "#ff0000"                // Focus text color, default: #bfbfbf
         }
     }
 });
+
 
 const domViewer = new MDViewer({
     id: "",                 // Element to replace

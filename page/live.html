@@ -197,6 +197,7 @@
                             elm_editor = new MDEditor({
                                 id: "editor",
                                 defaultContent: pre,
+                                // autoSave: 0,
                                 tabPin: 1,
                                 wrap: 1,
                                 style: {
@@ -212,7 +213,12 @@
                                         backgroundColor: "#ff00001a",   // 預設：#0000ffff
                                         color: "#ff0000"                // 預設：#bfbfbf
                                     }
-                                }
+                                },
+                                // event: {
+                                //     save: result => {
+                                //         console.log(result);
+                                //     }
+                                // }
                             });
                             elm_viewer = new MDViewer({
                                 id: "viewer",
