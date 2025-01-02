@@ -9,23 +9,23 @@
     ```
 
 - 從 CDN 引入
-    - **引入 `NanoMD` 套件**
+    - **UMD 版本**
         ```html
-        <!-- Version 1.8.0 and above -->
+        <!-- 1.8.0 版本以上 -->
         <script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@[VERSION]/dist/NanoMD.js"></script>
 
-        <!-- Version 1.6.0-1.7.1 -->
+        <!-- 1.6.0-1.7.1 版本 -->
         <script src="https://cdn.jsdelivr.net/npm/pdmarkdownkit@[VERSION]/dist/PDMarkdownKit.js"></script>
         ```
-    - **Module 版本**
+    - **ES Module 版本**
         ```javascript
-        // Version 1.8.0 and above
+        // 1.8.0 版本以上
         import { MDEditor, MDViewer } from "https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@[VERSION]/dist/NanoMD.esm.js";
 
-        // Version 1.6.0-1.7.1
+        // 1.6.0-1.7.1 版本
         import { editor, viewer } from "https://cdn.jsdelivr.net/npm/pdmarkdownkit@[VERSION]/dist/PDMarkdownKit.module.js";
-        
-        // Version 1.5.2 and below
+
+        // 1.5.2 版本以下
         import { editor, viewer } from "https://cdn.jsdelivr.net/npm/pdmarkdownkit@[VERSION]/dist/PDMarkdownKit.js";
         ```
 
@@ -33,10 +33,10 @@
 
 - **初始化 `MDEditor` 和 `MDViewer`**
     ```Javascript
-    // Version 1.8.0 and above
-    // Unified: MDEditor, MDViewer
+    // 1.8.0 版本以上
+    // 統一使用: MDEditor, MDViewer
 
-    // Version 1.7.1 and below
+    // 1.7.1 版本以下
     // IIFE: PDMarkdownEditor, PDMarkdownViewer
     // ESM: editor, viewer
 
@@ -45,20 +45,26 @@
         defaultContent: "",                     // 預設內容，初始顯示
         hotKey: 1,                              // 啟用快捷鍵，預設為 1
         preventRefresh: 0,                      // 防止頁面重整，預設值：0
-        tabPin: 0,                              // 1 | 0 | true | false
-        wrap: 1,                                // 1 | 0 | true | false
+        tabPin: 0,                              // 啟用 Tab 縮排，預設值：0 (關閉)
+        wrap: 1,                                // 啟用文字自動換行，預設值：1 (開啟)
+        autoSave: 1,                            // 自動儲存，預設值：1 (開啟)
+        event: {
+            save: result => {                   // 自定義儲存事件
+                console.log(result);            // 輸出當前 Markdown 內容
+            }
+        },
         style: {
-            mode: "",                           // auto | light | dark, 預設： auto
-            fill: 1,                            // 隨父元素大小調整，預設值：1
-            fontFamily: "",                     // 預設：'Noto Sans TC', sans-serif
-            showRow: 0,                         // 顯示行數，預設：1
+            mode: "",                           // 主題模式 auto | light | dark，預設值： auto
+            fill: 1,                            // 隨父元素大小調整，預設值：1 (開啟)
+            fontFamily: "",                     // 設定字體，預設：'Noto Sans TC', sans-serif
+            showRow: 0,                         // 顯示行號，預設值：0 (關閉)
             placeholder: {
-                text: "Content",                // 預設：Type here ...
-                color: "#ff000080"              // 預設：#0000ff1a
+                text: "Content",                // 設定提示文字，預設：Type here ...
+                color: "#ff000080"              // 提示文字顏色，預設：#0000ff1a
             },
             focus: {
-                backgroundColor: "#ff00001a",   // 預設：#0000ffff
-                color: "#ff0000"                // 預設：#bfbfbf
+                backgroundColor: "#ff00001a",   // 焦點背景顏色，預設：#0000ffff
+                color: "#ff0000"                // 焦點文字顏色，預設：#bfbfbf
             }
         }
     });

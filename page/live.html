@@ -129,10 +129,12 @@
         </section>
         <section class="button">
             <i class="fa-solid fa-circle-info" @click="click_info" title="關於項目"></i>
+            <i class="fa-regular fa-folder-open" @click="open_md" title="開啟 Markdown"></i>
             <i class="fa-brands fa-markdown" @click="click_markdown" title="下載 Markdown"></i>
             <i class="fa-brands fa-html5" @click="click_html" title="下載 HTML"></i>
             <i class="fa-regular fa-lightbulb" @click="click_mode" title="明暗模式"></i>
             <i class="fa-solid fa-eye" @click="click_show" title="預覽頁面"></i>
+            <input type="file" accept=".md" @change="openFile" style="display: none;">
         </section>
         <script>
             let elm_editor, elm_viewer;
@@ -176,11 +178,18 @@
                             elm_editor.changeMode(isDarkMode ? "light" : "dark")
                             elm_viewer.changeMode(isDarkMode ? "light" : "dark")
                         },
+                        openFile: e => {
+                            const file = e.target.files[0];
+                            elm_editor.openfile(file);
+                        },
+                        open_md: e => {
+                            document.querySelector("input[type='file']").click();
+                        },
                         click_html: e => {
-                            elm_editor.downloadHtml();
+                            elm_editor.download("HTML");
                         },
                         click_markdown: e => {
-                            elm_editor.downloadMd();
+                            elm_editor.downloadMd("MD");
                         },
                         click_info: e => {
                             alert("NanoMD\n還沒想好這一塊的設計\n也沒處理好暗色模式的配色")
@@ -198,6 +207,8 @@
                                 id: "editor",
                                 defaultContent: pre,
                                 // autoSave: 0,
+                                // preventRefresh: 1,
+                                // hotKey: 0,
                                 tabPin: 1,
                                 wrap: 1,
                                 style: {
@@ -214,11 +225,11 @@
                                         color: "#ff0000"                // 預設：#bfbfbf
                                     }
                                 },
-                                // event: {
-                                //     save: result => {
-                                //         console.log(result);
-                                //     }
-                                // }
+                                event: {
+                                    save: result => {
+                                        console.log(result);
+                                    }
+                                }
                             });
                             elm_viewer = new MDViewer({
                                 id: "viewer",
