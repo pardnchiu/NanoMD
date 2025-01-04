@@ -1,6 +1,6 @@
 {
     "title": "輕量且強大的編輯器",
-    "cover": "./static/image/header_zh.jpg",
+    "cover": "/static/image/header_zh.jpg",
     "quote": "這是一款基於純 JavaScript 和原生 API 的 Markdown 編輯器，<br>支持標準 Markdown 語法與多項擴展功能，包括即時預覽、自動檢測 YouTube / Vimeo 影片等。<br>專為網頁整合設計，適用於部落格等需要編輯器的專案。",
     "intro": "功能強大、方便嵌入，立即為你的專案加上 Markdown 編輯器。",
     "photo": "圖片尚未製作",

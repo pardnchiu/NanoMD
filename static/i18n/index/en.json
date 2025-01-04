@@ -1,6 +1,6 @@
 {
     "title": "lightweight & powerful",
-    "cover": "./static/image/header_en.jpg",
+    "cover": "/static/image/header_en.jpg",
     "quote": "A Markdown editor built with pure JavaScript and native APIs.<br>Supports real-time preview and automatic detection of YouTube/Vimeo videos.<br>Perfect for web integration, such as blog projects.",
     "intro": "Powerful and easy to embed, instantly add a Markdown editor to your project.",
     "photo": "not created yet",
