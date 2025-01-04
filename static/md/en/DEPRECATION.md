@@ -33,7 +33,7 @@
     - `addHeading(event)`: replaced by `heading(event)`
     - `addBold(event)`: replaced by `bold(event)`
     - `addItalic(event)`: replaced by `italic(event)`
-    - `addStrikethrough()`: replaced by `strikethrough()`
+    - `addStrikethrough(event)`: replaced by `strikethrough(event)`
     - `addUnderline(event)`: replaced by `underline(event)`
     - `addMarker(event)`: replaced by `marker(event)`
     - `addSup(event)`: replaced by `sup(event)`

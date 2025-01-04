@@ -33,7 +33,7 @@
     - `addHeading(event)`: 以 `heading(event)` 取代
     - `addBold(event)`: 以 `bold(event)` 取代
     - `addItalic(event)`: 以 `italic(event)` 取代
-    - `addStrikethrough()`: 以 `strikethrough()` 取代
+    - `addStrikethrough(event)`: 以 `strikethrough(event)` 取代
     - `addUnderline(event)`: 以 `underline(event)` 取代
     - `addMarker(event)`: 以 `marker(event)` 取代
     - `addSup(event)`: 以 `sup(event)` 取代
