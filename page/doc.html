@@ -467,6 +467,19 @@
                                     console.error(error);
                                 });
 
+
+                            const parser1 = new MDParser({
+                                standard: true,
+                                text: pre
+                            });
+
+                            const parser2 = new MDParser({
+                                standard: false,
+                                text: pre
+                            });
+                            console.log(parser1.parse())
+                            console.log(parser2.parse())
+
                             url.searchParams.set("tag", title);
                             window.history.replaceState({}, document.title, url.href);
 

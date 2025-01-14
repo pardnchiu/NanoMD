@@ -20,7 +20,7 @@
     - **ES Module 版本**
         ```javascript
         // 1.8.0 版本以上
-        import { MDEditor, MDViewer } from "https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@[VERSION]/dist/NanoMD.esm.js";
+        import { MDEditor, MDViewer, MDParser } from "https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@[VERSION]/dist/NanoMD.esm.js";
 
         // 1.6.0-1.7.1 版本
         import { editor, viewer } from "https://cdn.jsdelivr.net/npm/pdmarkdownkit@[VERSION]/dist/PDMarkdownKit.module.js";
@@ -31,7 +31,7 @@
 
 ## 使用方法
 
-- **初始化 `MDEditor` 和 `MDViewer`**
+- **初始化 `MDEditor`、`MDViewer` 和 `MDParser`**
     ```Javascript
     // 1.8.0 版本以上
     // 統一使用: MDEditor, MDViewer
@@ -74,7 +74,7 @@
         emptyContent: "",       // 預設內容，當編輯器為空時顯示
         style: {
             mode: "",           // auto | light | dark, 預設： auto
-            fill: "",           // 隨父元素大小調整，預設值：1 | true
+            fill: 1,            // 隨父元素大小調整，預設值：1 | true
             fontFamily: "",     // 預設：'Noto Sans TC', sans-serif
         },
         sync: {
@@ -91,4 +91,11 @@
     // 若無指定元件，需手動將播放器加入至 DOM 中
     (...).appendChild(domEditor.body);
     (...).appendChild(domViewer.body);
+
+    // 1.10.0 版本以上
+    const domParser = new MDParser({
+        standard: 1             // 僅支持標準語法，預設值：1 | true
+    });
+
+    console.log(domParser.parse("**欲解析的文字**"))
     ```

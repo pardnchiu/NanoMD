@@ -72,7 +72,7 @@ npm i @pardnchiu/nanomd
 #### ES Module version
 ```javascript
 // Version 1.8.0 and above
-import { MDEditor, MDViewer } from "https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@[VERSION]/dist/NanoMD.esm.js";
+import { MDEditor, MDViewer, MDParser } from "https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@[VERSION]/dist/NanoMD.esm.js";
 
 // Version 1.6.0-1.7.1
 import { editor, viewer } from "https://cdn.jsdelivr.net/npm/pdmarkdownkit@[VERSION]/dist/PDMarkdownKit.module.js";
@@ -145,6 +145,12 @@ const domViewer = new MDViewer({
 (...).appendChild(domEditor.body);
 (...).appendChild(domViewer.body);
 
+// Version 1.10.0 and above
+const domParser = new MDParser({
+    standard: 1             // Support only standard syntax, default: 1 | true
+});
+
+console.log(domParser.parse("**Text to parse**"));
 ``` 
 
 ## License
