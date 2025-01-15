@@ -145,7 +145,7 @@ const domViewer = new MDViewer({
 (...).appendChild(domEditor.body);
 (...).appendChild(domViewer.body);
 
-// 1.10.0 版本以上
+// 1.10.1 版本以上
 const domParser = new MDParser({
     standard: 1             // 僅支持標準語法，預設值：1 | true
 });

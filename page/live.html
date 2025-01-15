@@ -151,6 +151,7 @@
 
                 let pre = "";
 
+                // await fetch("/README.md")
                 await fetch("/static/md/" + (isZh ? "zh" : "en") + "/live.md")
                     .then(response => response.text())
                     .then(data => {
