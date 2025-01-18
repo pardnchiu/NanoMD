@@ -120,7 +120,7 @@
     (...).appendChild(domEditor.body);
     (...).appendChild(domViewer.body);
 
-    // 1.11.0 版本以上
+    // 1.11.1 版本以上
     const domParser = new MDParser({
         standard: 1             // 僅支持標準語法，預設值：1 | true
     });
