@@ -97,12 +97,41 @@ const domEditor = new MDEditor({
     defaultContent: "",                     // 預設內容，初始顯示
     hotKey: 1,                              // 啟用快捷鍵，預設為 1
     preventRefresh: 0,                      // 防止頁面重整，預設值：0
-    tabPin: 0,                              // 啟用 Tab 縮排，預設值：0 (關閉)
+    tabPin: 0,                              // 釘選 Tab，預設值：0 (關閉)
     wrap: 1,                                // 啟用文字自動換行，預設值：1 (開啟)
-    autoSave: 1,                            // 自動儲存，預設值：1 (開啟)
+    autosave: 1,                            // 自動儲存，預設值：1 (開啟)
     event: {
         save: result => {                   // 自定義儲存事件
             console.log(result);            // 輸出當前 Markdown 內容
+        },
+        upload: async result => {
+            /**
+             * 自定義圖片上傳函式
+            *
+            * 功能：
+            * - 此函式允許開發者定義圖片上傳邏輯。
+            * - 上傳完成後，回傳一個包含圖片連結和替代文字的物件，用於將圖片插入編輯器。
+            *
+            * 使用方式：
+            * - 在需要上傳圖片時，編輯器會調用此函式。
+            * - 開發者可以自定義上傳處理（例如：通過 API 將圖片上傳到伺服器）。
+            *
+            * 回傳值：
+            * - 必須是包含以下字段的物件：
+            *   - `href`：圖片的 URL，將被插入到編輯器中。
+            *   - `alt`：圖片的替代文字（用於圖片無法加載時的顯示）。
+            *
+            * 示例：
+            * - 目前模擬1秒延遲後返回空的 `href` 和 `alt`。
+            * - 可替換為真實的上傳邏輯（如使用 fetch 或 axios 發送 HTTP 請求）。
+            */
+            const link = await new Promise(resolve => {
+                setTimeout(() => resolve({
+                    href: "",  // 圖片的 URL（可替換為真實上傳返回的鏈接）
+                    alt: ""    // 圖片的替代文字（可替換為上傳時的描述）
+                }), 1000);  // 模擬 1 秒延遲
+            });
+            return link;
         }
     },
     style: {
@@ -145,7 +174,7 @@ const domViewer = new MDViewer({
 (...).appendChild(domEditor.body);
 (...).appendChild(domViewer.body);
 
-// 1.10.1 版本以上
+// 1.11.0 版本以上
 const domParser = new MDParser({
     standard: 1             // 僅支持標準語法，預設值：1 | true
 });

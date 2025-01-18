@@ -207,7 +207,7 @@
                             elm_editor = new MDEditor({
                                 id: "editor",
                                 defaultContent: pre,
-                                // autoSave: 0,
+                                // autosave: 0,
                                 preventRefresh: 1,
                                 // hotKey: 0,
                                 tabPin: 1,
@@ -229,6 +229,17 @@
                                 event: {
                                     save: result => {
                                         console.log(result);
+                                    },
+                                    upload: async result => {
+                                        // 模擬上傳並返回一個連結
+                                        alert("模擬傳送圖片\n一秒後插入圖片")
+                                        const link = await new Promise(resolve => {
+                                            setTimeout(() => resolve({
+                                                href: "/static/image/corn-9135131_640.jpg",
+                                                alt: "模擬傳送圖片"
+                                            }), 1000);
+                                        });
+                                        return link;
                                     }
                                 }
                             });

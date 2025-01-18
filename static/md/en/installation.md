@@ -45,19 +45,48 @@
         defaultContent: "",                     // Initial content to display
         hotKey: 1,                              // Enable keyboard shortcuts, default: 1 (enabled)
         preventRefresh: 0,                      // Prevent page refresh, default: 0 (disabled)
-        tabPin: 0,                              // Enable Tab indentation, default: 0 (disabled)
+        tabPin: 0,                              // Pin Tab, default: 0 (disabled)
         wrap: 1,                                // Enable word wrapping, default: 1 (enabled)
-        autoSave: 1,                            // Auto-save feature, default: 1 (enabled)
+        autosave: 1,                            // Auto-save feature, default: 1 (enabled)
         event: {
             save: result => {                   // Custom save event
                 console.log(result);            // Output current Markdown content
+            },
+            upload: async result => {
+                /**
+                 * Custom Image Upload Function
+                *
+                * Purpose:
+                * - This function allows developers to define custom image upload logic.
+                * - After the upload is completed, it returns an object containing the image URL and alt text, 
+                *   which is then used to insert the image into the editor.
+                *
+                * Usage:
+                * - This function is invoked by the editor when an image needs to be uploaded.
+                * - Developers can implement custom upload logic (e.g., using an API to upload the image to a server).
+                *
+                * Return Value:
+                * - The function must return an object with the following fields:
+                *   - `href`: The URL of the image to be inserted into the editor.
+                *   - `alt`: The alternative text for the image (used when the image cannot be loaded).
+                *
+                * Example:
+                * - The current implementation simulates a 1-second delay and returns an empty `href` and `alt`.
+                * - You can replace this logic with actual upload functionality (e.g., using fetch or axios to send an HTTP request).
+                */
+                const link = await new Promise(resolve => {
+                    setTimeout(() => resolve({
+                        href: "",  // The image URL (replace with the actual upload response link)
+                        alt: ""    // The alternative text for the image (replace with a description provided during upload)
+                    }), 1000);  // Simulating a 1-second delay
+                });
+                return link;
             }
         },
         style: {
             mode: "",                           // Theme mode: auto | light | dark, default: auto
             fill: 1,                            // Adjust size based on parent element, default: 1 (enabled)
             fontFamily: "",                     // Font settings, default: 'Noto Sans TC', sans-serif
-            showRow: 0,                         // Show line numbers, default: 0 (disabled)
             placeholder: {
                 text: "Content",                // Placeholder text, default: "Type here..."
                 color: "#ff000080"              // Placeholder color, default: #0000ff1a
@@ -92,7 +121,7 @@
     (...).appendChild(domEditor.body);
     (...).appendChild(domViewer.body);
 
-    // Version 1.10.1 and above
+    // Version 1.11.0 and above
     const domParser = new MDParser({
         standard: 1             // Support only standard syntax, default: 1 | true
     });
