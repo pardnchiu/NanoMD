@@ -175,7 +175,7 @@ const domViewer = new MDViewer({
 (...).appendChild(domEditor.body);
 (...).appendChild(domViewer.body);
 
-// Version 1.11.1 and above
+// Version 1.10.0 and above
 const domParser = new MDParser({
     standard: 1             // Support only standard syntax, default: 1 | true
 });
