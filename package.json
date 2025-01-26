@@ -1,16 +1,16 @@
 {
     "name": "@pardnchiu/nanomd",
-    "version": "1.11.3",
+    "version": "1.11.4",
     "description": "NanoMD is a lightweight Markdown editing and viewing library built on pure JavaScript and native APIs. Can be easily embedded into websites, offers rich features, and supports real-time previewing.",
     "main": "dist/NanoMD.js",
     "module": "dist/NanoMD.esm.js",
     "types": "src/interface.ts",
     "scripts": {
         "build:debug": "npx terser src/*.js src/**/*.js -o dist/NanoMD.debug.js",
-        "build:min": "npx terser src/*.js src/**/*.js -c -m -o dist/NanoMD.js --config-file terser.config.json --name-cache terser.cache.json",
-        "build:esm": "npx terser src/*.js src/**/*.js -c -m -o dist/NanoMD.esm.js --config-file terser.config.json --name-cache terser.cache.json && echo 'export const editor = window.MDEditor; export const MDEditor = window.MDEditor; export const viewer = window.MDViewer; export const MDViewer = window.MDViewer; export const MDParser = window.MDParser;' >> dist/NanoMD.esm.js",
+        "build:min": "npx terser src/*.js src/**/*.js -c -m -o dist/NanoMD.js --config-file terser.config.json",
+        "build:esm": "npx terser src/*.js src/**/*.js -c -m -o dist/NanoMD.esm.js --config-file terser.config.json && echo 'export const editor = window.MDEditor; export const MDEditor = window.MDEditor; export const viewer = window.MDViewer; export const MDViewer = window.MDViewer; export const MDParser = window.MDParser;' >> dist/NanoMD.esm.js",
         "build:once": "npm-run-all build:debug build:min build:esm",
-        "build": "chokidar 'src/*.js src/**/*.js src/**/**/*.js' -c 'npm run build:once'",
+        "build": "chokidar src/*.js src/**/*.js src/**/**/*.js -c 'npm run build:once'",
         "sass:library": "sass src/sass:dist/ -w --style compressed --no-source-map",
         "sass:index": "sass static/sass/:static/css/ -w --style compressed --no-source-map",
         "sass": "npm-run-all sass:library sass:index"
