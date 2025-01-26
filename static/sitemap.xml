@@ -3,7 +3,7 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
     <url>
         <loc>https://nanomd.pardn.io/</loc>
-        <lastmod>2024-12-20</lastmod>
+        <lastmod>2025-01-26</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
         <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/index.html?lang=zh"/>
@@ -12,7 +12,7 @@
 
     <url>
         <loc>https://nanomd.pardn.io/page/live.html</loc>
-        <lastmod>2024-12-20</lastmod>
+        <lastmod>2025-01-26</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
         <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/page/live.html?lang=zh"/>
@@ -21,7 +21,7 @@
 
     <url>
         <loc>https://nanomd.pardn.io/page/agreement.html</loc>
-        <lastmod>2024-12-20</lastmod>
+        <lastmod>2025-01-26</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
         <xhtml:link rel="alternate" hreflang="zh" href="https://nanomd.pardn.io/page/agreement.html?lang=zh"/>
@@ -31,7 +31,7 @@
     <!-- Documentation pages -->
     <url>
         <loc>https://nanomd.pardn.io/page/doc.html?tag=installation</loc>
-        <lastmod>2024-12-20</lastmod>
+        <lastmod>2025-01-26</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
         <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/page/doc.html?tag=installation&amp;lang=en"/>
@@ -39,7 +39,7 @@
     </url>
     <url>
         <loc>https://nanomd.pardn.io/page/doc.html?tag=font</loc>
-        <lastmod>2024-12-20</lastmod>
+        <lastmod>2025-01-26</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
         <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/page/doc.html?tag=font&amp;lang=en"/>
@@ -47,7 +47,7 @@
     </url>
     <url>
         <loc>https://nanomd.pardn.io/page/doc.html?tag=link</loc>
-        <lastmod>2024-12-20</lastmod>
+        <lastmod>2025-01-26</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
         <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/page/doc.html?tag=link&amp;lang=en"/>
@@ -55,7 +55,7 @@
     </url>
     <url>
         <loc>https://nanomd.pardn.io/page/doc.html?tag=image</loc>
-        <lastmod>2024-12-20</lastmod>
+        <lastmod>2025-01-26</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
         <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/page/doc.html?tag=image&amp;lang=en"/>
@@ -63,7 +63,7 @@
     </url>
     <url>
         <loc>https://nanomd.pardn.io/page/doc.html?tag=list</loc>
-        <lastmod>2024-12-20</lastmod>
+        <lastmod>2025-01-26</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
         <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/page/doc.html?tag=list&amp;lang=en"/>
@@ -71,7 +71,7 @@
     </url>
     <url>
         <loc>https://nanomd.pardn.io/page/doc.html?tag=code</loc>
-        <lastmod>2024-12-20</lastmod>
+        <lastmod>2025-01-26</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
         <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/page/doc.html?tag=code&amp;lang=en"/>
@@ -79,7 +79,7 @@
     </url>
     <url>
         <loc>https://nanomd.pardn.io/page/doc.html?tag=blockquote</loc>
-        <lastmod>2024-12-20</lastmod>
+        <lastmod>2025-01-26</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
         <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/page/doc.html?tag=blockquote&amp;lang=en"/>
@@ -87,7 +87,7 @@
     </url>
     <url>
         <loc>https://nanomd.pardn.io/page/doc.html?tag=table</loc>
-        <lastmod>2024-12-20</lastmod>
+        <lastmod>2025-01-26</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
         <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/page/doc.html?tag=table&amp;lang=en"/>
@@ -95,7 +95,7 @@
     </url>
     <url>
         <loc>https://nanomd.pardn.io/page/doc.html?tag=more</loc>
-        <lastmod>2024-12-20</lastmod>
+        <lastmod>2025-01-26</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
         <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/page/doc.html?tag=more&amp;lang=en"/>
@@ -103,7 +103,7 @@
     </url>
     <url>
         <loc>https://nanomd.pardn.io/page/doc.html?tag=shortcut</loc>
-        <lastmod>2024-12-20</lastmod>
+        <lastmod>2025-01-26</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
         <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/page/doc.html?tag=shortcut&amp;lang=en"/>
@@ -111,7 +111,7 @@
     </url>
     <url>
         <loc>https://nanomd.pardn.io/page/doc.html?tag=DEPRECATION</loc>
-        <lastmod>2024-12-20</lastmod>
+        <lastmod>2025-01-26</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
         <xhtml:link rel="alternate" hreflang="en" href="https://nanomd.pardn.io/page/doc.html?tag=DEPRECATION&amp;lang=en"/>

@@ -8,6 +8,7 @@ Icon?
 # 忽略 npm 套件資料夾和相關檔案
 node_modules
 terser.cache.json
+dist/NanoMD.debug.js
 
 # 忽略其他
 .reset.sh

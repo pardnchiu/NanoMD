@@ -1,22 +1,26 @@
 {
     "name": "@pardnchiu/nanomd",
-    "version": "1.11.2",
+    "version": "1.11.3",
     "description": "NanoMD is a lightweight Markdown editing and viewing library built on pure JavaScript and native APIs. Can be easily embedded into websites, offers rich features, and supports real-time previewing.",
     "main": "dist/NanoMD.js",
     "module": "dist/NanoMD.esm.js",
     "types": "src/interface.ts",
     "scripts": {
-        "combine": "npx terser src/*.js src/function/*.js src/model/*.js -o dist/NanoMD.origin.js",
-        "minify": "npx terser src/*.js src/function/*.js src/model/*.js -c -m -o dist/NanoMD.js --config-file terser.config.json --name-cache terser.cache.json && npx terser src/*.js src/function/*.js src/model/*.js -c -m -o dist/NanoMD.esm.js --config-file terser.config.json --name-cache terser.cache.json && echo 'export const editor = window.MDEditor; export const MDEditor = window.MDEditor; export const viewer = window.MDViewer; export const MDViewer = window.MDViewer; export const MDParser = window.MDParser;' >> dist/NanoMD.esm.js",
-        "minify-w": "chokidar src/*.js src/function/*.js src/model/*.js -c 'npm run minify'",
-        "sass": "sass src/sass:dist/ -w --style compressed --no-source-map",
-        "sass-index": "sass static/sass/:static/css/ -w --style compressed --no-source-map"
+        "build:debug": "npx terser src/*.js src/**/*.js -o dist/NanoMD.debug.js",
+        "build:min": "npx terser src/*.js src/**/*.js -c -m -o dist/NanoMD.js --config-file terser.config.json --name-cache terser.cache.json",
+        "build:esm": "npx terser src/*.js src/**/*.js -c -m -o dist/NanoMD.esm.js --config-file terser.config.json --name-cache terser.cache.json && echo 'export const editor = window.MDEditor; export const MDEditor = window.MDEditor; export const viewer = window.MDViewer; export const MDViewer = window.MDViewer; export const MDParser = window.MDParser;' >> dist/NanoMD.esm.js",
+        "build:once": "npm-run-all build:debug build:min build:esm",
+        "build": "chokidar 'src/*.js src/**/*.js src/**/**/*.js' -c 'npm run build:once'",
+        "sass:library": "sass src/sass:dist/ -w --style compressed --no-source-map",
+        "sass:index": "sass static/sass/:static/css/ -w --style compressed --no-source-map",
+        "sass": "npm-run-all sass:library sass:index"
     },
     "publishConfig": {
         "access": "public"
     },
     "files": [
         "dist",
+        "!dist/NanoMD.debug.js",
         "LICENSE",
         "README.md"
     ],
@@ -48,7 +52,8 @@
     "homepage": "https://github.com/pardnchiu/NanoMD#readme",
     "devDependencies": {
         "chokidar-cli": "3.0.0",
-        "terser": "5.31.3",
-        "sass": "1.62.0"
+        "npm-run-all": "^4.1.5",
+        "sass": "1.62.0",
+        "terser": "5.31.3"
     }
 }
