@@ -1,9 +1,11 @@
+macOS/NanoMD/** filter=git-crypt diff=git-crypt
 src/** filter=git-crypt diff=git-crypt
 src/interface.ts filter=git-crypt diff=git-crypt !filter !diff
 
 # 指定文件的語言
 *.ts linguist-language=TypeScript
 *.js linguist-language=JavaScript
+*.swift linguist-language=Swift
 
 # 將以下的所有文件與檔案視為第三方代碼，不計入語言統計
 static/** linguist-vendored
