@@ -1,59 +1,59 @@
 {
-    "name": "@pardnchiu/nanomd",
-    "version": "1.11.6",
-    "description": "NanoMD is a lightweight Markdown editing and viewing library built on pure JavaScript and native APIs. Can be easily embedded into websites, offers rich features, and supports real-time previewing.",
-    "main": "dist/NanoMD.js",
-    "module": "dist/NanoMD.esm.js",
-    "types": "src/interface.ts",
-    "scripts": {
-        "build:debug": "npx terser src/*.js src/**/*.js -o dist/NanoMD.debug.js",
-        "build:min": "npx terser src/*.js src/**/*.js -c -m -o dist/NanoMD.js --config-file terser.config.json",
-        "build:esm": "npx terser src/*.js src/**/*.js -c -m -o dist/NanoMD.esm.js --config-file terser.config.json && echo 'export const editor = window.MDEditor; export const MDEditor = window.MDEditor; export const viewer = window.MDViewer; export const MDViewer = window.MDViewer; export const MDParser = window.MDParser;' >> dist/NanoMD.esm.js",
-        "build:once": "npm-run-all build:debug build:min build:esm",
-        "build": "chokidar src/*.js src/**/*.js src/**/**/*.js -c 'npm run build:once'",
-        "sass:library": "sass src/sass:dist/ -w --style compressed --no-source-map",
-        "sass:index": "sass static/sass/:static/css/ -w --style compressed --no-source-map",
-        "sass": "npm-run-all sass:library sass:index"
-    },
-    "publishConfig": {
-        "access": "public"
-    },
-    "files": [
-        "dist",
-        "!dist/NanoMD.debug.js",
-        "LICENSE",
-        "README.md"
-    ],
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/pardnchiu/NanoMD.git"
-    },
-    "keywords": [
-        "markdown",
-        "markdown-editor",
-        "markdown-viewer",
-        "markdown-parser",
-        "javascript-library",
-        "pure-javascript",
-        "native-api",
-        "邱敬幃",
-        "pardnchiu"
-    ],
-    "author": {
-        "name": "邱敬幃 Pardn Chiu",
-        "email": "dev@pardn.io",
-        "url": "https://github.com/pardnchiu"
-    },
-    "license": "Proprietary",
-    "bugs": {
-        "url": "https://github.com/pardnchiu/NanoMD/issues",
-        "email": "dev@pardn.io"
-    },
-    "homepage": "https://github.com/pardnchiu/NanoMD#readme",
-    "devDependencies": {
-        "chokidar-cli": "3.0.0",
-        "npm-run-all": "^4.1.5",
-        "sass": "1.62.0",
-        "terser": "5.31.3"
-    }
+  "name": "@pardnchiu/nanomd",
+  "version": "1.11.6",
+  "description": "NanoMD is a lightweight Markdown editing and viewing library built on pure JavaScript and native APIs. Can be easily embedded into websites, offers rich features, and supports real-time previewing.",
+  "main": "dist/NanoMD.js",
+  "module": "dist/NanoMD.esm.js",
+  "types": "src/interface.ts",
+  "scripts": {
+    "build:debug": "npx terser src/*.js src/**/*.js -o dist/NanoMD.debug.js",
+    "build:min": "npx terser src/*.js src/**/*.js -c -m -o dist/NanoMD.js --config-file terser.config.json",
+    "build:esm": "npx terser src/*.js src/**/*.js -c -m -o dist/NanoMD.esm.js --config-file terser.config.json && echo 'export const editor = window.MDEditor; export const MDEditor = window.MDEditor; export const viewer = window.MDViewer; export const MDViewer = window.MDViewer; export const MDParser = window.MDParser;' >> dist/NanoMD.esm.js",
+    "build:once": "npm-run-all build:debug build:min build:esm",
+    "build": "chokidar src/*.js src/**/*.js src/**/**/*.js -c 'npm run build:once'",
+    "sass:library": "sass src/sass:dist/ -w --style compressed --no-source-map",
+    "sass:index": "sass static/sass/:static/css/ -w --style compressed --no-source-map",
+    "sass": "npm-run-all sass:library sass:index"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "!dist/NanoMD.debug.js",
+    "LICENSE",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pardnchiu/NanoMD.git"
+  },
+  "keywords": [
+    "markdown",
+    "markdown-editor",
+    "markdown-viewer",
+    "markdown-parser",
+    "javascript-library",
+    "pure-javascript",
+    "native-api",
+    "邱敬幃",
+    "pardnchiu"
+  ],
+  "author": {
+    "name": "邱敬幃 Pardn Chiu",
+    "email": "dev@pardn.io",
+    "url": "https://github.com/pardnchiu"
+  },
+  "license": "Proprietary",
+  "bugs": {
+    "url": "https://github.com/pardnchiu/NanoMD/issues",
+    "email": "dev@pardn.io"
+  },
+  "homepage": "https://github.com/pardnchiu/NanoMD#readme",
+  "devDependencies": {
+    "chokidar-cli": "3.0.0",
+    "npm-run-all": "^4.1.5",
+    "sass": "1.62.0",
+    "terser": "5.31.3"
+  }
 }

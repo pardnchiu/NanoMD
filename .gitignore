@@ -16,3 +16,5 @@ dist/NanoMD.debug.js
 
 # 保留編譯後的 dist
 !dist/
+
+docker-compose.yml
