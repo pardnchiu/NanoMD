@@ -1,42 +1,42 @@
 {
-    "ecma": 2022,
-    "enclose": false,
-    "keep_classnames": false,
-    "keep_fnames": false,
-    "ie8": false,
-    "nameCache": {},
-    "safari10": false,
-    "toplevel": true,
-    "mangle": {
-        "properties": {
-            "keep_quoted": false,
-            "regex": ".*"
-        }
-    },
-    "compress": {
-        "sequences": true,
-        "properties": true,
-        "dead_code": true,
-        "drop_debugger": true,
-        "conditionals": true,
-        "comparisons": true,
-        "evaluate": true,
-        "booleans": true,
-        "loops": true,
-        "unused": true,
-        "hoist_funs": true,
-        "keep_fargs": false,
-        "if_return": true,
-        "join_vars": true,
-        "collapse_vars": true,
-        "reduce_vars": true,
-        "side_effects": true,
-        "pure_getters": true,
-        "pure_funcs": null,
-        "negate_iife": true,
-        "drop_console": false,
-        "passes": 3
-    },
-    "module": false,
-    "wrap": "window"
+  "ecma": 2022,
+  "enclose": false,
+  "keep_classnames": false,
+  "keep_fnames": false,
+  "ie8": false,
+  "nameCache": {},
+  "safari10": false,
+  "toplevel": true,
+  "mangle": {
+    "properties": {
+      "keep_quoted": false,
+      "regex": ".*"
+    }
+  },
+  "compress": {
+    "sequences": true,
+    "properties": true,
+    "dead_code": true,
+    "drop_debugger": true,
+    "conditionals": true,
+    "comparisons": true,
+    "evaluate": true,
+    "booleans": true,
+    "loops": true,
+    "unused": true,
+    "hoist_funs": true,
+    "keep_fargs": false,
+    "if_return": true,
+    "join_vars": true,
+    "collapse_vars": true,
+    "reduce_vars": true,
+    "side_effects": true,
+    "pure_getters": true,
+    "pure_funcs": null,
+    "negate_iife": true,
+    "drop_console": false,
+    "passes": 3
+  },
+  "module": false,
+  "wrap": "window"
 }

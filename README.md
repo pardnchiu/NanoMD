@@ -1,18 +1,15 @@
-<img src="https://nanomd.pardn.io/static/image/logo.png" width=80>
+![](./cover.png)
 
 # NanoMD: Lightweight Markdown Editor
 
-> [!NOTE]
-> (Formerly known as PDMarkdownKit, renamed to NanoMD starting from version `1.8.0`)
+[![Author](https://img.shields.io/badge/Author-邱敬幃%20Pardn%20Chiu-white)](https://github.com/pardnchiu)
+[![version](https://img.shields.io/npm/v/@pardnchiu/nanomd)](https://www.npmjs.com/package/@pardnchiu/nanomd)
+[![jsdeliver](https://img.shields.io/jsdelivr/npm/hm/@pardnchiu/nanomd)](https://www.jsdelivr.com/package/npm/@pardnchiu/nanomd)
 
 > NanoMD is a lightweight Markdown editing and viewing library built on pure JavaScript and native APIs. Can be easily embedded into websites, offers rich features, and supports real-time previewing.
 
-![tag](https://img.shields.io/badge/tag-JavaScript%20Library-bb4444) 
-![size](https://img.shields.io/github/size/pardnchiu/NanoMD/dist%2FNanoMD.js)<br>
-[![npm](https://img.shields.io/npm/v/@pardnchiu/nanomd)](https://www.npmjs.com/package/@pardnchiu/nanomd)
-[![download](https://img.shields.io/npm/dm/@pardnchiu/nanomd)](https://www.npmjs.com/package/@pardnchiu/nanomd)
-[![jsdeliver](https://img.shields.io/jsdelivr/npm/hm/@pardnchiu/nanomd)](https://www.jsdelivr.com/package/npm/@pardnchiu/nanomd)<br>
-[![](https://img.shields.io/badge/查閱-中文版本-ffffff)](https://github.com/pardnchiu/NanoMD/blob/main/README.zh.md)
+> [!NOTE]
+> (Formerly known as PDMarkdownKit, renamed to NanoMD starting from version `1.8.0`)
 
 ## Features
 
@@ -204,6 +201,10 @@ For detailed terms and conditions, please see the [Software Usage Agreement](htt
 </a> <a href="https://linkedin.com/in/pardnchiu" target="_blank">
     <img src="https://pardn.io/image/linkedin.svg" width="48" height="48">
 </a>
+
+## Star History
+
+[![Star](https://api.star-history.com/svg?repos=pardnchiu/NanoMD&type=Date)](https://www.star-history.com/#pardnchiu/NanoMD&Date)
 
 ***
 
