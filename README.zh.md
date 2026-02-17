@@ -1,200 +1,78 @@
-![](./cover.png)
+> [!NOTE]
+> 此 README 由 [SKILL](https://github.com/pardnchiu/skill-readme-generate) 生成，英文版請參閱 [這裡](./README.md)。
 
-# NanoMD: Markdown 編輯器
+![cover](./cover.png)
 
-[![version](https://img.shields.io/npm/v/@pardnchiu/nanomd)](https://www.npmjs.com/package/@pardnchiu/nanomd)
+# NanoMD
+
+[![npm](https://img.shields.io/npm/v/@pardnchiu/nanomd)](https://www.npmjs.com/package/@pardnchiu/nanomd)
 [![jsdeliver](https://img.shields.io/jsdelivr/npm/hm/@pardnchiu/nanomd)](https://www.jsdelivr.com/package/npm/@pardnchiu/nanomd)
 
-> NanoMD 是一個基於純 JavaScript 配合原生 API 的輕量級 Markdown 模組。<br>
-> 可輕鬆嵌入網站，支持標準語法並提供豐富功能，且支持實時預覽。
+> 基於純 JavaScript 與原生 API 的輕量級 Markdown 編輯、預覽與解析函式庫，無需任何框架即可嵌入網頁。
 
 ## 目錄
-- [三大核心功能](#三大核心功能)
-  - [即時編輯與預覽](#即時編輯與預覽)
-  - [完整-markdown-支援](#完整-markdown-支援)
-  - [多媒體與模組化架構](#多媒體與模組化架構)
-- [文件](#文件)
-- [安裝方式](#安裝方式)
-  - [從-npm-安裝](#從-npm-安裝)
-  - [從-cdn-引入](#從-cdn-引入)
-    - [umd-版本](#umd-版本)
-    - [es-module-版本](#es-module-版本)
-- [使用方法](#使用方法)
-  - [初始化-mdeditor-和-mdviewer](#初始化-mdeditor-和-mdviewer)
-- [補充](#補充)
-- [授權條款](#授權條款)
-- [開發者](#開發者)
-- [星](#星)
 
-## 三大核心功能
+- [功能特點](#功能特點)
+- [架構](#架構)
+- [檔案結構](#檔案結構)
+- [授權](#授權)
+- [Author](#author)
+- [Stars](#stars)
 
-### 即時編輯與預覽
-- 虛擬 DOM 更新機制
-- 分屏即時預覽
-- 滾動同步定位
+## 功能特點
 
-### 標準 Markdown 支援與擴展
-- 標準語法支援
-- 程式碼格式化與高亮
-- 表格自動格式化
-- 任務清單與引用區塊
-- Mermaid 渲染
+> `npm i @pardnchiu/nanomd` · [完整文件](./doc.zh.md)
 
-### 多媒體與模組化架構
-- YouTube、Vimeo 影片嵌入
-- 圖片縮圖與尺寸控制
-- 純 JavaScript 實現
+### 即時編輯與分屏預覽
 
-## 文件
+NanoMD 內建完整的 Markdown 編輯器，支援即時渲染與分屏預覽，讓撰寫與檢視同步進行。編輯器提供 Undo/Redo、快捷鍵、自動縮排等功能，無需切換模式即可確認最終呈現效果。
 
-- 網站: [nanomd.pardn.io](https://nanomd.pardn.io)
-- 說明文件: [nanomd.pardn.io/page/doc](https://nanomd.pardn.io/page/doc.html)
-- 線上編輯器: [nanomd.pardn.io/page/live](https://nanomd.pardn.io/page/live.html)
+### 零框架依賴的輕量設計
 
-## 安裝方式
+完全基於原生 JavaScript 與 DOM API 構建，無需 React、Vue 等框架依賴。壓縮後體積極小，可直接透過 CDN 或 npm 引入任何網頁專案，降低整合成本與載入負擔。
 
-### 從 npm 安裝
-```bash
-npm i @pardnchiu/nanomd
+### 完整的 Markdown 語法解析
+
+支援標題、粗體斜體、程式碼區塊、表格、清單、引用、圖片影片嵌入及 Mermaid 圖表等完整 Markdown 語法。同時提供 Hashtag 連結、代碼高亮與檔案匯出（Markdown / HTML）等進階功能。
+
+## 架構
+
+```mermaid
+graph LR
+    A[MDEditor] -->|text| B[MDParser]
+    B -->|HTML| C[MDViewer]
+    A -->|sync| C
+    D[使用者輸入] --> A
+    C --> E[即時預覽]
+    A -->|匯出| F[Markdown / HTML]
 ```
 
-### 從 CDN 引入
+## 檔案結構
 
-#### UMD 版本
-```html
-<!-- 1.8.0 版本以上 -->
-<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@[VERSION]/dist/NanoMD.js"></script>
-
-<!-- 1.6.0-1.7.1 版本 -->
-<script src="https://cdn.jsdelivr.net/npm/pdmarkdownkit@[VERSION]/dist/PDMarkdownKit.js"></script>
+```
+NanoMD/
+├── dist/
+│   ├── NanoMD.js              # 壓縮版
+│   ├── NanoMD.esm.js          # ESM 模組
+│   └── NanoMD.css             # 樣式表
+├── src/
+│   ├── data.js                # 常數與設定
+│   ├── function/              # 解析工具函式
+│   └── model/                 # 核心類別
+│       ├── editor.js          # MDEditor
+│       ├── viewer.js          # MDViewer
+│       └── parser.js          # MDParser
+├── static/                    # 網站靜態資源
+├── page/                      # 文件頁面
+├── package.json
+└── LICENSE
 ```
 
-#### ES Module 版本
-```javascript
-// 1.8.0 版本以上
-import { MDEditor, MDViewer, MDParser } from "https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@[VERSION]/dist/NanoMD.esm.js";
+## 授權
 
-// 1.6.0-1.7.1 版本
-import { editor, viewer } from "https://cdn.jsdelivr.net/npm/pdmarkdownkit@[VERSION]/dist/PDMarkdownKit.module.js";
+本專案採用自訂 [授權條款](LICENSE)。
 
-// 1.5.2 版本以下
-import { editor, viewer } from "https://cdn.jsdelivr.net/npm/pdmarkdownkit@[VERSION]/dist/PDMarkdownKit.js";
-```
-
-## 使用方法
-
-### 初始化 `MDEditor` 和 `MDViewer`
-```Javascript
-// 1.8.0 版本以上
-// 統一使用: MDEditor, MDViewer
-
-// 1.7.1 版本以下
-// IIFE: PDMarkdownEditor, PDMarkdownViewer
-// ESM: editor, viewer
-
-const domEditor = new MDEditor({
-  id: "",                                 // 指定元素取代元件
-  defaultContent: "",                     // 預設內容，初始顯示
-  hotKey: 1,                              // 啟用快捷鍵，預設為 1
-  preventRefresh: 0,                      // 防止頁面重整，預設值：0
-  tabPin: 0,                              // 釘選 Tab，預設值：0 (關閉)
-  wrap: 1,                                // 啟用文字自動換行，預設值：1 (開啟)
-  autosave: 1,                            // 自動儲存，預設值：1 (開啟)
-  event: {
-    save: result => {                   // 自定義儲存事件
-      console.log(result);            // 輸出當前 Markdown 內容
-    },
-    upload: async result => {
-      /**
-       * 自定義圖片上傳函式
-      *
-      * 功能：
-      * - 此函式允許開發者定義圖片上傳邏輯。
-      * - 上傳完成後，回傳一個包含圖片連結和替代文字的物件，用於將圖片插入編輯器。
-      *
-      * 使用方式：
-      * - 在需要上傳圖片時，編輯器會調用此函式。
-      * - 開發者可以自定義上傳處理（例如：通過 API 將圖片上傳到伺服器）。
-      *
-      * 回傳值：
-      * - 必須是包含以下字段的物件：
-      *   - `href`：圖片的 URL，將被插入到編輯器中。
-      *   - `alt`：圖片的替代文字（用於圖片無法加載時的顯示）。
-      *
-      * 示例：
-      * - 目前模擬1秒延遲後返回空的 `href` 和 `alt`。
-      * - 可替換為真實的上傳邏輯（如使用 fetch 或 axios 發送 HTTP 請求）。
-      */
-      const link = await new Promise(resolve => {
-        setTimeout(() => resolve({
-          href: "",  // 圖片的 URL（可替換為真實上傳返回的鏈接）
-          alt: ""    // 圖片的替代文字（可替換為上傳時的描述）
-        }), 1000);  // 模擬 1 秒延遲
-      });
-      return link;
-    }
-  },
-  style: {
-    mode: "",                           // 主題模式 auto | light | dark，預設值： auto
-    fill: 1,                            // 隨父元素大小調整，預設值：1 (開啟)
-    fontFamily: "",                     // 設定字體，預設：'Noto Sans TC', sans-serif
-    showRow: 0,                         // 顯示行號，預設值：0 (關閉)
-    placeholder: {
-      text: "Content",                // 設定提示文字，預設：Type here ...
-      color: "#ff000080"              // 提示文字顏色，預設：#0000ff1a
-    },
-    focus: {
-      backgroundColor: "#ff00001a",   // 焦點背景顏色，預設：#0000ffff
-      color: "#ff0000"                // 焦點文字顏色，預設：#bfbfbf
-    }
-  }
-});
-
-const domViewer = new MDViewer({
-  id: "",                 // 指定元素取代元件
-  emptyContent: "",       // 預設內容，當編輯器為空時顯示
-  style: {
-    mode: "",           // auto | light | dark, 預設： auto
-    fill: "",           // 隨父元素大小調整，預設值：1 | true
-    fontFamily: "",     // 預設：'Noto Sans TC', sans-serif
-  },
-  sync: {
-    editor: domEditor,  // 關聯的編輯器
-    delay: 50,          // 更新延遲，單位ms，預設 300
-    scrollSync: 1,      // 與編輯器同步滾動，預設值：0 | false
-  },
-  hashtag: {
-    path: "?keyword=",  // 標籤路徑，用於檢測 # 並轉換為Link
-    target: "_blank"    // 標籤打開方式，預設 _blank
-  }
-});
-
-// 若無指定元件，需手動將播放器加入至 DOM 中
-(...).appendChild(domEditor.body);
-(...).appendChild(domViewer.body);
-
-// 1.10.0 版本以上
-const domParser = new MDParser({
-  standard: 1             // 僅支持標準語法，預設值：1 | true
-});
-
-console.log(domParser.parse("**欲解析的文字**"))
-```
-
-## 補充
-
-- 原名：PDMarkdownKit，自 `1.8.0` 版本起更名為 NanoMD
-
-## 授權條款
-
-本專案採用類 MIT 授權，但僅提供混淆後的程式碼：
-- 與 MIT 相同：可自由使用、修改、再散布，包含商業用途
-- 主要差異：預設僅提供混淆版程式碼，原始碼需另外購買
-- 授權內容：必須保留原始版權聲明 (與 MIT 相同)
-
-詳細條款與條件請參閱[軟體使用協議](https://github.com/pardnchiu/NanoMD/blob/main/LICENSE)。
-
-## 開發者
+## Author
 
 <img src="https://avatars.githubusercontent.com/u/25631760" align="left" width="96" height="96" style="margin-right: 0.5rem;">
 
@@ -206,11 +84,10 @@ console.log(domParser.parse("**欲解析的文字**"))
 <img src="https://pardn.io/image/linkedin.svg" width="48" height="48">
 </a>
 
-## 星
+## Stars
 
 [![Star](https://api.star-history.com/svg?repos=pardnchiu/NanoMD&type=Date)](https://www.star-history.com/#pardnchiu/NanoMD&Date)
 
 ***
 
-©️ 2023 [邱敬幃 Pardn Chiu](https://pardn.io)
-
+©️ 2024 [邱敬幃 Pardn Chiu](https://linkedin.com/in/pardnchiu)
