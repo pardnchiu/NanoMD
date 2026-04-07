@@ -1,10 +1,10 @@
 # NanoMD - Documentation
 
-> Back to [README](./README.md)
+> Back to [README](../README.md)
 
 ## Prerequisites
 
-- Node.js ≥ 16 (only required for development builds)
+- Node.js ≥ 22 (only required for development builds)
 - Modern browser (Chrome, Firefox, Safari, Edge)
 
 ## Installation
@@ -19,8 +19,8 @@ npm i @pardnchiu/nanomd
 
 ```html
 <!-- Via jsDelivr -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@1.11.6/dist/NanoMD.css">
-<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@1.11.6/dist/NanoMD.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@latest/dist/NanoMD.css">
+<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@latest/dist/NanoMD.js"></script>
 ```
 
 ### ESM Module
@@ -42,7 +42,7 @@ npm run build:once
 
 ### Basic: Viewer Only
 
-Create a Markdown Viewer that renders Markdown content as HTML:
+Create an MDViewer that renders Markdown as HTML:
 
 ```html
 <section id="viewer"></section>
@@ -151,6 +151,18 @@ const viewer = new MDViewer({
     }
 });
 ```
+
+### Advanced: Mermaid Diagrams
+
+Use Mermaid syntax blocks in Markdown for auto-rendered diagrams in preview:
+
+````markdown
+```mermaid
+graph LR
+    A[Start] --> B[Process]
+    B --> C[End]
+```
+````
 
 ## API Reference
 

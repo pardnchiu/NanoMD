@@ -4,7 +4,7 @@
 
 ## 前置需求
 
-- Node.js ≥ 16（僅開發建置需要）
+- Node.js ≥ 22（僅開發建置需要）
 - 現代瀏覽器（Chrome、Firefox、Safari、Edge）
 
 ## 安裝
@@ -19,8 +19,8 @@ npm i @pardnchiu/nanomd
 
 ```html
 <!-- 透過 jsDelivr 引入 -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@1.11.6/dist/NanoMD.css">
-<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@1.11.6/dist/NanoMD.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@latest/dist/NanoMD.css">
+<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@latest/dist/NanoMD.js"></script>
 ```
 
 ### ESM 模組
@@ -42,7 +42,7 @@ npm run build:once
 
 ### 基礎用法：僅預覽
 
-建立一個 Markdown Viewer，將 Markdown 內容渲染為 HTML：
+建立 MDViewer 將 Markdown 渲染為 HTML：
 
 ```html
 <section id="viewer"></section>
@@ -106,7 +106,7 @@ const viewer = new MDViewer({
 
 ### 進階用法：MDParser 獨立解析
 
-不需要 DOM 元素，直接將 Markdown 文字轉為 HTML 字串：
+不需要 DOM 元素，直接將 Markdown 轉為 HTML 字串：
 
 ```javascript
 const parser = new MDParser({
@@ -151,6 +151,18 @@ const viewer = new MDViewer({
     }
 });
 ```
+
+### 進階用法：Mermaid 圖表
+
+在 Markdown 中使用 Mermaid 語法區塊，預覽時自動渲染：
+
+````markdown
+```mermaid
+graph LR
+    A[Start] --> B[Process]
+    B --> C[End]
+```
+````
 
 ## API 參考
 
