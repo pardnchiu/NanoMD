@@ -12,8 +12,7 @@
     "build:once": "npm-run-all build:debug build:min build:esm",
     "build": "chokidar src/*.js src/**/*.js src/**/**/*.js -c 'npm run build:once'",
     "sass:library": "sass src/sass:dist/ -w --style compressed --no-source-map",
-    "sass:index": "sass static/sass/:static/css/ -w --style compressed --no-source-map",
-    "sass": "npm-run-all sass:library sass:index"
+    "sass": "npm-run-all sass:library"
   },
   "publishConfig": {
     "access": "public"
