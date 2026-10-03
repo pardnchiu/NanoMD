@@ -4,30 +4,33 @@
 
 ## Prerequisites
 
-- Node.js ≥ 22 (only required for development builds)
-- Modern browser (Chrome, Firefox, Safari, Edge)
+- A modern browser with ES2022 private class fields (`#field`): Chrome, Firefox, Safari, Edge
+- Network access to `cdn.jsdelivr.net`, `fonts.googleapis.com` and `fonts.gstatic.com`: on load the bundle inserts Material Symbols, Mermaid 11.4.1, code-prettify and `NanoMD.css`
+- Node.js only when building from source
 
 ## Installation
 
-### Using npm
+### CDN
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@latest/dist/NanoMD.js"></script>
+```
+
+`NanoMD.js` inserts `NanoMD.css` into `<head>` by itself, so no extra `<link>` is required. The `MDEditor`, `MDViewer` and `MDParser` classes are attached to `window`.
+
+### npm
 
 ```bash
 npm i @pardnchiu/nanomd
 ```
 
-### Using CDN
-
-```html
-<!-- Via jsDelivr -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@latest/dist/NanoMD.css">
-<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@latest/dist/NanoMD.js"></script>
-```
-
-### ESM Module
+### ESM
 
 ```javascript
 import { MDEditor, MDViewer, MDParser } from "@pardnchiu/nanomd";
 ```
+
+`dist/NanoMD.esm.js` is the same bundle with `export` statements appended, plus lowercase aliases `editor` (= `MDEditor`) and `viewer` (= `MDViewer`).
 
 ### From Source
 
@@ -38,275 +41,221 @@ npm install
 npm run build:once
 ```
 
+`build:once` produces `dist/NanoMD.debug.js`, `dist/NanoMD.js` (terser-minified) and `dist/NanoMD.esm.js`; `npm run build` watches `src/` and rebuilds, and `npm run sass` watches and compiles the SCSS.
+
 ## Usage
 
-### Basic: Viewer Only
-
-Create an MDViewer that renders Markdown as HTML:
+### Basic: Render Markdown Only
 
 ```html
 <section id="viewer"></section>
 
+<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@latest/dist/NanoMD.js"></script>
 <script>
 const viewer = new MDViewer({
     id: "viewer",
     emptyContent: "# Hello\n\nThis is **NanoMD**.",
-    style: {
-        mode: "auto",       // "auto" | "light" | "dark"
-        fill: true,          // Fill parent container
-        fontFamily: "sans-serif"
-    }
+    style: { mode: "auto", fill: false }
 });
 </script>
 ```
 
-### Basic: Editor + Viewer
-
-Create a synchronized editor and viewer pair:
+### Basic: Editor and Viewer
 
 ```html
-<section id="editor"></section>
-<section id="viewer"></section>
+<div style="position: relative; height: 480px;"><section id="editor"></section></div>
+<div style="position: relative; height: 480px;"><section id="viewer"></section></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@latest/dist/NanoMD.js"></script>
 <script>
 const editor = new MDEditor({
     id: "editor",
-    defaultContent: "# Hello\n\nStart editing...",
-    hotKey: true,           // Enable keyboard shortcuts
-    autosave: true,         // Auto-sync to Viewer
-    style: {
-        mode: "auto",
-        fill: true,
-        showRow: true,       // Show line numbers
-        placeholder: {
-            text: "Type here ...",
-            color: "#bfbfbf"
-        },
-        focus: {
-            backgroundColor: "#0000ff1a",
-            color: "#0000ffff"
-        }
-    }
+    defaultContent: "# Hello\n\nStart editing..."
 });
 
 const viewer = new MDViewer({
     id: "viewer",
-    sync: {
-        editor: editor,     // Bind to editor
-        delay: 300,          // Render delay (ms)
-        scroll: true         // Sync scrolling
-    },
-    style: {
-        mode: "auto",
-        fill: true
-    }
+    sync: { editor: editor, delay: 300, scroll: true }
 });
 </script>
 ```
 
-### Advanced: Standalone MDParser
+`style.fill` defaults to `true`, which positions the container absolutely to fill its parent, so the parent needs a `position` and a height.
 
-Parse Markdown to HTML without any DOM elements:
+### Advanced: Convert a String Only
 
 ```javascript
-const parser = new MDParser({
-    standard: true   // Use standard Markdown parsing
-});
+const parser = new MDParser({ standard: false });
+const html = parser.parse("```js\nconst a = 1;\n```\n\n> [!TIP]\n> Extended syntax");
 
-const html = parser.parse("# Title\n\n**bold** and *italic*");
-console.log(html);
+document.querySelector("#out").innerHTML = html;
+if (typeof PR !== "undefined") {
+    PR.prettyPrint();
+}
 ```
 
-### Advanced: Events and Export
+`MDParser` defaults to `standard: true`, which skips fenced code blocks, Mermaid, marker/sub/superscript and alerts; pass `standard: false` to match `MDViewer` output. The output is not sanitized, so filter untrusted content before writing it to `innerHTML`.
+
+### Advanced: Save and Image Upload
 
 ```javascript
 const editor = new MDEditor({
     id: "editor",
     event: {
-        save: (text) => {
-            // Custom save logic
-            console.log("Content saved:", text);
+        save: async (text) => {
+            try {
+                const res = await fetch("/api/save", { method: "POST", body: text });
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}`);
+                }
+            } catch (err) {
+                console.error("save failed", err);
+            }
+        },
+        upload: async () => {
+            try {
+                const res = await fetch("/api/upload", { method: "POST" });
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}`);
+                }
+                const { url, name } = await res.json();
+                return { href: url, alt: name };
+            } catch (err) {
+                console.error("upload failed", err);
+                return { href: "", alt: "" };
+            }
         }
     }
 });
-
-// Programmatic operations
-editor.bold(event);         // Insert bold
-editor.heading(event, 2);   // Insert H2
-editor.link("Title", "https://example.com"); // Insert link
-editor.download("md");      // Export as Markdown
-editor.download("html");    // Export as HTML
-editor.undo();              // Undo
-editor.redo();              // Redo
 ```
 
-### Advanced: Hashtag Linking
+`Cmd/Ctrl+S` triggers `save()`; setting `event.upload` adds an upload button to the toolbar. A rejected `upload()` is not caught, so handle errors yourself; an empty `href` inserts nothing.
+
+### Advanced: Follow the System Theme and Hashtags
 
 ```javascript
 const viewer = new MDViewer({
     id: "viewer",
-    hashtag: {
-        path: "/tags/",     // Hashtag link path prefix
-        target: "_blank"    // Link open target
-    }
+    sync: { editor: editor },
+    hashtag: { path: "/search?tag=", target: "_blank" }
+});
+
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+    const mode = e.matches ? "dark" : "light";
+    editor.changeMode(mode);
+    viewer.changeMode(mode);
 });
 ```
 
-### Advanced: Mermaid Diagrams
+`style.mode: "auto"` reads the system preference once when the bundle loads; to follow later changes, listen yourself and call `changeMode()` on both components.
 
-Use Mermaid syntax blocks in Markdown for auto-rendered diagrams in preview:
+### Advanced: Import and Export
 
-````markdown
-```mermaid
-graph LR
-    A[Start] --> B[Process]
-    B --> C[End]
+```html
+<input type="file" accept=".md" onchange="editor.openfile(this.files[0])">
+<button onclick="editor.download('md')">Export Markdown</button>
+<button onclick="editor.download('html')">Export HTML</button>
 ```
-````
 
 ## API Reference
 
-### MDEditor
+### MDEditor Options
 
-```javascript
-new MDEditor(config)
-```
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `id` | `string` | None | Container element ID; if not found, a detached `<section>` is created; get it from `editor.body` and insert it yourself |
+| `defaultContent` | `string` | `""` | Initial Markdown |
+| `hotKey` | `boolean` | `true` | Enables formatting shortcuts; undo, save, Tab and other editing keys are unaffected |
+| `autosave` | `boolean` | `true` | Updates the preview after input; when `false`, only `save()` updates it |
+| `preventRefresh` | `boolean` | `false` | Registers `beforeunload` and blocks `F5` and `Cmd/Ctrl+R` |
+| `tabPin` | `boolean` | `false` | Keeps the toolbar visible |
+| `style.mode` | `string` | `"auto"` | `"auto"` / `"light"` / `"dark"` |
+| `style.fill` | `boolean` | `true` | Fills the parent element |
+| `style.fontFamily` | `string` | `"'Roboto Mono', monospace"` | Editor font |
+| `style.showRow` | `boolean` | `true` | Shows line numbers |
+| `style.placeholder.text` | `string` | `"Type here ..."` | Hint text for an empty row |
+| `style.placeholder.color` | `string` | `"#bfbfbf"` | Hint color |
+| `style.focus.backgroundColor` | `string` | `"#0000ff1a"` | Background of the current row |
+| `style.focus.color` | `string` | `"#0000ffff"` | Text and caret color of the current row |
+| `event.save` | `function(text)` | None | Save callback |
+| `event.upload` | `async function()` | None | Returns `{ href, alt }`; when set, the toolbar shows an upload button |
 
-#### Constructor Options
+### MDEditor Methods and Properties
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `id` | `string` | - | Target DOM element ID |
-| `defaultContent` | `string` | `""` | Initial Markdown content |
-| `hotKey` | `boolean` | `true` | Enable keyboard shortcuts |
-| `autosave` | `boolean` | `true` | Auto-sync to Viewer on input |
-| `preventRefresh` | `boolean` | `false` | Prevent page refresh |
-| `wrap` | `boolean` | `true` | Enable word wrap |
-| `tabPin` | `boolean` | `false` | Pin toolbar |
-| `style.mode` | `string` | `"auto"` | Theme: `"auto"` / `"light"` / `"dark"` |
-| `style.fill` | `boolean` | `true` | Fill parent container |
-| `style.showRow` | `boolean` | `true` | Show line numbers |
-| `style.fontFamily` | `string` | `"'Roboto Mono', monospace"` | Editor font family |
-| `style.placeholder.text` | `string` | `"Type here ..."` | Placeholder text |
-| `style.placeholder.color` | `string` | `"#bfbfbf"` | Placeholder color |
-| `style.focus.backgroundColor` | `string` | `"#0000ff1a"` | Focused line background |
-| `style.focus.color` | `string` | `"#0000ffff"` | Focused line text color |
-| `event.save` | `function` | - | Save callback, receives `text` |
+| Name | Description |
+|---|---|
+| `body` | The editor container (`contentEditable`); each row is a `<div>` |
+| `text` | Read-only; every row's text joined with `\n` |
+| `viewer` | The bound `MDViewer`, set automatically by the viewer's `sync.editor` |
+| `init(text?, withFocus = true, set = true)` | Rebuilds every row from `text`; does not update the preview |
+| `clear()` | Empties the editor and updates the preview |
+| `selectAll()` | Selects all content |
+| `save()` | Runs the save flow based on `autosave` and `event.save`; without `event.save` it opens the export dialog |
+| `unsave()` | Sets `data-saved` to `0` on the editor and the viewer |
+| `undo()` / `redo()` | Undo / redo |
+| `openfile(file)` | Reads a `File` with `FileReader` and updates the preview |
+| `download(type = "md")` | Exports an `"md"` or `"html"` file |
+| `changeMode(mode = "light")` | Writes `data-mode` directly |
+| `bold(event)`, `italic(event)`, `strikethrough(event)`, `underline(event)`, `marker(event)`, `sup(event)`, `sub(event)`, `code(event)` | Insert inline formatting; HTML tags when `event.metaKey` or `event.ctrlKey` is true, Markdown markers otherwise; pass `{}` from code |
+| `heading(event, num)` | `num` `1`-`6` inserts a heading, `0` removes an existing `#` |
+| `blockquote()`, `ul()`, `ol()` | Prefix every selected row with `> `, `- `, `1. ` |
+| `link(title, href)` | Inserts `[title](href)` |
+| `image(src, alt, title)` | Inserts `![title or alt](src)` |
 
-#### Methods
+### MDViewer Options
 
-| Method | Parameters | Description |
-|--------|------------|-------------|
-| `init(text?, withFocus?, set?)` | `string, boolean, boolean` | Initialize editor content |
-| `heading(event, num)` | `Event, number(1-6)` | Insert heading |
-| `bold(event)` | `Event` | Insert bold |
-| `italic(event)` | `Event` | Insert italic |
-| `strikethrough(event)` | `Event` | Insert strikethrough |
-| `underline(event)` | `Event` | Insert underline |
-| `marker(event)` | `Event` | Insert highlight marker |
-| `sup(event)` | `Event` | Insert superscript |
-| `sub(event)` | `Event` | Insert subscript |
-| `code(event)` | `Event` | Insert code |
-| `blockquote()` | - | Insert blockquote |
-| `ul()` | - | Insert unordered list |
-| `ol()` | - | Insert ordered list |
-| `link(title, href)` | `string, string` | Insert hyperlink |
-| `image(src, alt, title)` | `string, string, string` | Insert image |
-| `download(type)` | `"md"` / `"html"` | Export file |
-| `openfile(file)` | `File` | Open Markdown file |
-| `undo()` | - | Undo |
-| `redo()` | - | Redo |
-| `save()` | - | Trigger save |
-| `clear()` | - | Clear editor |
-| `selectAll()` | - | Select all content |
-| `changeMode(mode)` | `"light"` / `"dark"` | Switch theme |
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `id` | `string` | None | Container element ID; if not found, a detached `<section>` is created |
+| `emptyContent` | `string` | `""` | Markdown rendered when `init()` has no argument and the editor has no text |
+| `style.mode` | `string` | `"auto"` | `"auto"` / `"light"` / `"dark"` |
+| `style.fill` | `boolean` | `true` | Fills the parent element |
+| `style.fontFamily` | `string` | `"sans-serif"` | Preview font |
+| `sync.editor` | `MDEditor` | `null` | The editor to bind |
+| `sync.delay` | `number` | `300` | Render delay in milliseconds; `0` falls back to `300` |
+| `sync.scroll` | `boolean` | `false` | Editor wheel scrolls the viewer |
+| `hashtag.path` | `string` | `""` | `#tag` link prefix; an empty string disables conversion |
+| `hashtag.target` | `string` | `""` | `"_blank"` opens a new tab, anything else means `_self` |
 
-#### Properties
+### MDViewer Methods and Properties
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `text` | `string` (read-only) | Get editor plain text content |
-| `viewer` | `MDViewer` | Bound Viewer instance |
-
-### MDViewer
-
-```javascript
-new MDViewer(config)
-```
-
-#### Constructor Options
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `id` | `string` | - | Target DOM element ID |
-| `emptyContent` | `string` | `""` | Default Markdown content when no editor is bound |
-| `style.mode` | `string` | `"auto"` | Theme mode |
-| `style.fill` | `boolean` | `true` | Fill parent container |
-| `style.fontFamily` | `string` | `"sans-serif"` | Viewer font family |
-| `sync.editor` | `MDEditor` | `null` | Bound editor instance |
-| `sync.delay` | `number` | `300` | Render delay (milliseconds) |
-| `sync.scroll` | `boolean` | `false` | Sync scrolling |
-| `hashtag.path` | `string` | `""` | Hashtag link path prefix |
-| `hashtag.target` | `string` | `""` | Hashtag link open target |
-
-#### Methods
-
-| Method | Parameters | Description |
-|--------|------------|-------------|
-| `init(text?)` | `string` | Re-render content |
-| `clear()` | - | Clear viewer |
-| `changeMode(mode)` | `"light"` / `"dark"` | Switch theme |
-
-#### Properties
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `editor` | `MDEditor` | Bound Editor instance |
-| `body` | `HTMLElement` | Viewer DOM element |
+| Name | Description |
+|---|---|
+| `body` | The viewer container |
+| `editor` | The bound editor; can be assigned after construction |
+| `init(txt = "")` | After `sync.delay`, renders `txt`, the editor text or `emptyContent`, then runs code highlighting and Mermaid |
+| `clear()` | Empties the container |
+| `unsave()` | Sets `data-saved` to `0` |
+| `changeMode(mode = "light")` | Writes `data-mode` directly |
 
 ### MDParser
 
-```javascript
-new MDParser(config)
-```
+| Name | Description |
+|---|---|
+| `new MDParser({ standard = true, text = "" })` | With `standard` true, only standard syntax is handled; `text` is the default for `parse()` without an argument |
+| `parse(text?)` | Returns an HTML string; creates no DOM container but still needs a browser environment |
 
-#### Constructor Options
+### Keyboard Shortcuts
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `standard` | `boolean` | `true` | Use standard Markdown parsing mode |
-| `text` | `string` | `""` | Default Markdown text |
+| Combo | Action | Controlled by `hotKey` |
+|---|---|---|
+| `Cmd/Ctrl+B` / `I` / `U` / `M` / `K` | Bold / italic / underline / marker / code | Yes |
+| `Cmd/Ctrl+Shift+X` | Strikethrough | Yes |
+| `Cmd/Ctrl+↑` / `↓` | Superscript / subscript | Yes |
+| `Cmd/Ctrl+Z` / `Cmd/Ctrl+Shift+Z` | Undo / redo | No |
+| `Cmd/Ctrl+S` | `save()` | No |
+| `Cmd/Ctrl+A` | Selects the editor content only | No |
+| `Tab` / `Cmd/Ctrl+]` | Inserts 4 spaces / indents every selected row | No |
 
-#### Methods
+### Known Limitations (v1.11.6)
 
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| `parse(text?)` | `string` | `string` | Convert Markdown to HTML string |
-
-### Supported Markdown Syntax
-
-| Syntax | Description |
-|--------|-------------|
-| `# ~ ######` | H1 – H6 headings |
-| `**text**` | Bold |
-| `*text*` | Italic |
-| `~~text~~` | Strikethrough |
-| `==text==` | Highlight marker |
-| `^text^` | Superscript |
-| `~text~` | Subscript |
-| `` `code` `` | Inline code |
-| ` ``` ` | Code block |
-| `> text` | Blockquote |
-| `- item` | Unordered list |
-| `1. item` | Ordered list |
-| `- [x] item` | Checkbox |
-| `[text](url)` | Hyperlink |
-| `![alt](url)` | Image |
-| `---` | Horizontal rule |
-| `\| table \|` | Table |
-| `#hashtag` | Hashtag link |
-| Mermaid block | Mermaid diagram |
+| Symptom | Cause |
+|---|---|
+| A `$` in the text is output as `@dollar@` | Wrong mapping in the pipeline's restore table |
+| `MDViewer` produces no YouTube/Vimeo preview cards without `hashtag.path` | `transToHTML()` passes the hashtag path into `setLink()`'s `isDefault` argument; `MDParser` is unaffected |
+| Rows built through `init(text)` (`defaultContent`, `openfile()`, `undo()` / `redo()`) may not render marker, sub/superscript or alerts in the preview | `init()` runs `escapeHTML()` and then writes the result as plain text, so rows hold literal `&nbsp;` strings |
+| Vimeo links block the main thread | Thumbnails are fetched with a synchronous XHR |
 
 ***
 
-©️ 2024 [邱敬幃 Pardn Chiu](https://linkedin.com/in/pardnchiu)
+©️ 2024 [邱敬幃 Pardn Chiu](https://www.linkedin.com/in/pardnchiu)

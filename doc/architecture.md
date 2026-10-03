@@ -4,231 +4,146 @@
 
 ## Overview
 
-NanoMD consists of three core components: **MDEditor** (editor), **MDParser** (parser), and **MDViewer** (previewer). Users type raw Markdown in the Editor, the Parser pipeline converts it to HTML, and the Viewer renders the result to the DOM.
-
 ```mermaid
 graph LR
-    Input[User Input] --> Editor[MDEditor]
-    Editor -->|raw text| Parser[MDParser]
-    Parser -->|HTML| Viewer[MDViewer]
-    Editor -->|sync scroll| Viewer
-    Editor -->|export| Export[Markdown / HTML File]
+    User[User input] --> Editor[MDEditor]
+    Editor -->|"init() triggers render"| Viewer[MDViewer]
+    Viewer -->|reads each row| Editor
+    Viewer -->|Markdown| Trans["transToHTML()"]
+    Parser[MDParser] -->|Markdown| Trans
+    Editor -->|"download('html')"| Trans
+    Trans -->|HTML string| Viewer
+    Trans -->|HTML string| Parser
+    Trans --> Funcs["set* transforms<br/>src/function/"]
+    Data["src/data.js<br/>CDN injection"] --> Runtime[Material Symbols / Mermaid / code-prettify / NanoMD.css]
+    Viewer --> Runtime
 ```
 
-## Core Components
+None of the three components parses Markdown itself; all call the same `transToHTML()`. `MDViewer` passes its hashtag settings and always uses extended mode, `MDParser` passes its `standard` flag, and `MDEditor` calls it only when exporting HTML.
 
-### MDEditor
+## Module: MDEditor
 
-Markdown editor responsible for user input, cursor management, shortcut handling, and history tracking.
+A `contentEditable` editor where each row is a `<div>`; sub-modules handle the caret, selection, history, shortcuts and toolbar.
 
 ```mermaid
 graph TB
-    Editor[MDEditor] --- Caret[editorCaret<br/>Cursor Positioning]
-    Editor --- Selection[editorSelection<br/>Selection Ops]
-    Editor --- History[editorHistory<br/>Undo / Redo Stack]
-    Editor --- Keydown[editorKeydown<br/>Shortcut Mapping]
-    Editor --- Panel[editorPanel<br/>Toolbar]
-    Editor --- Tab[editorTab<br/>Tab Indentation]
-```
-
-| Module | Responsibility |
-|--------|---------------|
-| `editorCaret` | Track and set cursor position (row index and offset) |
-| `editorSelection` | Handle multi-line selection, cut, and paste range calculation |
-| `editorHistory` | Maintain undo/redo dual stacks with delayed writes to merge consecutive inputs |
-| `editorKeydown` | Map keyboard combos (`Cmd+B`, `Cmd+Z`, etc.) to editor methods |
-| `editorPanel` | Render top toolbar buttons and bind corresponding actions |
-| `editorTab` | Handle Tab key indentation and de-indentation logic |
-
-### MDParser
-
-Standalone Markdown-to-HTML parser with no DOM dependency, usable independently.
-
-```mermaid
-graph LR
-    Text[Markdown Text] --> Parse["parse()"]
-    Parse --> Trans[transToHTML]
-    Trans --> HTML[HTML String]
-```
-
-Parser internally calls `transToHTML()`, which sequentially executes each transform function in the parsing pipeline.
-
-### MDViewer
-
-Live previewer that receives HTML and renders it to the DOM. Includes a built-in vDOM diffing mechanism (currently paused in favor of full replacement for rendering correctness).
-
-```mermaid
-graph TB
-    Viewer[MDViewer]
-    Viewer -->|"timed trigger"| GetText["#get_text()"]
-    GetText -->|"Markdown"| Trans[transToHTML]
-    Trans -->|"HTML"| Render[replaceChildren]
-    Viewer --- Scroll["Sync Scrolling<br/>(onwheel event forwarding)"]
-    Viewer --- Theme["Theme Switching<br/>(light / dark / auto)"]
-
-    subgraph VDOM["vDOM (paused)"]
-        Diff["diff compare"]
-        Patch["patch apply"]
-        Diff --> Patch
+    subgraph MDEditor["MDEditor (src/model/editor.js)"]
+        Core[MDEditor core<br/>init / save / download / formatting]
+        Caret[editorCaret<br/>caret row and offset]
+        Selection[editorSelection<br/>selection range]
+        History[editorHistory<br/>snapshot undo / redo stacks]
+        Keydown[editorKeydown<br/>key combo mapping]
+        Tab[editorTab<br/>floating toolbar]
+        Core --- Caret
+        Core --- Selection
+        Core --- History
+        Core --- Keydown
+        Core --- Tab
     end
+    Keyboard[Keyboard events] --> Keydown
+    Tab -->|event.upload| Upload[User upload function]
+    Core -->|event.save| Save[User save function]
+    Core -->|"viewer.init()"| Viewer[MDViewer]
+    Core -->|export| File[.md / .html file]
 ```
 
-## Parsing Pipeline
+## Module: MDViewer
 
-`transToHTML()` is the core of the entire parsing flow, calling the following transform functions in fixed order:
+A debounced preview container that wires copy buttons, code highlighting and Mermaid after each render.
 
 ```mermaid
 graph TB
-    Input["Raw Markdown"] --> Escape["Escape Pre-processing<br/>(backslash sequences → placeholders)"]
-
-    Escape --> PreCode["setPreCode<br/>Fenced Code Blocks"]
-    PreCode --> Code["setCode<br/>Inline Code"]
-    Code --> Media["setMedia<br/>Image / Video / Vimeo / YouTube"]
-    Media --> Link["setLink<br/>Hyperlink / Email"]
-    Link --> Font["setFont<br/>Bold / Italic / Strikethrough / Highlight / Sub-Superscript"]
-    Font --> Heading["setHeading<br/>H1 – H6 Headings"]
-    Heading --> Hr["setHr<br/>Horizontal Rule"]
-    Hr --> Table["setTable<br/>Table"]
-    Table --> Blockquote["setBlockquote<br/>Blockquote"]
-    Blockquote --> List["setList<br/>Ordered / Unordered List / Checkbox"]
-    List --> TabCode["setTabCode<br/>Tab-indented Code Block"]
-    TabCode --> Hashtag["setHashtag<br/>Hashtag Link"]
-
-    Hashtag --> UUID["UUID Placeholder Restoration"]
-    UUID --> Cleanup["Escape Restoration<br/>(placeholders → HTML entities)"]
-    Cleanup --> Output["HTML Output"]
+    subgraph MDViewer["MDViewer (src/model/viewer.js)"]
+        Init["init(txt)"]
+        Timer[Delay timer<br/>sync.delay]
+        Pick[Pick content<br/>txt / editor text / emptyContent]
+        Replace["replaceChildren()"]
+        Copy[Bind copy buttons]
+        Poll[Poll for PR every 50ms]
+        Init --> Timer --> Pick
+        Pick --> Trans["transToHTML()"]
+        Trans --> Replace --> Copy --> Poll
+    end
+    Editor[MDEditor] -->|wheel deltaY| Scroll[sync.scroll]
+    Scroll --> MDViewer
+    Poll --> PR["PR.prettyPrint()"]
+    Poll --> Mermaid["mermaid.run()"]
+    VDOM[vDOM<br/>kept but inactive] -.-> MDViewer
 ```
 
-### Pipeline Order and Design Rationale
+## Module: Parsing Pipeline
 
-| Order | Function | Rationale |
-|-------|----------|-----------|
-| 1 | `setPreCode` | Fenced code blocks must be isolated first to prevent inner syntax from being misinterpreted |
-| 2 | `setCode` | Inline code must be isolated before font formatting |
-| 3 | `setMedia` | Image syntax `![]()` resembles link syntax `[]()` and must match first |
-| 4 | `setLink` | Hyperlinks and email links |
-| 5 | `setFont` | Bold, italic, and other inline formatting |
-| 6 | `setHeading` | Headings must precede lists (`#` may appear inside list items) |
-| 7 | `setHr` | Horizontal rules `---` must precede tables to avoid conflicts |
-| 8 | `setTable` | Table parsing |
-| 9 | `setBlockquote` | Blockquotes (nestable) |
-| 10 | `setList` | Ordered/unordered lists and checkboxes |
-| 11 | `setTabCode` | Tab-indented code blocks processed last to avoid list conflicts |
-| 12 | `setHashtag` | Hashtag links as the final text transform |
+`transToHTML()` runs the transforms in a fixed order; converted fragments are isolated as `{{tag-uuid}}` placeholders and restored once at the end.
 
-### UUID Placeholder Mechanism
+```mermaid
+graph TB
+    subgraph Pipeline["transToHTML() (src/function/)"]
+        Escape[Escape pre-processing<br/>\\* → @ast@, $ → @dollar@]
+        Pre[setPreCode<br/>fenced code / Mermaid]
+        Code[setCode<br/>inline code]
+        Media[setMedia / setMediaDefault<br/>images, video]
+        Link[setLink / setLinkStandard<br/>links, YouTube / Vimeo]
+        Font[setFont / setFontStandard<br/>bold, marker, sub/sup]
+        Block[setHeading / setHr / setTable]
+        Quote[setBlockquote / setBlockquoteStandard<br/>quotes, alerts]
+        List[setList / setTabCode]
+        Tag[setHashtag]
+        Restore[Restore placeholders and escapes]
+        Escape --> Pre --> Code --> Media --> Link --> Font --> Block --> Quote --> List --> Tag --> Restore
+    end
+    UUID[replaceWithUUID<br/>elementUUIDMap] -.-> Pipeline
+    Standard{standard is true} -.->|skip extended transforms| Pipeline
+```
 
-During parsing, processed HTML fragments are replaced with UUID placeholders (`{{uuid32}}`) to prevent re-parsing by subsequent steps. After all transforms complete, placeholders are restored to actual HTML.
+## Module: Runtime Resources
 
-### Standard Mode
+```mermaid
+graph LR
+    subgraph Data["src/data.js"]
+        Inject[Insert into head on load]
+        Dark[isDarkMode<br/>one-time matchMedia read]
+    end
+    Inject --> Fonts[Material Symbols]
+    Inject --> MermaidLib[Mermaid 11.4.1]
+    Inject --> Prettify[code-prettify]
+    Inject --> CSS[NanoMD.css]
+    Dark --> Mode[style.mode auto]
+```
 
-When `standard: true`, the extended versions of `setPreCode`, `setMedia`, `setLink`, `setFont`, `setBlockquote`, and `setHashtag` are skipped. Only standard Markdown equivalents (`setLinkStandard`, `setFontStandard`, `setBlockquoteStandard`) are used.
-
-## Editor Event Flow
+## Data Flow
 
 ```mermaid
 sequenceDiagram
     participant U as User
     participant E as MDEditor
-    participant H as editorHistory
     participant V as MDViewer
     participant T as transToHTML
-
-    U->>E: Keyboard input / Paste / Cut
-    E->>E: editorKeydown intercepts shortcuts
-    E->>E: editorCaret updates cursor position
-    E->>H: add(cursor, clearForward, delay)
-    H->>H: Delayed merge then push to undo stack
-
-    alt autosave enabled
-        E->>V: Trigger init()
-        V->>V: #get_text() reads editor text
-        V->>T: transToHTML(markdown)
-        T-->>V: HTML string
-        V->>V: replaceChildren(HTML)
+    participant R as PR / mermaid
+    U->>E: Type (keyup)
+    E->>E: unsave(), write history
+    E->>V: init()
+    V->>V: Reset timer, wait sync.delay
+    V->>E: Read each row's innerText
+    V->>T: transToHTML(text, hashtag)
+    T-->>V: HTML string
+    V->>V: replaceChildren(), bind copy buttons
+    loop Every 50ms
+        V->>R: Check whether PR exists
     end
-
-    U->>E: Cmd+Z
-    E->>H: undo()
-    H-->>E: Previous state (content + cursor)
-    E->>E: Restore editor content and cursor
-    E->>V: Trigger init()
+    V->>R: PR.prettyPrint(), mermaid.run()
 ```
 
-## Virtual DOM Diffing
-
-The vDOM module implements a lightweight diff algorithm that compares old and new node trees to produce minimal patch operations.
+## State Machine
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Compare: Old/New vDOM input
-
-    Compare --> Create: Old node missing
-    Compare --> Remove: New node missing
-    Compare --> Replace: Different tag
-    Compare --> DiffProps: Same tag
-
-    DiffProps --> DiffChildren: Props diffed
-    DiffChildren --> Text: Both children are text
-    DiffChildren --> Append: Old child missing
-    DiffChildren --> RemoveChild: New child missing
-    DiffChildren --> Recurse: Recurse into children
-
-    Create --> [*]
-    Remove --> [*]
-    Replace --> [*]
-    Text --> [*]
-    Append --> [*]
-    RemoveChild --> [*]
-    Recurse --> Compare
+    [*] --> Synced: Construct
+    Synced --> Unsynced: Input (data-saved=0)
+    Unsynced --> PendingRender: viewer.init() (data-saved=1)
+    PendingRender --> Unsynced: Input within the delay
+    PendingRender --> Synced: Timer fires and renders
 ```
-
-### Patch Operation Types
-
-| Type | Description |
-|------|-------------|
-| `create` | Add new node |
-| `remove` | Remove node |
-| `replace` | Replace node (different tag) |
-| `prop` | Update or remove attribute |
-| `text` | Update text content |
-| `append` | Append child node |
-
-> The vDOM diffing is currently paused in favor of `replaceChildren()` full replacement to ensure rendering correctness. A future version plans to rewrite the diff algorithm to reduce DOM operations.
-
-## Theme System
-
-```mermaid
-graph LR
-    System["System Preference<br/>prefers-color-scheme"] -->|auto| Mode{Mode Check}
-    User["User Specified<br/>light / dark"] --> Mode
-    Mode -->|dark| Dark["data-mode='dark'"]
-    Mode -->|light| Light["data-mode=''"]
-    Dark --> CSS["SCSS Variable Switch"]
-    Light --> CSS
-```
-
-Editor and Viewer each maintain a `data-mode` attribute. SCSS uses `[data-mode="dark"]` selectors to switch color variables.
-
-## Keyboard Shortcuts
-
-| Combo | Action |
-|-------|--------|
-| `Cmd+B` | Bold |
-| `Cmd+I` | Italic |
-| `Cmd+Shift+X` | Strikethrough |
-| `Cmd+U` | Underline |
-| `Cmd+M` | Highlight marker |
-| `Cmd+K` | Inline code |
-| `Cmd+↑` | Superscript |
-| `Cmd+↓` | Subscript |
-| `Cmd+Z` | Undo |
-| `Cmd+Shift+Z` | Redo |
-| `Cmd+A` | Select all |
-| `Cmd+S` | Save |
-| `Cmd+]` | Indent |
-| `Tab` | Insert indentation |
 
 ***
 
-©️ 2024 [邱敬幃 Pardn Chiu](https://linkedin.com/in/pardnchiu)
+©️ 2024 [邱敬幃 Pardn Chiu](https://www.linkedin.com/in/pardnchiu)

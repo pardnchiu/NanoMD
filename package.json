@@ -37,19 +37,20 @@
     "pure-javascript",
     "native-api",
     "邱敬幃",
+    "Pardn Chiu",
     "pardnchiu"
   ],
   "author": {
     "name": "邱敬幃 Pardn Chiu",
     "email": "dev@pardn.io",
-    "url": "https://github.com/pardnchiu"
+    "url": "https://pardn.io/"
   },
-  "license": "Proprietary",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/pardnchiu/NanoMD/issues",
     "email": "dev@pardn.io"
   },
-  "homepage": "https://github.com/pardnchiu/NanoMD#readme",
+  "homepage": "https://nanomd.pardn.io/",
   "devDependencies": {
     "chokidar-cli": "3.0.0",
     "npm-run-all": "^4.1.5",
