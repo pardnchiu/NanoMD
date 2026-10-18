@@ -56,6 +56,27 @@ var NewParser = (() => {
   );
   var MD_INLINE_TYPES = [null, "b", "em", "b", "em", "del", "mark", "sub", "sup"];
 
+  // src/parser/codeBlock.ts
+  function parseCodeBlock(lines, i) {
+    const fence = lines[i].trim();
+    let render;
+    if (REGEX_MD_CODE_BLOCK_MERMAID.test(fence)) {
+      render = "mermaid";
+    } else if (REGEX_MD_CODE_BLOCK_LATEX.test(fence)) {
+      render = "latex";
+    } else if (!REGEX_MD_CODE_BLOCK_PREFIX.test(fence)) {
+      return null;
+    }
+    const blockLines = [];
+    let j = i + 1;
+    while (j < lines.length && lines[j].trim() !== "```") {
+      blockLines.push(lines[j]);
+      j++;
+    }
+    const value = blockLines.join("\n");
+    return { node: render ? { type: "codeBlock", render, value } : { type: "codeBlock", value }, next: j + 1 };
+  }
+
   // src/parser/inline.ts
   function parseInline(text) {
     const domMap = [];
@@ -76,6 +97,25 @@ var NewParser = (() => {
     return domMap;
   }
 
+  // src/parser/heading.ts
+  function parseHeading(lines, i) {
+    const line = lines[i];
+    const mdHeading = line.match(REGEX_MD_H);
+    if (mdHeading) {
+      return { node: { type: "heading", level: mdHeading[1].length, children: parseInline(mdHeading[2]) }, next: i + 1 };
+    }
+    if (lines[i + 1] !== void 0) {
+      const nextLine = lines[i + 1];
+      if (REGEX_MD_H1.test(nextLine)) {
+        return { node: { type: "heading", level: 1, children: parseInline(line) }, next: i + 2 };
+      }
+      if (REGEX_MD_H2.test(nextLine)) {
+        return { node: { type: "heading", level: 2, children: parseInline(line) }, next: i + 2 };
+      }
+    }
+    return null;
+  }
+
   // src/parser/index.ts
   function Parse(content) {
     const lines = content.split("\n");
@@ -87,37 +127,10 @@ var NewParser = (() => {
         i++;
         continue;
       }
-      if (REGEX_MD_CODE_BLOCK_PREFIX.test(line.trim())) {
-        const blockLines = [];
-        let j = i + 1;
-        while (j < lines.length && lines[j].trim() !== "```") {
-          blockLines.push(lines[j]);
-          j++;
-        }
-        domMap.push({ type: "codeBlock", value: blockLines.join("\n") });
-        i = j + 1;
-        continue;
-      }
-      if (REGEX_MD_CODE_BLOCK_MERMAID.test(line.trim())) {
-        const blockLines = [];
-        let j = i + 1;
-        while (j < lines.length && lines[j].trim() !== "```") {
-          blockLines.push(lines[j]);
-          j++;
-        }
-        domMap.push({ type: "codeBlock", render: "mermaid", value: blockLines.join("\n") });
-        i = j + 1;
-        continue;
-      }
-      if (REGEX_MD_CODE_BLOCK_LATEX.test(line.trim())) {
-        const blockLines = [];
-        let j = i + 1;
-        while (j < lines.length && lines[j].trim() !== "```") {
-          blockLines.push(lines[j]);
-          j++;
-        }
-        domMap.push({ type: "codeBlock", render: "latex", value: blockLines.join("\n") });
-        i = j + 1;
+      const codeBlock = parseCodeBlock(lines, i);
+      if (codeBlock) {
+        domMap.push(codeBlock.node);
+        i = codeBlock.next;
         continue;
       }
       if (REGEX_MD_HR.test(line)) {
@@ -125,24 +138,11 @@ var NewParser = (() => {
         i++;
         continue;
       }
-      const mdHeading = line.match(REGEX_MD_H);
-      if (mdHeading) {
-        domMap.push({ type: "heading", level: mdHeading[1].length, children: parseInline(mdHeading[2]) });
-        i++;
+      const heading = parseHeading(lines, i);
+      if (heading) {
+        domMap.push(heading.node);
+        i = heading.next;
         continue;
-      }
-      if (lines[i + 1] !== void 0) {
-        const nextLine = lines[i + 1];
-        if (REGEX_MD_H1.test(nextLine)) {
-          domMap.push({ type: "heading", level: 1, children: parseInline(line) });
-          i += 2;
-          continue;
-        }
-        if (REGEX_MD_H2.test(nextLine)) {
-          domMap.push({ type: "heading", level: 2, children: parseInline(line) });
-          i += 2;
-          continue;
-        }
       }
       if (REGEX_HTML_DOM.test(line)) {
         domMap.push({ type: "html", value: line });
