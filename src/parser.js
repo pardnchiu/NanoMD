@@ -29,10 +29,12 @@ var NewParser = (() => {
   var REGEX_MD_CODE_BLOCK_PREFIX = /^```(?!mermaid|latex|math)\S*$/;
   var REGEX_MD_CODE_BLOCK_MERMAID = /^```mermaid\S*$/;
   var REGEX_MD_CODE_BLOCK_LATEX = /^```(latex|math)\S*$/;
+  var REGEX_MD_CODE_INLINE = /`([^`\n]+)`/g;
   var REGEX_MD_H = /^(#{1,6})\s+(.+)$/;
   var REGEX_MD_H1 = /^ {0,3}=+[ \t]*$/;
   var REGEX_MD_H2 = /^ {0,3}-+[ \t]*$/;
   var REGEX_MD_HR = /^ {0,3}([-*_])( *\1){2,}$/;
+  var REGEX_MD_TABLE_ALIGN = /^(:)?-+(:)?$/;
   var REGEX_MD_INLINE = new RegExp(
     [
       "\\*\\*(.+?)\\*\\*",
@@ -82,6 +84,23 @@ var NewParser = (() => {
     const domMap = [];
     let last = 0;
     let match;
+    REGEX_MD_CODE_INLINE.lastIndex = 0;
+    while (match = REGEX_MD_CODE_INLINE.exec(text)) {
+      if (match.index > last) {
+        domMap.push(...parseInlineMarks(text.slice(last, match.index)));
+      }
+      domMap.push({ type: "code", value: match[1] });
+      last = REGEX_MD_CODE_INLINE.lastIndex;
+    }
+    if (last < text.length) {
+      domMap.push(...parseInlineMarks(text.slice(last)));
+    }
+    return domMap;
+  }
+  function parseInlineMarks(text) {
+    const domMap = [];
+    let last = 0;
+    let match;
     REGEX_MD_INLINE.lastIndex = 0;
     while (match = REGEX_MD_INLINE.exec(text)) {
       if (match.index > last) {
@@ -116,6 +135,67 @@ var NewParser = (() => {
     return null;
   }
 
+  // src/parser/tableBlock.ts
+  function parseTableBlock(lines, i) {
+    const line = lines[i];
+    if (!line.includes("|") || lines[i + 1] === void 0) {
+      return null;
+    }
+    const align = parseAlign(lines[i + 1]);
+    if (!align) {
+      return null;
+    }
+    const rows = [
+      {
+        type: "tableRow",
+        header: true,
+        children: splitCells(line).map((cell) => ({ type: "tableCell", children: parseInline(cell) }))
+      }
+    ];
+    let j = i + 2;
+    while (j < lines.length && lines[j].includes("|") && !parseAlign(lines[j])) {
+      rows.push({
+        type: "tableRow",
+        header: false,
+        children: splitCells(lines[j]).map((cell) => ({ type: "tableCell", children: parseInline(cell) }))
+      });
+      j++;
+    }
+    return { node: { type: "table", align, children: rows }, next: j };
+  }
+  function parseAlign(line) {
+    if (!line.includes("|")) {
+      return null;
+    }
+    const align = [];
+    for (const cell of splitCells(line)) {
+      const match = cell.match(REGEX_MD_TABLE_ALIGN);
+      if (!match) {
+        return null;
+      }
+      if (match[1] && match[2]) {
+        align.push("center");
+      } else if (match[1]) {
+        align.push("left");
+      } else if (match[2]) {
+        align.push("right");
+      } else {
+        align.push(null);
+      }
+    }
+    return align;
+  }
+  function splitCells(line) {
+    let lineTrim = line.trim();
+    if (lineTrim.startsWith("|")) {
+      lineTrim = lineTrim.slice(1);
+    }
+    if (lineTrim.endsWith("|")) {
+      lineTrim = lineTrim.slice(0, -1);
+    }
+    return lineTrim.split("|").map((cell) => cell.trim());
+  }
+
   // src/parser/index.ts
   function Parse(content) {
     const lines = content.split("\n");
@@ -133,6 +213,22 @@ var NewParser = (() => {
         i = codeBlock.next;
         continue;
       }
+      if (REGEX_HTML_DOM.test(line)) {
+        domMap.push({ type: "html", value: line });
+        i++;
+        continue;
+      }
+      const table = parseTableBlock(lines, i);
+      if (table) {
+        domMap.push(table.node);
+        i = table.next;
+        continue;
+      }
+      if (line.includes("|")) {
+        domMap.push({ type: "text", children: parseInline(line) });
+        i++;
+        continue;
+      }
       if (REGEX_MD_HR.test(line)) {
         domMap.push({ type: "hr" });
         i++;
@@ -142,11 +238,6 @@ var NewParser = (() => {
       if (heading) {
         domMap.push(heading.node);
         i = heading.next;
-        continue;
-      }
-      if (REGEX_HTML_DOM.test(line)) {
-        domMap.push({ type: "html", value: line });
-        i++;
         continue;
       }
       console.log(line);

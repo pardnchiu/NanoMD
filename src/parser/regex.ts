@@ -4,10 +4,12 @@ export const REGEX_HTML_DOM = /^\s*<\/?[A-Za-z][A-Za-z0-9-]*(?:\s[^<>]*)?\/?>/;
 export const REGEX_MD_CODE_BLOCK_PREFIX = /^```(?!mermaid|latex|math)\S*$/;
 export const REGEX_MD_CODE_BLOCK_MERMAID = /^```mermaid\S*$/;
 export const REGEX_MD_CODE_BLOCK_LATEX = /^```(latex|math)\S*$/;
+export const REGEX_MD_CODE_INLINE = /`([^`\n]+)`/g;
 export const REGEX_MD_H = /^(#{1,6})\s+(.+)$/;
 export const REGEX_MD_H1 = /^ {0,3}=+[ \t]*$/;
 export const REGEX_MD_H2 = /^ {0,3}-+[ \t]*$/;
 export const REGEX_MD_HR = /^ {0,3}([-*_])( *\1){2,}$/;
+export const REGEX_MD_TABLE_ALIGN = /^(:)?-+(:)?$/;
 export const REGEX_MD_INLINE = new RegExp(
   [
     "\\*\\*(.+?)\\*\\*", // 1 **bold**

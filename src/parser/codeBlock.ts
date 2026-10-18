@@ -1,7 +1,10 @@
 import { REGEX_MD_CODE_BLOCK_LATEX, REGEX_MD_CODE_BLOCK_MERMAID, REGEX_MD_CODE_BLOCK_PREFIX } from "./regex";
 import type { CodeBlockRender, Node } from "./types";
 
-export function parseCodeBlock(lines: string[], i: number): { node: Extract<Node, { type: "codeBlock" }>; next: number } | null {
+export function parseCodeBlock(
+  lines: string[],
+  i: number,
+): { node: Extract<Node, { type: "codeBlock" }>; next: number } | null {
   const fence = lines[i].trim();
 
   let render: CodeBlockRender | undefined;

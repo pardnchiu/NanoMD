@@ -1,7 +1,27 @@
-import { MD_INLINE_TYPES, REGEX_MD_INLINE } from "./regex";
+import { MD_INLINE_TYPES, REGEX_MD_CODE_INLINE, REGEX_MD_INLINE } from "./regex";
 import type { ChildNode, ChildType } from "./types";
 
 export function parseInline(text: string): ChildNode[] {
+  const domMap: ChildNode[] = [];
+  let last = 0;
+  let match: RegExpExecArray | null;
+  REGEX_MD_CODE_INLINE.lastIndex = 0;
+  while ((match = REGEX_MD_CODE_INLINE.exec(text))) {
+    if (match.index > last) {
+      domMap.push(...parseInlineMarks(text.slice(last, match.index)));
+    }
+
+    domMap.push({ type: "code", value: match[1] });
+    last = REGEX_MD_CODE_INLINE.lastIndex;
+  }
+
+  if (last < text.length) {
+    domMap.push(...parseInlineMarks(text.slice(last)));
+  }
+  return domMap;
+}
+
+function parseInlineMarks(text: string): ChildNode[] {
   const domMap: ChildNode[] = [];
   let last = 0;
   let match: RegExpExecArray | null;

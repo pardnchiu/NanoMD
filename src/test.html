@@ -87,7 +87,9 @@
   </body>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-      document.getElementById("output").textContent = NewParser.render(document.getElementById("sample").textContent);
+      const lines = document.getElementById("sample").textContent.replace(/^\n|\n\s*$/g, "").split("\n");
+      const indent = Math.min(...lines.filter((line) => line.trim() !== "").map((line) => line.match(/^ */)[0].length));
+      document.getElementById("output").textContent = NewParser.Parse(lines.map((line) => line.slice(indent)).join("\n"));
     });
   </script>
 </html>

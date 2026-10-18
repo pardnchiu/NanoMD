@@ -2,7 +2,10 @@ import { parseInline } from "./inline";
 import { REGEX_MD_H, REGEX_MD_H1, REGEX_MD_H2 } from "./regex";
 import type { Node } from "./types";
 
-export function parseHeading(lines: string[], i: number): { node: Extract<Node, { type: "heading" }>; next: number } | null {
+export function parseHeading(
+  lines: string[],
+  i: number,
+): { node: Extract<Node, { type: "heading" }>; next: number } | null {
   const line = lines[i];
 
   const mdHeading = line.match(REGEX_MD_H);
