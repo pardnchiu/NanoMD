@@ -1,8 +1,8 @@
-import { parseLines } from "./index";
+import { ParseLines } from "./index";
 import { REGEX_MD_BLOCKQUOTE_TAG, REGEX_MD_BLOCKQUOTE } from "./regex";
 import type { BlockquoteTag, Node } from "./types";
 
-export function parseBlockquote(
+export function ParseBlockquote(
   lines: string[],
   i: number,
   nested: boolean,
@@ -28,6 +28,6 @@ export function parseBlockquote(
     tag = tagMatch[1].toLowerCase() as BlockquoteTag;
   }
 
-  const children = parseLines(tag ? quoteLines.slice(1) : quoteLines, true);
+  const children = ParseLines(tag ? quoteLines.slice(1) : quoteLines, true);
   return { node: tag ? { type: "blockquote", tag, children } : { type: "blockquote", children }, next: j };
 }

@@ -1,16 +1,44 @@
-import { parseBlockquote } from "./blockquote";
-import { parseCodeBlock } from "./codeBlock";
-import { parseHeading } from "./heading";
-import { parseInline } from "./inline";
+import { ParseBlockquote } from "./blockquote";
+import { ParseCodeBlock } from "./codeBlock";
+import { ParseHeading } from "./heading";
+import { ParseInline } from "./inline";
 import { REGEX_HTML_DOM, REGEX_MD_HR } from "./regex";
-import { parseTableBlock } from "./tableBlock";
+import { ParseTableBlock } from "./tableBlock";
 import type { Node } from "./types";
 
-export function Parse(content: string): Node[] {
-  return parseLines(content.split("\n"));
+export const EXTERNAL_DEPENDENCIES: string[] = [
+  "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js",
+  "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js",
+  "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css",
+  "https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js",
+];
+
+if (typeof document !== "undefined") {
+  insertHead("link", { rel: "preconnect", href: "https://cdn.jsdelivr.net" });
+  for (const url of EXTERNAL_DEPENDENCIES) {
+    if (url.endsWith(".js")) {
+      insertHead("link", { rel: "preload", href: url, as: "script" });
+      insertHead("script", { src: url });
+    } else if (url.endsWith(".css")) {
+      insertHead("link", { rel: "preload", href: url, as: "style" });
+      insertHead("link", { rel: "stylesheet", href: url });
+    }
+  }
 }
 
-export function parseLines(lines: string[], nested = false): Node[] {
+function insertHead(tag: "link" | "script", attrs: Record<string, string>): void {
+  const dom = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    dom.setAttribute(k, v);
+  }
+  document.head.appendChild(dom);
+}
+
+export function Parse(content: string): Node[] {
+  return ParseLines(content.split("\n"));
+}
+
+export function ParseLines(lines: string[], nested = false): Node[] {
   const domMap: Node[] = [];
 
   let i = 0;
@@ -24,7 +52,7 @@ export function parseLines(lines: string[], nested = false): Node[] {
     }
 
     // * collect code block
-    const codeBlock = parseCodeBlock(lines, i);
+    const codeBlock = ParseCodeBlock(lines, i);
     if (codeBlock) {
       domMap.push(codeBlock.node);
       i = codeBlock.next;
@@ -37,16 +65,10 @@ export function parseLines(lines: string[], nested = false): Node[] {
       continue;
     }
 
-    const table = parseTableBlock(lines, i);
+    const table = ParseTableBlock(lines, i);
     if (table) {
       domMap.push(table.node);
       i = table.next;
-      continue;
-    }
-
-    if (line.includes("|")) {
-      domMap.push({ type: "text", children: parseInline(line) });
-      i++;
       continue;
     }
 
@@ -56,14 +78,14 @@ export function parseLines(lines: string[], nested = false): Node[] {
       continue;
     }
 
-    const blockquote = parseBlockquote(lines, i, nested);
+    const blockquote = ParseBlockquote(lines, i, nested);
     if (blockquote) {
       domMap.push(blockquote.node);
       i = blockquote.next;
       continue;
     }
 
-    const heading = parseHeading(lines, i);
+    const heading = ParseHeading(lines, i);
     if (heading) {
       domMap.push(heading.node);
       i = heading.next;
@@ -71,7 +93,7 @@ export function parseLines(lines: string[], nested = false): Node[] {
     }
 
     console.log(line);
-    domMap.push({ type: "text", children: parseInline(line) });
+    domMap.push({ type: "text", children: ParseInline(line) });
 
     i++;
   }

@@ -1,8 +1,8 @@
-import { parseInline } from "./inline";
+import { ParseInline } from "./inline";
 import { REGEX_MD_TABLE_ALIGN } from "./regex";
 import type { Node, TableAlign, TableRow } from "./types";
 
-export function parseTableBlock(
+export function ParseTableBlock(
   lines: string[],
   i: number,
 ): { node: Extract<Node, { type: "table" }>; next: number } | null {
@@ -20,7 +20,7 @@ export function parseTableBlock(
     {
       type: "tableRow",
       header: true,
-      children: splitCells(line).map((cell) => ({ type: "tableCell", children: parseInline(cell) })),
+      children: splitCells(line).map((cell) => ({ type: "tableCell", children: ParseInline(cell) })),
     },
   ];
   let j = i + 2;
@@ -28,7 +28,7 @@ export function parseTableBlock(
     rows.push({
       type: "tableRow",
       header: false,
-      children: splitCells(lines[j]).map((cell) => ({ type: "tableCell", children: parseInline(cell) })),
+      children: splitCells(lines[j]).map((cell) => ({ type: "tableCell", children: ParseInline(cell) })),
     });
     j++;
   }

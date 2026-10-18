@@ -21,8 +21,9 @@ var NewParser = (() => {
   // src/parser/index.ts
   var index_exports = {};
   __export(index_exports, {
+    EXTERNAL_DEPENDENCIES: () => EXTERNAL_DEPENDENCIES,
     Parse: () => Parse,
-    parseLines: () => parseLines
+    ParseLines: () => ParseLines
   });
 
   // src/parser/regex.ts
@@ -38,6 +39,23 @@ var NewParser = (() => {
   var REGEX_MD_BLOCKQUOTE = /^ {0,3}>[ \t]?(.*)$/;
   var REGEX_MD_BLOCKQUOTE_TAG = /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][ \t]*$/i;
   var REGEX_MD_TABLE_ALIGN = /^(:)?-+(:)?$/;
+  var REGEX_FILE_PATH_1 = "[\\p{L}\\p{M}\\p{N}_.\\-\\/~]";
+  var REGEX_FILE_PATH_2 = "[\\p{L}\\p{M}\\p{N}_.\\-~]+";
+  var REGEX_FILE_EXT = "\\.[A-Za-z0-9]+";
+  var REGEX_FILE_PATH = `~\\/${REGEX_FILE_PATH_1}*|\\/(?!v\\d+\\/)${REGEX_FILE_PATH_2}\\/${REGEX_FILE_PATH_2}\\/${REGEX_FILE_PATH_1}*|\\/${REGEX_FILE_PATH_1}+\\/${REGEX_FILE_PATH_1}*${REGEX_FILE_EXT}`;
+  var REGEX_URL = "https?:\\/\\/[A-Za-z0-9\\-._~:/?#\\[\\]@!$&'()*+,;=%]+";
+  var REGEX_MD_FILE_PATH = new RegExp(`^(?:${REGEX_FILE_PATH})$`, "u");
+  var REGEX_MD_FILE_PATH_TRAILING = /[./]+$/;
+  var REGEX_MD_URL_TRAILING = /[)\]}.,;:!?*_~、。，；：！？」』】》”）]+$/;
+  var REGEX_MD_LINK = new RegExp(
+    `!\\[(?<alt>[^\\]\\n]*)\\]\\((?<src>[^)\\s]+)(?:[ \\t]+(?<q1>["'])(?<imgTitle>[^)\\n]*?)\\k<q1>)?\\)(?:\\((?:(?<size>[0-9]+%?)|(?<width>[0-9]+%?)?[ \\t*x]+(?<height>[0-9]+%?)?)\\))?|\\[(?<label>[^\\]]+)\\]\\((?<href>https?:\\/\\/[^\\s)]+)(?:[ \\t]+(?<q2>["'])(?<linkTitle>[^)\\n]*?)\\k<q2>)?\\)|(?<![\\w/])(?<path>${REGEX_FILE_PATH})|(?<url>${REGEX_URL})`,
+    "gu"
+  );
+  var REGEX_MD_VIDEO = /\.(mp4|mov)$/i;
+  var REGEX_MD_IMAGE_SIZE_PERCENT = /%$/;
+  var REGEX_MD_LINK_PLACEHOLDER = /\u0000(\d+)\u0000/;
+  var REGEX_YOUTUBE = /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?/;
+  var REGEX_VIMEO = /(?:https?:\/\/)?(?:www\.)?vimeo\.com\/(?:channels\/[\w]+\/|groups\/[\w]+\/videos\/|album\/\d+\/video\/|video\/|)(\d+)/;
   var REGEX_MD_INLINE = new RegExp(
     [
       "\\*\\*(.+?)\\*\\*",
@@ -62,7 +80,7 @@ var NewParser = (() => {
   var MD_INLINE_TYPES = [null, "b", "em", "b", "em", "del", "mark", "sub", "sup"];
 
   // src/parser/blockquote.ts
-  function parseBlockquote(lines, i, nested) {
+  function ParseBlockquote(lines, i, nested) {
     const quoteLines = [];
     let j = i;
     while (j < lines.length) {
@@ -81,12 +99,12 @@ var NewParser = (() => {
     if (tagMatch && quoteLines.slice(1).some((line) => line.trim() !== "")) {
       tag = tagMatch[1].toLowerCase();
     }
-    const children = parseLines(tag ? quoteLines.slice(1) : quoteLines, true);
+    const children = ParseLines(tag ? quoteLines.slice(1) : quoteLines, true);
     return { node: tag ? { type: "blockquote", tag, children } : { type: "blockquote", children }, next: j };
   }
 
   // src/parser/codeBlock.ts
-  function parseCodeBlock(lines, i) {
+  function ParseCodeBlock(lines, i) {
     const fence = lines[i].trim();
     let render;
     if (REGEX_MD_CODE_BLOCK_MERMAID.test(fence)) {
@@ -106,8 +124,83 @@ var NewParser = (() => {
     return { node: render ? { type: "codeBlock", render, value } : { type: "codeBlock", value }, next: j + 1 };
   }
 
+  // src/parser/link.ts
+  function ParseLink(text) {
+    const links = [];
+    const masked = text.replace(/\u0000/g, "").replace(REGEX_MD_LINK, (...args) => {
+      const { node, trail } = parseMeta(args[args.length - 1]);
+      links.push(node);
+      return `\0${links.length - 1}\0${trail}`;
+    });
+    return { masked, links };
+  }
+  function parseMeta(meta) {
+    if (meta.src !== void 0) {
+      const node = {
+        type: "link",
+        href: meta.src,
+        tag: REGEX_MD_VIDEO.test(meta.src) ? "video" : "image",
+        children: [{ type: "text", value: meta.alt ?? "" }]
+      };
+      if (meta.imgTitle) {
+        node.title = meta.imgTitle;
+      }
+      if (meta.size) {
+        node.width = REGEX_MD_IMAGE_SIZE_PERCENT.test(meta.size) ? meta.size : `${meta.size}px`;
+        node.height = node.width;
+      }
+      if (meta.width) {
+        node.width = REGEX_MD_IMAGE_SIZE_PERCENT.test(meta.width) ? meta.width : `${meta.width}px`;
+      }
+      if (meta.height) {
+        node.height = REGEX_MD_IMAGE_SIZE_PERCENT.test(meta.height) ? meta.height : `${meta.height}px`;
+      }
+      return { node, trail: "" };
+    }
+    if (meta.label !== void 0 && meta.href !== void 0) {
+      return { node: linkNode(meta.href, [{ type: "text", value: meta.label }], meta.linkTitle), trail: "" };
+    }
+    if (meta.path !== void 0) {
+      const trail2 = meta.path.match(REGEX_MD_FILE_PATH_TRAILING)?.[0] ?? "";
+      const filePath = meta.path.slice(0, meta.path.length - trail2.length);
+      return {
+        node: { type: "link", href: filePath, tag: "file", children: [{ type: "text", value: filePath }] },
+        trail: trail2
+      };
+    }
+    const value = meta.url ?? "";
+    const trail = value.match(REGEX_MD_URL_TRAILING)?.[0] ?? "";
+    const bareURL = value.slice(0, value.length - trail.length);
+    return { node: linkNode(bareURL, [{ type: "text", value: bareURL }]), trail };
+  }
+  function linkNode(href, children, title) {
+    let tag;
+    if (REGEX_YOUTUBE.test(href)) {
+      tag = "youtube";
+    } else if (REGEX_VIMEO.test(href)) {
+      tag = "vimeo";
+    }
+    const node = tag ? { type: "link", href, tag, children } : { type: "link", href, children };
+    if (title) {
+      node.title = title;
+    }
+    return node;
+  }
+  function RestoreLinks(text, links) {
+    const domMap = [];
+    const parts = text.split(REGEX_MD_LINK_PLACEHOLDER);
+    for (let k = 0; k < parts.length; k++) {
+      if (k % 2 === 1) {
+        domMap.push(links[Number(parts[k])]);
+      } else if (parts[k]) {
+        domMap.push({ type: "text", value: parts[k] });
+      }
+    }
+    return domMap;
+  }
+
   // src/parser/inline.ts
-  function parseInline(text) {
+  function ParseInline(text) {
     const domMap = [];
     let last = 0;
     let match;
@@ -116,7 +209,9 @@ var NewParser = (() => {
       if (match.index > last) {
         domMap.push(...parseInlineMarks(text.slice(last, match.index)));
       }
-      domMap.push({ type: "code", value: match[1] });
+      domMap.push(
+        REGEX_MD_FILE_PATH.test(match[1]) ? { type: "link", href: match[1], tag: "file", children: [{ type: "text", value: match[1] }] } : { type: "code", value: match[1] }
+      );
       last = REGEX_MD_CODE_INLINE.lastIndex;
     }
     if (last < text.length) {
@@ -125,45 +220,46 @@ var NewParser = (() => {
     return domMap;
   }
   function parseInlineMarks(text) {
+    const { masked, links } = ParseLink(text);
     const domMap = [];
     let last = 0;
     let match;
     REGEX_MD_INLINE.lastIndex = 0;
-    while (match = REGEX_MD_INLINE.exec(text)) {
+    while (match = REGEX_MD_INLINE.exec(masked)) {
       if (match.index > last) {
-        domMap.push({ type: "text", value: text.slice(last, match.index) });
+        domMap.push(...RestoreLinks(masked.slice(last, match.index), links));
       }
       const target = match.findIndex((v, k) => k > 0 && v !== void 0);
-      domMap.push({ type: MD_INLINE_TYPES[target], value: match[target] });
+      domMap.push({ type: MD_INLINE_TYPES[target], children: RestoreLinks(match[target], links) });
       last = REGEX_MD_INLINE.lastIndex;
     }
-    if (last < text.length) {
-      domMap.push({ type: "text", value: text.slice(last) });
+    if (last < masked.length) {
+      domMap.push(...RestoreLinks(masked.slice(last), links));
     }
     return domMap;
   }
 
   // src/parser/heading.ts
-  function parseHeading(lines, i) {
+  function ParseHeading(lines, i) {
     const line = lines[i];
     const mdHeading = line.match(REGEX_MD_H);
     if (mdHeading) {
-      return { node: { type: "heading", level: mdHeading[1].length, children: parseInline(mdHeading[2]) }, next: i + 1 };
+      return { node: { type: "heading", level: mdHeading[1].length, children: ParseInline(mdHeading[2]) }, next: i + 1 };
     }
     if (lines[i + 1] !== void 0) {
       const nextLine = lines[i + 1];
       if (REGEX_MD_H1.test(nextLine)) {
-        return { node: { type: "heading", level: 1, children: parseInline(line) }, next: i + 2 };
+        return { node: { type: "heading", level: 1, children: ParseInline(line) }, next: i + 2 };
       }
       if (REGEX_MD_H2.test(nextLine)) {
-        return { node: { type: "heading", level: 2, children: parseInline(line) }, next: i + 2 };
+        return { node: { type: "heading", level: 2, children: ParseInline(line) }, next: i + 2 };
       }
     }
     return null;
   }
 
   // src/parser/tableBlock.ts
-  function parseTableBlock(lines, i) {
+  function ParseTableBlock(lines, i) {
     const line = lines[i];
     if (!line.includes("|") || lines[i + 1] === void 0) {
       return null;
@@ -176,7 +272,7 @@ var NewParser = (() => {
       {
         type: "tableRow",
         header: true,
-        children: splitCells(line).map((cell) => ({ type: "tableCell", children: parseInline(cell) }))
+        children: splitCells(line).map((cell) => ({ type: "tableCell", children: ParseInline(cell) }))
       }
     ];
     let j = i + 2;
@@ -184,7 +280,7 @@ var NewParser = (() => {
       rows.push({
         type: "tableRow",
         header: false,
-        children: splitCells(lines[j]).map((cell) => ({ type: "tableCell", children: parseInline(cell) }))
+        children: splitCells(lines[j]).map((cell) => ({ type: "tableCell", children: ParseInline(cell) }))
       });
       j++;
     }
@@ -224,10 +320,35 @@ var NewParser = (() => {
   }
 
   // src/parser/index.ts
-  function Parse(content) {
-    return parseLines(content.split("\n"));
+  var EXTERNAL_DEPENDENCIES = [
+    "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js",
+    "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js",
+    "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css",
+    "https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"
+  ];
+  if (typeof document !== "undefined") {
+    insertHead("link", { rel: "preconnect", href: "https://cdn.jsdelivr.net" });
+    for (const url of EXTERNAL_DEPENDENCIES) {
+      if (url.endsWith(".js")) {
+        insertHead("link", { rel: "preload", href: url, as: "script" });
+        insertHead("script", { src: url });
+      } else if (url.endsWith(".css")) {
+        insertHead("link", { rel: "preload", href: url, as: "style" });
+        insertHead("link", { rel: "stylesheet", href: url });
+      }
+    }
   }
-  function parseLines(lines, nested = false) {
+  function insertHead(tag, attrs) {
+    const dom = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      dom.setAttribute(k, v);
+    }
+    document.head.appendChild(dom);
+  }
+  function Parse(content) {
+    return ParseLines(content.split("\n"));
+  }
+  function ParseLines(lines, nested = false) {
     const domMap = [];
     let i = 0;
     while (i < lines.length) {
@@ -236,7 +357,7 @@ var NewParser = (() => {
         i++;
         continue;
       }
-      const codeBlock = parseCodeBlock(lines, i);
+      const codeBlock = ParseCodeBlock(lines, i);
       if (codeBlock) {
         domMap.push(codeBlock.node);
         i = codeBlock.next;
@@ -247,15 +368,10 @@ var NewParser = (() => {
         i++;
         continue;
       }
-      const table = parseTableBlock(lines, i);
+      const table = ParseTableBlock(lines, i);
       if (table) {
         domMap.push(table.node);
         i = table.next;
-        continue;
-      }
-      if (line.includes("|")) {
-        domMap.push({ type: "text", children: parseInline(line) });
-        i++;
         continue;
       }
       if (REGEX_MD_HR.test(line)) {
@@ -263,20 +379,20 @@ var NewParser = (() => {
         i++;
         continue;
       }
-      const blockquote = parseBlockquote(lines, i, nested);
+      const blockquote = ParseBlockquote(lines, i, nested);
       if (blockquote) {
         domMap.push(blockquote.node);
         i = blockquote.next;
         continue;
       }
-      const heading = parseHeading(lines, i);
+      const heading = ParseHeading(lines, i);
       if (heading) {
         domMap.push(heading.node);
         i = heading.next;
         continue;
       }
       console.log(line);
-      domMap.push({ type: "text", children: parseInline(line) });
+      domMap.push({ type: "text", children: ParseInline(line) });
       i++;
     }
     return domMap;
