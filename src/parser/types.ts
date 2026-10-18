@@ -7,6 +7,8 @@ export interface ChildNode {
 
 export type CodeBlockRender = "mermaid" | "latex";
 
+export type BlockquoteTag = "note" | "tip" | "important" | "warning" | "caution";
+
 export type TableAlign = "left" | "center" | "right";
 
 export interface TableRow {
@@ -25,5 +27,6 @@ export type Node =
   | { type: "hr" }
   | { type: "heading"; level: number; children: ChildNode[] }
   | { type: "html"; value: string }
+  | { type: "blockquote"; tag?: BlockquoteTag; children: Node[] }
   | { type: "table"; align: (TableAlign | null)[]; children: TableRow[] }
   | { type: "text"; children: ChildNode[] };

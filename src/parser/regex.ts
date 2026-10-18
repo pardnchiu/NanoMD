@@ -9,6 +9,8 @@ export const REGEX_MD_H = /^(#{1,6})\s+(.+)$/;
 export const REGEX_MD_H1 = /^ {0,3}=+[ \t]*$/;
 export const REGEX_MD_H2 = /^ {0,3}-+[ \t]*$/;
 export const REGEX_MD_HR = /^ {0,3}([-*_])( *\1){2,}$/;
+export const REGEX_MD_BLOCKQUOTE = /^ {0,3}>[ \t]?(.*)$/;
+export const REGEX_MD_BLOCKQUOTE_TAG = /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][ \t]*$/i;
 export const REGEX_MD_TABLE_ALIGN = /^(:)?-+(:)?$/;
 export const REGEX_MD_INLINE = new RegExp(
   [

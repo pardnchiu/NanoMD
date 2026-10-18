@@ -34,6 +34,34 @@
       > 引言第二行 **粗體**
       >> 引言第三行，內引言 **粗體**
 
+      > [!NOTE]
+      > 提示：使用者略讀時也該知道的資訊。
+
+      > [!TIP]
+      > 建議：讓事情更順利的做法，支援 **粗體** 與 `code`。
+
+      > [!IMPORTANT]
+      > 重要：達成目標必須知道的資訊。
+      >
+      > - 可包含清單
+      > - 第二項
+
+      > [!WARNING]
+      > 警告：需要立即注意以避免問題。
+
+      > [!CAUTION]
+      > 注意：某些操作可能帶來負面後果。
+
+      不轉換成提示框（只有標記、標記後同行有文字、巢狀在引言內）：
+
+      > [!NOTE]
+
+      > [!TIP] 同一行的文字
+
+      > 外層引言
+      >> [!WARNING]
+      >> 巢狀引言內的標記
+
       - 項目一
       - 項目二
         - 巢狀項目
@@ -41,6 +69,11 @@
 
       1. 第一
       2. 第二
+
+      indent（tab 寬度）：下方巢狀項目以一個 tab 縮排，indent 為 4 時巢狀；改成 2 會斷成兩個清單
+
+      1.  有序項目，內容從第 4 欄開始
+      	- tab 縮排的巢狀項目
 
       | 欄位 | 說明 |
       |:---|---:|
@@ -89,7 +122,11 @@
     document.addEventListener("DOMContentLoaded", function () {
       const lines = document.getElementById("sample").textContent.replace(/^\n|\n\s*$/g, "").split("\n");
       const indent = Math.min(...lines.filter((line) => line.trim() !== "").map((line) => line.match(/^ */)[0].length));
-      document.getElementById("output").textContent = NewParser.Parse(lines.map((line) => line.slice(indent)).join("\n"));
+      document.getElementById("output").textContent = JSON.stringify(
+        NewParser.Parse(lines.map((line) => line.slice(indent)).join("\n")),
+        null,
+        2,
+      );
     });
   </script>
 </html>

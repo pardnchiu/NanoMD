@@ -21,7 +21,8 @@ var NewParser = (() => {
   // src/parser/index.ts
   var index_exports = {};
   __export(index_exports, {
-    Parse: () => Parse
+    Parse: () => Parse,
+    parseLines: () => parseLines
   });
 
   // src/parser/regex.ts
@@ -34,6 +35,8 @@ var NewParser = (() => {
   var REGEX_MD_H1 = /^ {0,3}=+[ \t]*$/;
   var REGEX_MD_H2 = /^ {0,3}-+[ \t]*$/;
   var REGEX_MD_HR = /^ {0,3}([-*_])( *\1){2,}$/;
+  var REGEX_MD_BLOCKQUOTE = /^ {0,3}>[ \t]?(.*)$/;
+  var REGEX_MD_BLOCKQUOTE_TAG = /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][ \t]*$/i;
   var REGEX_MD_TABLE_ALIGN = /^(:)?-+(:)?$/;
   var REGEX_MD_INLINE = new RegExp(
     [
@@ -57,6 +60,30 @@ var NewParser = (() => {
     "g"
   );
   var MD_INLINE_TYPES = [null, "b", "em", "b", "em", "del", "mark", "sub", "sup"];
+
+  // src/parser/blockquote.ts
+  function parseBlockquote(lines, i, nested) {
+    const quoteLines = [];
+    let j = i;
+    while (j < lines.length) {
+      const match = lines[j].match(REGEX_MD_BLOCKQUOTE);
+      if (!match) {
+        break;
+      }
+      quoteLines.push(match[1]);
+      j++;
+    }
+    if (quoteLines.length === 0) {
+      return null;
+    }
+    let tag;
+    const tagMatch = nested ? null : quoteLines[0].match(REGEX_MD_BLOCKQUOTE_TAG);
+    if (tagMatch && quoteLines.slice(1).some((line) => line.trim() !== "")) {
+      tag = tagMatch[1].toLowerCase();
+    }
+    const children = parseLines(tag ? quoteLines.slice(1) : quoteLines, true);
+    return { node: tag ? { type: "blockquote", tag, children } : { type: "blockquote", children }, next: j };
+  }
 
   // src/parser/codeBlock.ts
   function parseCodeBlock(lines, i) {
@@ -198,7 +225,9 @@ var NewParser = (() => {
 
   // src/parser/index.ts
   function Parse(content) {
-    const lines = content.split("\n");
+    return parseLines(content.split("\n"));
+  }
+  function parseLines(lines, nested = false) {
     const domMap = [];
     let i = 0;
     while (i < lines.length) {
@@ -234,6 +263,12 @@ var NewParser = (() => {
         i++;
         continue;
       }
+      const blockquote = parseBlockquote(lines, i, nested);
+      if (blockquote) {
+        domMap.push(blockquote.node);
+        i = blockquote.next;
+        continue;
+      }
       const heading = parseHeading(lines, i);
       if (heading) {
         domMap.push(heading.node);
@@ -244,7 +279,7 @@ var NewParser = (() => {
       domMap.push({ type: "text", children: parseInline(line) });
       i++;
     }
-    return JSON.stringify(domMap, null, 2);
+    return domMap;
   }
   return __toCommonJS(index_exports);
 })();

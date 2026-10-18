@@ -1,3 +1,4 @@
+import { parseBlockquote } from "./blockquote";
 import { parseCodeBlock } from "./codeBlock";
 import { parseHeading } from "./heading";
 import { parseInline } from "./inline";
@@ -5,8 +6,11 @@ import { REGEX_HTML_DOM, REGEX_MD_HR } from "./regex";
 import { parseTableBlock } from "./tableBlock";
 import type { Node } from "./types";
 
-export function Parse(content: string): string {
-  const lines = content.split("\n");
+export function Parse(content: string): Node[] {
+  return parseLines(content.split("\n"));
+}
+
+export function parseLines(lines: string[], nested = false): Node[] {
   const domMap: Node[] = [];
 
   let i = 0;
@@ -52,6 +56,13 @@ export function Parse(content: string): string {
       continue;
     }
 
+    const blockquote = parseBlockquote(lines, i, nested);
+    if (blockquote) {
+      domMap.push(blockquote.node);
+      i = blockquote.next;
+      continue;
+    }
+
     const heading = parseHeading(lines, i);
     if (heading) {
       domMap.push(heading.node);
@@ -64,5 +75,5 @@ export function Parse(content: string): string {
 
     i++;
   }
-  return JSON.stringify(domMap, null, 2);
+  return domMap;
 }
