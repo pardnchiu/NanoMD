@@ -22,6 +22,7 @@ var NewParser = (() => {
   var index_exports = {};
   __export(index_exports, {
     EXTERNAL_DEPENDENCIES: () => EXTERNAL_DEPENDENCIES,
+    Init: () => Init,
     Parse: () => Parse,
     ParseLines: () => ParseLines
   });
@@ -29,10 +30,7 @@ var NewParser = (() => {
   // src/parser/regex.ts
   var REGEX_HTML_DOM = /^\s*<\/?[A-Za-z][A-Za-z0-9-]*(?:\s[^<>]*)?\/?>/;
   var REGEX_MD_CODE_BLOCK = /^```(\S*)$/;
-  var REGEX_MD_CODE_LANG_MERMAID = /^mermaid/;
-  var REGEX_MD_CODE_LANG_LATEX = /^(latex|math)/;
-  var REGEX_MD_CODE_LANG_CHARTJS = /^chartjs/;
-  var REGEX_MD_CODE_INLINE = /`([^`\n]+)`/g;
+  var REGEX_MD_CODE_INLINE = /(?<!\\)`([^`\n]+)`/g;
   var REGEX_MD_H = /^(#{1,6})\s+(.+)$/;
   var REGEX_MD_H1 = /^ {0,3}=+[ \t]*$/;
   var REGEX_MD_H2 = /^ {0,3}-+[ \t]*$/;
@@ -59,26 +57,43 @@ var NewParser = (() => {
   var REGEX_VIMEO = /(?:https?:\/\/)?(?:www\.)?vimeo\.com\/(?:channels\/[\w]+\/|groups\/[\w]+\/videos\/|album\/\d+\/video\/|video\/|)(\d+)/;
   var REGEX_MD_INLINE = new RegExp(
     [
+      "\\*\\*\\*(.+?)\\*\\*\\*",
+      // 1 ***bold em***
+      "(?<![A-Za-z0-9_])___(.+?)___(?![A-Za-z0-9_])",
+      // 2 ___bold em___, prevent ___abc___123
       "\\*\\*(.+?)\\*\\*",
-      // 1 **bold**
+      // 3 **bold**
       "\\*([^\\s*](?:[^*]*[^\\s*])?)\\*",
-      // 2 *em*, prevent ***
+      // 4 *em*, prevent ***
       "(?<![A-Za-z0-9_])__(.+?)__(?![A-Za-z0-9_])",
-      // 3 __bold__, prevent __abc__123
+      // 5 __bold__, prevent __abc__123
       "(?<![A-Za-z0-9_])_([^\\s_](?:[^_]*[^\\s_])?)_(?![A-Za-z0-9_])",
-      // 4 _em_, prevent abc_123
+      // 6 _em_, prevent abc_123
       "~~(.+?)~~",
-      // 5 ~~del~~
+      // 7 ~~del~~
       "==(.+?)==",
-      // 6 ==mark==
+      // 8 ==mark==
       "~([^\\s~]+)~",
-      // 7 ~sub~
+      // 9 ~sub~
       "\\^([^\\s^]+)\\^"
-      // 8 ^sup^
+      // 10 ^sup^
     ].join("|"),
     "g"
   );
-  var MD_INLINE_TYPES = [null, "b", "em", "b", "em", "del", "mark", "sub", "sup"];
+  var MD_INLINE_TYPES = [
+    null,
+    "bem",
+    "bem",
+    "b",
+    "em",
+    "b",
+    "em",
+    "del",
+    "mark",
+    "sub",
+    "sup"
+  ];
+  var REGEX_MD_ESCAPE = /\\([!-\/:-@\[-`{-~])/g;
 
   // src/parser/blockquote.ts
   function ParseBlockquote(lines, i, nested) {
@@ -127,7 +142,10 @@ var NewParser = (() => {
   // src/parser/link.ts
   function ParseLink(text) {
     const links = [];
-    const mask = text.replace(/\u0000/g, "").replace(REGEX_MD_LINK, (...args) => {
+    const mask = text.replace(/\u0000/g, "").replace(REGEX_MD_ESCAPE, (_, char) => {
+      links.push({ type: "text", value: char });
+      return `\0${links.length - 1}\0`;
+    }).replace(REGEX_MD_LINK, (...args) => {
       const { node, trail } = parseMeta(args[args.length - 1]);
       links.push(node);
       return `\0${links.length - 1}\0${trail}`;
@@ -233,7 +251,9 @@ var NewParser = (() => {
         domMap.push(...RestoreLinks(masked.slice(last, match.index), links));
       }
       const target = match.findIndex((v, k) => k > 0 && v !== void 0);
-      domMap.push({ type: MD_INLINE_TYPES[target], children: RestoreLinks(match[target], links) });
+      const children = RestoreLinks(match[target], links);
+      const type = MD_INLINE_TYPES[target];
+      domMap.push(type === "bem" ? { type: "b", children: [{ type: "em", children }] } : { type, children });
       last = REGEX_MD_INLINE.lastIndex;
     }
     if (last < masked.length) {
@@ -330,60 +350,54 @@ var NewParser = (() => {
     googleprettifyjs: "https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js",
     chartjs: "https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"
   };
-  var insertedDependencies = /* @__PURE__ */ new Set();
-  function Parse(content, dependencies = {}) {
-    const nodes = ParseLines(content.split("\n"));
-    if (dependencies.enable && typeof document !== "undefined") {
-      const endpoint = dependencies.endpoint ?? {};
-      insertDependencies(nodes, {
-        mermaidjs: endpoint.mermaidjs ?? EXTERNAL_DEPENDENCIES.mermaidjs,
-        katexjs: endpoint.katexjs ?? EXTERNAL_DEPENDENCIES.katexjs,
-        katexcss: endpoint.katexcss ?? EXTERNAL_DEPENDENCIES.katexcss,
-        googleprettifyjs: endpoint.googleprettifyjs ?? EXTERNAL_DEPENDENCIES.googleprettifyjs,
-        chartjs: endpoint.chartjs ?? EXTERNAL_DEPENDENCIES.chartjs
-      });
+  var insertedDependencies = /* @__PURE__ */ new Map();
+  function Init(enable = {}, endpoint = {}) {
+    if (typeof document === "undefined") {
+      return Promise.resolve([]);
     }
-    return nodes;
+    const loads = [];
+    if (enable.mermaid) {
+      loads.push(insertHead("script", endpoint.mermaidjs ?? EXTERNAL_DEPENDENCIES.mermaidjs));
+    }
+    if (enable.latex) {
+      loads.push(insertHead("style", endpoint.katexcss ?? EXTERNAL_DEPENDENCIES.katexcss));
+      loads.push(insertHead("script", endpoint.katexjs ?? EXTERNAL_DEPENDENCIES.katexjs));
+    }
+    if (enable.highlight) {
+      loads.push(insertHead("script", endpoint.googleprettifyjs ?? EXTERNAL_DEPENDENCIES.googleprettifyjs));
+    }
+    if (enable.chartjs) {
+      loads.push(insertHead("script", endpoint.chartjs ?? EXTERNAL_DEPENDENCIES.chartjs));
+    }
+    return Promise.all(loads);
   }
-  function insertDependencies(nodes, dependencies) {
-    for (const node of nodes) {
-      if (node.type === "blockquote") {
-        insertDependencies(node.children, dependencies);
-      } else if (node.type === "codeBlock") {
-        const lang = node.lang ?? "";
-        if (REGEX_MD_CODE_LANG_MERMAID.test(lang)) {
-          insertHead("script", dependencies.mermaidjs);
-        } else if (REGEX_MD_CODE_LANG_LATEX.test(lang)) {
-          insertHead("style", dependencies.katexcss);
-          insertHead("script", dependencies.katexjs);
-        } else if (REGEX_MD_CODE_LANG_CHARTJS.test(lang)) {
-          insertHead("script", dependencies.chartjs);
-        } else {
-          insertHead("script", dependencies.googleprettifyjs);
-        }
-      }
-    }
+  function Parse(content) {
+    return ParseLines(content.split("\n"));
   }
   function insertHead(type, url) {
-    if (insertedDependencies.has(url)) {
-      return;
+    const inserted = insertedDependencies.get(url);
+    if (inserted) {
+      return inserted;
     }
-    insertedDependencies.add(url);
     const preload = document.createElement("link");
     preload.rel = "preload";
     preload.href = url;
     preload.as = type;
     document.head.appendChild(preload);
-    if (type === "script") {
-      const script = document.createElement("script");
-      script.src = url;
-      document.head.appendChild(script);
+    const element = type === "script" ? document.createElement("script") : document.createElement("link");
+    const load = new Promise((resolve, reject) => {
+      element.onload = () => resolve();
+      element.onerror = () => reject(new Error(`[Unavailable] ${url}: failed to load`));
+    });
+    insertedDependencies.set(url, load);
+    if (element instanceof HTMLScriptElement) {
+      element.src = url;
     } else {
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href = url;
-      document.head.appendChild(link);
+      element.rel = "stylesheet";
+      element.href = url;
     }
+    document.head.appendChild(element);
+    return load;
   }
   function ParseLines(lines, nested = false) {
     const domMap = [];
@@ -428,7 +442,6 @@ var NewParser = (() => {
         i = heading.next;
         continue;
       }
-      console.log(line);
       domMap.push({ type: "text", children: ParseInline(line) });
       i++;
     }

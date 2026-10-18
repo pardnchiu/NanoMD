@@ -63,7 +63,9 @@ export interface DependencyEndpoint {
   chartjs?: string;
 }
 
-export interface Dependencies {
-  enable?: boolean;
-  endpoint?: DependencyEndpoint;
+export interface DependencyEnable {
+  mermaid?: boolean;
+  latex?: boolean;
+  highlight?: boolean;
+  chartjs?: boolean;
 }

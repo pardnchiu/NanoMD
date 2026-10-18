@@ -5,7 +5,7 @@ export const REGEX_MD_CODE_BLOCK = /^```(\S*)$/;
 export const REGEX_MD_CODE_LANG_MERMAID = /^mermaid/;
 export const REGEX_MD_CODE_LANG_LATEX = /^(latex|math)/;
 export const REGEX_MD_CODE_LANG_CHARTJS = /^chartjs/;
-export const REGEX_MD_CODE_INLINE = /`([^`\n]+)`/g;
+export const REGEX_MD_CODE_INLINE = /(?<!\\)`([^`\n]+)`/g;
 export const REGEX_MD_H = /^(#{1,6})\s+(.+)$/;
 export const REGEX_MD_H1 = /^ {0,3}=+[ \t]*$/;
 export const REGEX_MD_H2 = /^ {0,3}-+[ \t]*$/;
@@ -40,15 +40,30 @@ export const REGEX_VIMEO =
   /(?:https?:\/\/)?(?:www\.)?vimeo\.com\/(?:channels\/[\w]+\/|groups\/[\w]+\/videos\/|album\/\d+\/video\/|video\/|)(\d+)/;
 export const REGEX_MD_INLINE = new RegExp(
   [
-    "\\*\\*(.+?)\\*\\*", // 1 **bold**
-    "\\*([^\\s*](?:[^*]*[^\\s*])?)\\*", // 2 *em*, prevent ***
-    "(?<![A-Za-z0-9_])__(.+?)__(?![A-Za-z0-9_])", // 3 __bold__, prevent __abc__123
-    "(?<![A-Za-z0-9_])_([^\\s_](?:[^_]*[^\\s_])?)_(?![A-Za-z0-9_])", // 4 _em_, prevent abc_123
-    "~~(.+?)~~", // 5 ~~del~~
-    "==(.+?)==", // 6 ==mark==
-    "~([^\\s~]+)~", // 7 ~sub~
-    "\\^([^\\s^]+)\\^", // 8 ^sup^
+    "\\*\\*\\*(.+?)\\*\\*\\*", // 1 ***bold em***
+    "(?<![A-Za-z0-9_])___(.+?)___(?![A-Za-z0-9_])", // 2 ___bold em___, prevent ___abc___123
+    "\\*\\*(.+?)\\*\\*", // 3 **bold**
+    "\\*([^\\s*](?:[^*]*[^\\s*])?)\\*", // 4 *em*, prevent ***
+    "(?<![A-Za-z0-9_])__(.+?)__(?![A-Za-z0-9_])", // 5 __bold__, prevent __abc__123
+    "(?<![A-Za-z0-9_])_([^\\s_](?:[^_]*[^\\s_])?)_(?![A-Za-z0-9_])", // 6 _em_, prevent abc_123
+    "~~(.+?)~~", // 7 ~~del~~
+    "==(.+?)==", // 8 ==mark==
+    "~([^\\s~]+)~", // 9 ~sub~
+    "\\^([^\\s^]+)\\^", // 10 ^sup^
   ].join("|"),
   "g",
 );
-export const MD_INLINE_TYPES: (MarkType | null)[] = [null, "b", "em", "b", "em", "del", "mark", "sub", "sup"];
+export const MD_INLINE_TYPES: (MarkType | "bem" | null)[] = [
+  null,
+  "bem",
+  "bem",
+  "b",
+  "em",
+  "b",
+  "em",
+  "del",
+  "mark",
+  "sub",
+  "sup",
+];
+export const REGEX_MD_ESCAPE = /\\([!-\/:-@\[-`{-~])/g; // \* => *, \` => `, \[ => [, \\ => \

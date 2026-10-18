@@ -1,5 +1,6 @@
 import {
   REGEX_MD_FILE_PATH_TRAILING,
+  REGEX_MD_ESCAPE,
   REGEX_MD_IMAGE_SIZE_PERCENT,
   REGEX_MD_LINK,
   REGEX_MD_LINK_PLACEHOLDER,
@@ -29,11 +30,17 @@ interface Link {
 export function ParseLink(text: string): { mask: string; links: ChildNode[] } {
   const links: ChildNode[] = [];
   // * mask links for later style parse, keep link's style be correct like ~~http://abc.de~~
-  const mask = text.replace(/\u0000/g, "").replace(REGEX_MD_LINK, (...args) => {
-    const { node, trail } = parseMeta(args[args.length - 1] as Link);
-    links.push(node);
-    return `\u0000${links.length - 1}\u0000${trail}`;
-  });
+  const mask = text
+    .replace(/\u0000/g, "")
+    .replace(REGEX_MD_ESCAPE, (_, char: string) => {
+      links.push({ type: "text", value: char });
+      return `\u0000${links.length - 1}\u0000`;
+    })
+    .replace(REGEX_MD_LINK, (...args) => {
+      const { node, trail } = parseMeta(args[args.length - 1] as Link);
+      links.push(node);
+      return `\u0000${links.length - 1}\u0000${trail}`;
+    });
   return { mask, links };
 }
 

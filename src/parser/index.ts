@@ -2,15 +2,9 @@ import { ParseBlockquote } from "./blockquote";
 import { ParseCodeBlock } from "./codeBlock";
 import { ParseHeading } from "./heading";
 import { ParseInline } from "./inline";
-import {
-  REGEX_HTML_DOM,
-  REGEX_MD_CODE_LANG_CHARTJS,
-  REGEX_MD_CODE_LANG_LATEX,
-  REGEX_MD_CODE_LANG_MERMAID,
-  REGEX_MD_HR,
-} from "./regex";
+import { REGEX_HTML_DOM, REGEX_MD_HR } from "./regex";
 import { ParseTableBlock } from "./tableBlock";
-import type { Dependencies, DependencyEndpoint, Node } from "./types";
+import type { DependencyEnable, DependencyEndpoint, Node } from "./types";
 
 export const EXTERNAL_DEPENDENCIES: Required<DependencyEndpoint> = {
   mermaidjs: "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js",
@@ -20,63 +14,57 @@ export const EXTERNAL_DEPENDENCIES: Required<DependencyEndpoint> = {
   chartjs: "https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js",
 };
 
-const insertedDependencies = new Set<string>();
+const insertedDependencies = new Map<string, Promise<void>>();
 
-export function Parse(content: string, dependencies: Dependencies = {}): Node[] {
-  const nodes = ParseLines(content.split("\n"));
-  if (dependencies.enable && typeof document !== "undefined") {
-    const endpoint = dependencies.endpoint ?? {};
-    insertDependencies(nodes, {
-      mermaidjs: endpoint.mermaidjs ?? EXTERNAL_DEPENDENCIES.mermaidjs,
-      katexjs: endpoint.katexjs ?? EXTERNAL_DEPENDENCIES.katexjs,
-      katexcss: endpoint.katexcss ?? EXTERNAL_DEPENDENCIES.katexcss,
-      googleprettifyjs: endpoint.googleprettifyjs ?? EXTERNAL_DEPENDENCIES.googleprettifyjs,
-      chartjs: endpoint.chartjs ?? EXTERNAL_DEPENDENCIES.chartjs,
-    });
+export function Init(enable: DependencyEnable = {}, endpoint: DependencyEndpoint = {}): Promise<void[]> {
+  if (typeof document === "undefined") {
+    return Promise.resolve([]);
   }
-  return nodes;
+  const loads: Promise<void>[] = [];
+  if (enable.mermaid) {
+    loads.push(insertHead("script", endpoint.mermaidjs ?? EXTERNAL_DEPENDENCIES.mermaidjs));
+  }
+  if (enable.latex) {
+    loads.push(insertHead("style", endpoint.katexcss ?? EXTERNAL_DEPENDENCIES.katexcss));
+    loads.push(insertHead("script", endpoint.katexjs ?? EXTERNAL_DEPENDENCIES.katexjs));
+  }
+  if (enable.highlight) {
+    loads.push(insertHead("script", endpoint.googleprettifyjs ?? EXTERNAL_DEPENDENCIES.googleprettifyjs));
+  }
+  if (enable.chartjs) {
+    loads.push(insertHead("script", endpoint.chartjs ?? EXTERNAL_DEPENDENCIES.chartjs));
+  }
+  return Promise.all(loads);
 }
 
-function insertDependencies(nodes: Node[], dependencies: Required<DependencyEndpoint>): void {
-  for (const node of nodes) {
-    if (node.type === "blockquote") {
-      insertDependencies(node.children, dependencies);
-    } else if (node.type === "codeBlock") {
-      const lang = node.lang ?? "";
-      if (REGEX_MD_CODE_LANG_MERMAID.test(lang)) {
-        insertHead("script", dependencies.mermaidjs);
-      } else if (REGEX_MD_CODE_LANG_LATEX.test(lang)) {
-        insertHead("style", dependencies.katexcss);
-        insertHead("script", dependencies.katexjs);
-      } else if (REGEX_MD_CODE_LANG_CHARTJS.test(lang)) {
-        insertHead("script", dependencies.chartjs);
-      } else {
-        insertHead("script", dependencies.googleprettifyjs);
-      }
-    }
-  }
+export function Parse(content: string): Node[] {
+  return ParseLines(content.split("\n"));
 }
 
-function insertHead(type: "script" | "style", url: string): void {
-  if (insertedDependencies.has(url)) {
-    return;
+function insertHead(type: "script" | "style", url: string): Promise<void> {
+  const inserted = insertedDependencies.get(url);
+  if (inserted) {
+    return inserted;
   }
-  insertedDependencies.add(url);
   const preload = document.createElement("link");
   preload.rel = "preload";
   preload.href = url;
   preload.as = type;
   document.head.appendChild(preload);
-  if (type === "script") {
-    const script = document.createElement("script");
-    script.src = url;
-    document.head.appendChild(script);
+  const element = type === "script" ? document.createElement("script") : document.createElement("link");
+  const load = new Promise<void>((resolve, reject) => {
+    element.onload = () => resolve();
+    element.onerror = () => reject(new Error(`[Unavailable] ${url}: failed to load`));
+  });
+  insertedDependencies.set(url, load);
+  if (element instanceof HTMLScriptElement) {
+    element.src = url;
   } else {
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = url;
-    document.head.appendChild(link);
+    element.rel = "stylesheet";
+    element.href = url;
   }
+  document.head.appendChild(element);
+  return load;
 }
 
 export function ParseLines(lines: string[], nested = false): Node[] {
@@ -133,7 +121,6 @@ export function ParseLines(lines: string[], nested = false): Node[] {
       continue;
     }
 
-    console.log(line);
     domMap.push({ type: "text", children: ParseInline(line) });
 
     i++;

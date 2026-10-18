@@ -41,7 +41,9 @@ function parseInlineMarks(text: string): ChildNode[] {
 
     // * matched
     const target = match.findIndex((v, k) => k > 0 && v !== undefined);
-    domMap.push({ type: MD_INLINE_TYPES[target] as MarkType, children: RestoreLinks(match[target], links) });
+    const children = RestoreLinks(match[target], links);
+    const type = MD_INLINE_TYPES[target] as MarkType | "bem";
+    domMap.push(type === "bem" ? { type: "b", children: [{ type: "em", children }] } : { type, children });
     last = REGEX_MD_INLINE.lastIndex;
   }
 
