@@ -4,14 +4,90 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <script src="./v2.js"></script>
+    <script src="./parser.js"></script>
   </head>
   <body>
     <pre id="output"></pre>
+    <script type="text/plain" id="sample">
+      # 標題 H1 *(1)*
+      ## 標題 H2 _(1)_
+      ### 標題 ~~H3~~
+      #### 標題 ==H4==
+      ##### 標題 H5
+      ###### 標題 H6
+
+      標題 H1^(2)^
+      ===
+
+      標題 H2~(2)~
+      ---
+
+      行內：**粗體**、__粗體__、*斜體*、_斜體_、~~刪除~~、==標記==、H~2~O、x^2^、`code`
+
+      不轉換：snake_case_name、__init__x、2^10 and 3^ x、`a*b*c`
+
+      連結：[NanoMD](https://nanomd.pardn.io)、裸網址 https://github.com/pardnchiu/NanoMD。
+
+      路徑：~/Desktop/test.md、/Users/pardn/a/b.go、`/tmp/demo.png`
+
+      > 引言第一行
+      > 引言第二行 **粗體**
+      >> 引言第三行，內引言 **粗體**
+
+      - 項目一
+      - 項目二
+        - 巢狀項目
+      - 項目三
+
+      1. 第一
+      2. 第二
+
+      | 欄位 | 說明 |
+      |:---|---:|
+      | a | **粗體** |
+      | b | `code` |
+
+      ***
+
+      - - -
+
+      ___
+
+      ```js
+      const a = "<b>不轉換</b>";
+      ```
+
+      ```mermaid
+      flowchart LR
+        A[輸入 Markdown] --> B{是否為區塊?}
+        B -->|是| C[parseLines]
+        B -->|否| D[parseInline]
+        C --> E[renderToHTML]
+        D --> E
+      ```
+
+      ```mermaid
+      sequenceDiagram
+        User->>Editor: 輸入文字
+        Editor->>Parser: render()
+        Parser-->>Editor: JSON
+      ```
+
+      ```latex
+      E = mc^2
+      ```
+
+      ```math
+      \int_0^\infty e^{-x^2} \, dx = \frac{\sqrt{\pi}}{2}
+      ```
+
+      <div onclick="alert(1)">raw HTML（onclick 應被移除）</div>
+      <a href="javascript:alert(1)">javascript: href（應被移除）</a>
+    </script>
   </body>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-      document.getElementById("output").textContent = render();
+      document.getElementById("output").textContent = NewParser.render(document.getElementById("sample").textContent);
     });
   </script>
 </html>
