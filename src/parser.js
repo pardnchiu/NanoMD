@@ -28,9 +28,10 @@ var NewParser = (() => {
 
   // src/parser/regex.ts
   var REGEX_HTML_DOM = /^\s*<\/?[A-Za-z][A-Za-z0-9-]*(?:\s[^<>]*)?\/?>/;
-  var REGEX_MD_CODE_BLOCK_PREFIX = /^```(?!mermaid|latex|math)\S*$/;
-  var REGEX_MD_CODE_BLOCK_MERMAID = /^```mermaid\S*$/;
-  var REGEX_MD_CODE_BLOCK_LATEX = /^```(latex|math)\S*$/;
+  var REGEX_MD_CODE_BLOCK = /^```(\S*)$/;
+  var REGEX_MD_CODE_LANG_MERMAID = /^mermaid/;
+  var REGEX_MD_CODE_LANG_LATEX = /^(latex|math)/;
+  var REGEX_MD_CODE_LANG_CHARTJS = /^chartjs/;
   var REGEX_MD_CODE_INLINE = /`([^`\n]+)`/g;
   var REGEX_MD_H = /^(#{1,6})\s+(.+)$/;
   var REGEX_MD_H1 = /^ {0,3}=+[ \t]*$/;
@@ -105,13 +106,8 @@ var NewParser = (() => {
 
   // src/parser/codeBlock.ts
   function ParseCodeBlock(lines, i) {
-    const fence = lines[i].trim();
-    let render;
-    if (REGEX_MD_CODE_BLOCK_MERMAID.test(fence)) {
-      render = "mermaid";
-    } else if (REGEX_MD_CODE_BLOCK_LATEX.test(fence)) {
-      render = "latex";
-    } else if (!REGEX_MD_CODE_BLOCK_PREFIX.test(fence)) {
+    const fence = lines[i].trim().match(REGEX_MD_CODE_BLOCK);
+    if (!fence) {
       return null;
     }
     const blockLines = [];
@@ -121,18 +117,22 @@ var NewParser = (() => {
       j++;
     }
     const value = blockLines.join("\n");
-    return { node: render ? { type: "codeBlock", render, value } : { type: "codeBlock", value }, next: j + 1 };
+    const lang = fence[1].toLowerCase();
+    if (lang && j < lines.length) {
+      return { node: { type: "codeBlock", lang, value }, next: j + 1 };
+    }
+    return { node: { type: "codeBlock", value }, next: j + 1 };
   }
 
   // src/parser/link.ts
   function ParseLink(text) {
     const links = [];
-    const masked = text.replace(/\u0000/g, "").replace(REGEX_MD_LINK, (...args) => {
+    const mask = text.replace(/\u0000/g, "").replace(REGEX_MD_LINK, (...args) => {
       const { node, trail } = parseMeta(args[args.length - 1]);
       links.push(node);
       return `\0${links.length - 1}\0${trail}`;
     });
-    return { masked, links };
+    return { mask, links };
   }
   function parseMeta(meta) {
     if (meta.src !== void 0) {
@@ -157,8 +157,11 @@ var NewParser = (() => {
       }
       return { node, trail: "" };
     }
-    if (meta.label !== void 0 && meta.href !== void 0) {
-      return { node: linkNode(meta.href, [{ type: "text", value: meta.label }], meta.linkTitle), trail: "" };
+    if (meta.href !== void 0 && meta.label !== void 0) {
+      return {
+        node: linkNode(meta.href, [{ type: "text", value: meta.label }], meta.linkTitle),
+        trail: ""
+      };
     }
     if (meta.path !== void 0) {
       const trail2 = meta.path.match(REGEX_MD_FILE_PATH_TRAILING)?.[0] ?? "";
@@ -168,9 +171,9 @@ var NewParser = (() => {
         trail: trail2
       };
     }
-    const value = meta.url ?? "";
-    const trail = value.match(REGEX_MD_URL_TRAILING)?.[0] ?? "";
-    const bareURL = value.slice(0, value.length - trail.length);
+    const url = meta.url ?? "";
+    const trail = url.match(REGEX_MD_URL_TRAILING)?.[0] ?? "";
+    const bareURL = url.slice(0, url.length - trail.length);
     return { node: linkNode(bareURL, [{ type: "text", value: bareURL }]), trail };
   }
   function linkNode(href, children, title) {
@@ -220,7 +223,7 @@ var NewParser = (() => {
     return domMap;
   }
   function parseInlineMarks(text) {
-    const { masked, links } = ParseLink(text);
+    const { mask: masked, links } = ParseLink(text);
     const domMap = [];
     let last = 0;
     let match;
@@ -320,33 +323,67 @@ var NewParser = (() => {
   }
 
   // src/parser/index.ts
-  var EXTERNAL_DEPENDENCIES = [
-    "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js",
-    "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js",
-    "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css",
-    "https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"
-  ];
-  if (typeof document !== "undefined") {
-    insertHead("link", { rel: "preconnect", href: "https://cdn.jsdelivr.net" });
-    for (const url of EXTERNAL_DEPENDENCIES) {
-      if (url.endsWith(".js")) {
-        insertHead("link", { rel: "preload", href: url, as: "script" });
-        insertHead("script", { src: url });
-      } else if (url.endsWith(".css")) {
-        insertHead("link", { rel: "preload", href: url, as: "style" });
-        insertHead("link", { rel: "stylesheet", href: url });
+  var EXTERNAL_DEPENDENCIES = {
+    mermaidjs: "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js",
+    katexjs: "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js",
+    katexcss: "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css",
+    googleprettifyjs: "https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js",
+    chartjs: "https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"
+  };
+  var insertedDependencies = /* @__PURE__ */ new Set();
+  function Parse(content, dependencies = {}) {
+    const nodes = ParseLines(content.split("\n"));
+    if (dependencies.enable && typeof document !== "undefined") {
+      const endpoint = dependencies.endpoint ?? {};
+      insertDependencies(nodes, {
+        mermaidjs: endpoint.mermaidjs ?? EXTERNAL_DEPENDENCIES.mermaidjs,
+        katexjs: endpoint.katexjs ?? EXTERNAL_DEPENDENCIES.katexjs,
+        katexcss: endpoint.katexcss ?? EXTERNAL_DEPENDENCIES.katexcss,
+        googleprettifyjs: endpoint.googleprettifyjs ?? EXTERNAL_DEPENDENCIES.googleprettifyjs,
+        chartjs: endpoint.chartjs ?? EXTERNAL_DEPENDENCIES.chartjs
+      });
+    }
+    return nodes;
+  }
+  function insertDependencies(nodes, dependencies) {
+    for (const node of nodes) {
+      if (node.type === "blockquote") {
+        insertDependencies(node.children, dependencies);
+      } else if (node.type === "codeBlock") {
+        const lang = node.lang ?? "";
+        if (REGEX_MD_CODE_LANG_MERMAID.test(lang)) {
+          insertHead("script", dependencies.mermaidjs);
+        } else if (REGEX_MD_CODE_LANG_LATEX.test(lang)) {
+          insertHead("style", dependencies.katexcss);
+          insertHead("script", dependencies.katexjs);
+        } else if (REGEX_MD_CODE_LANG_CHARTJS.test(lang)) {
+          insertHead("script", dependencies.chartjs);
+        } else {
+          insertHead("script", dependencies.googleprettifyjs);
+        }
       }
     }
   }
-  function insertHead(tag, attrs) {
-    const dom = document.createElement(tag);
-    for (const [k, v] of Object.entries(attrs)) {
-      dom.setAttribute(k, v);
+  function insertHead(type, url) {
+    if (insertedDependencies.has(url)) {
+      return;
     }
-    document.head.appendChild(dom);
-  }
-  function Parse(content) {
-    return ParseLines(content.split("\n"));
+    insertedDependencies.add(url);
+    const preload = document.createElement("link");
+    preload.rel = "preload";
+    preload.href = url;
+    preload.as = type;
+    document.head.appendChild(preload);
+    if (type === "script") {
+      const script = document.createElement("script");
+      script.src = url;
+      document.head.appendChild(script);
+    } else {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = url;
+      document.head.appendChild(link);
+    }
   }
   function ParseLines(lines, nested = false) {
     const domMap = [];

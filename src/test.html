@@ -34,19 +34,25 @@
 
       非 ASCII 路徑：/Users/pardn/Desktop/截圖2026-10-19凌晨1.03.32.png、~/문서/보고서.md、/Users/pardn/ドキュメント/メモ.txt
 
-      連結標題：[NanoMD](https://nanomd.pardn.io "NanoMD 文件")、[GitHub](https://github.com/pardnchiu/NanoMD 'GitHub')
-
-      圖片：![小狗](../wiki-worker/public/static/image/dog-7128749_640.jpg "小狗標題")(300x200)、![寬度](a.jpg)(50%x)、![高度](a.jpg)(x200)
-
-      正方形：![小狗](a.jpg)(120) 只給一個值時寬高相同
-
-      影片：![影片](../wiki-worker/public/static/image/233867_tiny.mp4 "影片標題")(320x)
-
       YouTube：[Me at the zoo](https://www.youtube.com/watch?v=jNQXAC9IVRw)
 
       YouTube 裸網址：https://youtu.be/jNQXAC9IVRw
 
       Vimeo：[The New Vimeo Player](https://vimeo.com/76979871)
+
+      連結標題：[NanoMD](https://nanomd.pardn.io "NanoMD 文件站")、[GitHub](https://github.com/pardnchiu/NanoMD '單引號標題')
+
+      圖片：![小狗](../wiki-worker/public/static/image/dog-7128749_640.jpg "小狗")
+
+      圖片尺寸：![小狗](../wiki-worker/public/static/image/dog-7128749_640.jpg)(300x200)
+
+      只設寬度：![小狗](../wiki-worker/public/static/image/dog-7128749_640.jpg)(50%x)
+
+      只設高度：![小狗](../wiki-worker/public/static/image/dog-7128749_640.jpg)(x120)
+
+      正方形：![小狗](../wiki-worker/public/static/image/dog-7128749_640.jpg)(120) 只給一個值時寬高相同
+
+      影片：![影片](../wiki-worker/public/static/image/233867_tiny.mp4 "影片標題")(320x)
 
       > 引言第一行
       > 引言第二行 **粗體**
@@ -136,6 +142,56 @@
 
       ```math
       \int_0^\infty e^{-x^2} \, dx = \frac{\sqrt{\pi}}{2}
+      ```
+
+      ```chartjs
+      {
+        "type": "bar",
+        "data": {
+          "labels": ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
+          "datasets": [{ "label": "# test", "data": [12, 19, 3, 5, 2, 3] }]
+        }
+      }
+      ```
+
+      ```chartjs
+      {
+        "type": "pie",
+        "data": {
+          "labels": ["A", "B", "C"],
+          "datasets": [{ "data": [30, 50, 20] }]
+        }
+      }
+      ```
+
+      ```chartjs
+      {
+        "type": "bubble",
+        "data": {
+          "datasets": [
+            { "label": "A", "data": [{ "x": 10, "y": 20, "r": 8 }, { "x": 25, "y": 35, "r": 15 }, { "x": 40, "y": 10, "r": 5 }] },
+            { "label": "B", "data": [{ "x": 15, "y": 30, "r": 10 }, { "x": 30, "y": 15, "r": 12 }, { "x": 45, "y": 40, "r": 6 }] }
+          ]
+        }
+      }
+      ```
+
+      不成立時以一般程式碼區塊輸出（mermaid 語法錯誤、LaTeX 語法錯誤、chartjs 缺 data、chartjs 未註冊的 type）：
+
+      ```mermaid
+      這不是 mermaid 語法
+      ```
+
+      ```latex
+      \frac{1}{
+      ```
+
+      ```chartjs
+      { "type": "bar" }
+      ```
+
+      ```chartjs
+      { "type": "unknown", "data": { "datasets": [{ "data": [1, 2, 3] }] } }
       ```
 
       <div onclick="alert(1)">raw HTML（onclick 應被移除）</div>

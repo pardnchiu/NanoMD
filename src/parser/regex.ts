@@ -1,9 +1,10 @@
 import type { MarkType } from "./types";
 
 export const REGEX_HTML_DOM = /^\s*<\/?[A-Za-z][A-Za-z0-9-]*(?:\s[^<>]*)?\/?>/;
-export const REGEX_MD_CODE_BLOCK_PREFIX = /^```(?!mermaid|latex|math)\S*$/;
-export const REGEX_MD_CODE_BLOCK_MERMAID = /^```mermaid\S*$/;
-export const REGEX_MD_CODE_BLOCK_LATEX = /^```(latex|math)\S*$/;
+export const REGEX_MD_CODE_BLOCK = /^```(\S*)$/;
+export const REGEX_MD_CODE_LANG_MERMAID = /^mermaid/;
+export const REGEX_MD_CODE_LANG_LATEX = /^(latex|math)/;
+export const REGEX_MD_CODE_LANG_CHARTJS = /^chartjs/;
 export const REGEX_MD_CODE_INLINE = /`([^`\n]+)`/g;
 export const REGEX_MD_H = /^(#{1,6})\s+(.+)$/;
 export const REGEX_MD_H1 = /^ {0,3}=+[ \t]*$/;

@@ -1,18 +1,12 @@
-import { REGEX_MD_CODE_BLOCK_LATEX, REGEX_MD_CODE_BLOCK_MERMAID, REGEX_MD_CODE_BLOCK_PREFIX } from "./regex";
-import type { CodeBlockRender, Node } from "./types";
+import { REGEX_MD_CODE_BLOCK } from "./regex";
+import type { Node } from "./types";
 
 export function ParseCodeBlock(
   lines: string[],
   i: number,
 ): { node: Extract<Node, { type: "codeBlock" }>; next: number } | null {
-  const fence = lines[i].trim();
-
-  let render: CodeBlockRender | undefined;
-  if (REGEX_MD_CODE_BLOCK_MERMAID.test(fence)) {
-    render = "mermaid";
-  } else if (REGEX_MD_CODE_BLOCK_LATEX.test(fence)) {
-    render = "latex";
-  } else if (!REGEX_MD_CODE_BLOCK_PREFIX.test(fence)) {
+  const fence = lines[i].trim().match(REGEX_MD_CODE_BLOCK);
+  if (!fence) {
     return null;
   }
 
@@ -24,5 +18,9 @@ export function ParseCodeBlock(
   }
 
   const value = blockLines.join("\n");
-  return { node: render ? { type: "codeBlock", render, value } : { type: "codeBlock", value }, next: j + 1 };
+  const lang = fence[1].toLowerCase();
+  if (lang && j < lines.length) {
+    return { node: { type: "codeBlock", lang, value }, next: j + 1 };
+  }
+  return { node: { type: "codeBlock", value }, next: j + 1 };
 }

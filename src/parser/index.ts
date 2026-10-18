@@ -2,40 +2,81 @@ import { ParseBlockquote } from "./blockquote";
 import { ParseCodeBlock } from "./codeBlock";
 import { ParseHeading } from "./heading";
 import { ParseInline } from "./inline";
-import { REGEX_HTML_DOM, REGEX_MD_HR } from "./regex";
+import {
+  REGEX_HTML_DOM,
+  REGEX_MD_CODE_LANG_CHARTJS,
+  REGEX_MD_CODE_LANG_LATEX,
+  REGEX_MD_CODE_LANG_MERMAID,
+  REGEX_MD_HR,
+} from "./regex";
 import { ParseTableBlock } from "./tableBlock";
-import type { Node } from "./types";
+import type { Dependencies, DependencyEndpoint, Node } from "./types";
 
-export const EXTERNAL_DEPENDENCIES: string[] = [
-  "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js",
-  "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js",
-  "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css",
-  "https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js",
-];
+export const EXTERNAL_DEPENDENCIES: Required<DependencyEndpoint> = {
+  mermaidjs: "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js",
+  katexjs: "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js",
+  katexcss: "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css",
+  googleprettifyjs: "https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js",
+  chartjs: "https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js",
+};
 
-if (typeof document !== "undefined") {
-  insertHead("link", { rel: "preconnect", href: "https://cdn.jsdelivr.net" });
-  for (const url of EXTERNAL_DEPENDENCIES) {
-    if (url.endsWith(".js")) {
-      insertHead("link", { rel: "preload", href: url, as: "script" });
-      insertHead("script", { src: url });
-    } else if (url.endsWith(".css")) {
-      insertHead("link", { rel: "preload", href: url, as: "style" });
-      insertHead("link", { rel: "stylesheet", href: url });
+const insertedDependencies = new Set<string>();
+
+export function Parse(content: string, dependencies: Dependencies = {}): Node[] {
+  const nodes = ParseLines(content.split("\n"));
+  if (dependencies.enable && typeof document !== "undefined") {
+    const endpoint = dependencies.endpoint ?? {};
+    insertDependencies(nodes, {
+      mermaidjs: endpoint.mermaidjs ?? EXTERNAL_DEPENDENCIES.mermaidjs,
+      katexjs: endpoint.katexjs ?? EXTERNAL_DEPENDENCIES.katexjs,
+      katexcss: endpoint.katexcss ?? EXTERNAL_DEPENDENCIES.katexcss,
+      googleprettifyjs: endpoint.googleprettifyjs ?? EXTERNAL_DEPENDENCIES.googleprettifyjs,
+      chartjs: endpoint.chartjs ?? EXTERNAL_DEPENDENCIES.chartjs,
+    });
+  }
+  return nodes;
+}
+
+function insertDependencies(nodes: Node[], dependencies: Required<DependencyEndpoint>): void {
+  for (const node of nodes) {
+    if (node.type === "blockquote") {
+      insertDependencies(node.children, dependencies);
+    } else if (node.type === "codeBlock") {
+      const lang = node.lang ?? "";
+      if (REGEX_MD_CODE_LANG_MERMAID.test(lang)) {
+        insertHead("script", dependencies.mermaidjs);
+      } else if (REGEX_MD_CODE_LANG_LATEX.test(lang)) {
+        insertHead("style", dependencies.katexcss);
+        insertHead("script", dependencies.katexjs);
+      } else if (REGEX_MD_CODE_LANG_CHARTJS.test(lang)) {
+        insertHead("script", dependencies.chartjs);
+      } else {
+        insertHead("script", dependencies.googleprettifyjs);
+      }
     }
   }
 }
 
-function insertHead(tag: "link" | "script", attrs: Record<string, string>): void {
-  const dom = document.createElement(tag);
-  for (const [k, v] of Object.entries(attrs)) {
-    dom.setAttribute(k, v);
+function insertHead(type: "script" | "style", url: string): void {
+  if (insertedDependencies.has(url)) {
+    return;
   }
-  document.head.appendChild(dom);
-}
-
-export function Parse(content: string): Node[] {
-  return ParseLines(content.split("\n"));
+  insertedDependencies.add(url);
+  const preload = document.createElement("link");
+  preload.rel = "preload";
+  preload.href = url;
+  preload.as = type;
+  document.head.appendChild(preload);
+  if (type === "script") {
+    const script = document.createElement("script");
+    script.src = url;
+    document.head.appendChild(script);
+  } else {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = url;
+    document.head.appendChild(link);
+  }
 }
 
 export function ParseLines(lines: string[], nested = false): Node[] {
