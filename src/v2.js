@@ -46,12 +46,42 @@ ___
 const a = "<b>不轉換</b>";
 \`\`\`
 
+\`\`\`mermaid
+flowchart LR
+  A[輸入 Markdown] --> B{是否為區塊?}
+  B -->|是| C[parseLines]
+  B -->|否| D[parseInline]
+  C --> E[renderToHTML]
+  D --> E
+\`\`\`
+
+\`\`\`mermaid
+sequenceDiagram
+  User->>Editor: 輸入文字
+  Editor->>Parser: render()
+  Parser-->>Editor: JSON
+\`\`\`
+
+\`\`\`latex
+E = mc^2
+\`\`\`
+
+\`\`\`math
+\\int_0^\\infty e^{-x^2} \\, dx = \\frac{\\sqrt{\\pi}}{2}
+\`\`\`
+
 <div onclick="alert(1)">raw HTML（onclick 應被移除）</div>
 <a href="javascript:alert(1)">javascript: href（應被移除）</a>
 `;
 
 const REGEX_HTML_DOM = /^\s*<\/?[A-Za-z][A-Za-z0-9-]*(?:\s[^<>]*)?\/?>/;
-const REGEX_MD_CODE_BLOCK_PREFIX = /^```(?!mermaid$)\S*$/;
+const REGEX_MD_CODE_BLOCK_PREFIX = /^```(?!mermaid|latex|math)\S*$/;
+const REGEX_MD_CODE_BLOCK_MERMAID = /^```mermaid\S*$/;
+const REGEX_MD_CODE_BLOCK_LATEX = /^```(latex|math)\S*$/;
+const REGEX_MD_H = /^(#{1,6})\s+(.+)$/;
+const REGEX_MD_H1 = /^ {0,3}=+[ \t]*$/;
+const REGEX_MD_H2 = /^ {0,3}-+[ \t]*$/;
+const REGEX_MD_HR = /^ {0,3}([-*_])( *\1){2,}$/;
 
 function render(content) {
   if (!content) {
@@ -82,6 +112,59 @@ function render(content) {
       domMap.push({ type: "codeBlock", value: blockLines.join("\n") });
       i = j + 1;
       continue;
+    }
+
+    if (REGEX_MD_CODE_BLOCK_MERMAID.test(line.trim())) {
+      let blockLines = [];
+      let j = i + 1;
+      while (j < lines.length && lines[j].trim() !== "```") {
+        blockLines.push(lines[j]);
+        j++;
+      }
+      domMap.push({ type: "codeBlock", render: "mermaid", value: blockLines.join("\n") });
+      i = j + 1;
+      continue;
+    }
+
+    if (REGEX_MD_CODE_BLOCK_LATEX.test(line.trim())) {
+      let blockLines = [];
+      let j = i + 1;
+      let nextLine = lines[j];
+      while (j < lines.length && nextLine.trim() !== "```") {
+        blockLines.push(nextLine);
+        j++;
+        nextLine = lines[j];
+      }
+      domMap.push({ type: "codeBlock", render: "latex", value: blockLines.join("\n") });
+      i = j + 1;
+      continue;
+    }
+
+    if (REGEX_MD_HR.test(line)) {
+      domMap.push({ type: "hr" });
+      i++;
+      continue;
+    }
+
+    let mdHeading = line.match(REGEX_MD_H);
+    if (mdHeading) {
+      domMap.push({ type: "heading", level: mdHeading[1].length, value: mdHeading[2] });
+      i++;
+      continue;
+    }
+
+    if (lines[i + 1] !== undefined) {
+      const nextLine = lines[i + 1];
+      if (REGEX_MD_H1.test(nextLine)) {
+        domMap.push({ type: "heading", level: 1, value: line });
+        i += 2;
+        continue;
+      }
+      if (REGEX_MD_H2.test(nextLine)) {
+        domMap.push({ type: "heading", level: 2, value: line });
+        i += 2;
+        continue;
+      }
     }
 
     if (REGEX_HTML_DOM.test(line)) {
