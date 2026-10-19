@@ -83,6 +83,7 @@ function insertHead(type: "script" | "style", url: string): Promise<void> {
 
 export function ParseLines(lines: string[], nested = false): Node[] {
   const domMap: Node[] = [];
+  let textLine = -1;
 
   let i = 0;
   while (i < lines.length) {
@@ -163,7 +164,13 @@ export function ParseLines(lines: string[], nested = false): Node[] {
       continue;
     }
 
-    domMap.push({ type: "text", children: ParseInline(line) });
+    const last = domMap[domMap.length - 1];
+    if (last?.type === "text" && textLine === i - 1) {
+      last.children.push({ type: "text", value: "\n" }, ...ParseInline(line));
+    } else {
+      domMap.push({ type: "text", children: ParseInline(line) });
+    }
+    textLine = i;
 
     i++;
   }

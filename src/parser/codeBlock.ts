@@ -12,7 +12,11 @@ export function ParseCodeBlock(
 
   const blockLines: string[] = [];
   let j = i + 1;
-  while (j < lines.length && lines[j].trim() !== fence[1]) {
+  while (j < lines.length) {
+    const line = lines[j].trim();
+    if (line.length >= fence[1].length && line === fence[1][0].repeat(line.length)) {
+      break;
+    }
     blockLines.push(lines[j]);
     j++;
   }

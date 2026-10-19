@@ -1,9 +1,9 @@
 import type { MarkType } from "./types";
 
 export const REGEX_HTML_DOM = /^\s*<\/?[A-Za-z][A-Za-z0-9-]*(?:\s[^<>]*)?\/?>/;
-export const REGEX_MD_CODE_BLOCK = /^(```|~~~)(\S*)$/;
+export const REGEX_MD_CODE_BLOCK = /^(`{3,}(?=[^`]*$)|~{3,})(\S*)$/; // * let 3+ `/~, for ` inside, prevent ```abc``` single foramt wrong
 export const REGEX_MD_CODE_FENCE = /^\s*(```|~~~)/;
-export const REGEX_MD_CODE_INLINE = /(?<!\\)`([^`\n]+)`/g;
+export const REGEX_MD_CODE_INLINE = /(?<![\\`])(`+)(?!`)(.+?)(?<!`)\1(?!`)/g; // * prevent \` or ``a`, need same number of ` on start and close
 export const REGEX_MD_MATH_INLINE = /(?<![\\$])\$([^\s$](?:[^$\n]*[^\s$\\])?)\$(?![\d$])/g;
 export const REGEX_MD_H = /^(#{1,6})\s+(.+)$/;
 export const REGEX_MD_H1 = /^ {0,3}=+[ \t]*$/;

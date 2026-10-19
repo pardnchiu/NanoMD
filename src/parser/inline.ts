@@ -12,10 +12,12 @@ export function ParseInline(text: string): ChildNode[] {
       domMap.push(...parseInlineMarks(text.slice(last, match.index)));
     }
 
+    const code =
+      match[2].startsWith(" ") && match[2].endsWith(" ") && /[^ ]/.test(match[2]) ? match[2].slice(1, -1) : match[2];
     domMap.push(
-      REGEX_MD_FILE_PATH.test(match[1])
-        ? { type: "link", href: match[1], tag: "file", children: [{ type: "text", value: match[1] }] }
-        : { type: "code", value: match[1] },
+      REGEX_MD_FILE_PATH.test(code)
+        ? { type: "link", href: code, tag: "file", children: [{ type: "text", value: code }] }
+        : { type: "code", value: code },
     );
     last = REGEX_MD_CODE_INLINE.lastIndex;
   }

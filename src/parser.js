@@ -30,9 +30,9 @@ var NewParser = (() => {
 
   // src/parser/regex.ts
   var REGEX_HTML_DOM = /^\s*<\/?[A-Za-z][A-Za-z0-9-]*(?:\s[^<>]*)?\/?>/;
-  var REGEX_MD_CODE_BLOCK = /^(```|~~~)(\S*)$/;
+  var REGEX_MD_CODE_BLOCK = /^(`{3,}(?=[^`]*$)|~{3,})(\S*)$/;
   var REGEX_MD_CODE_FENCE = /^\s*(```|~~~)/;
-  var REGEX_MD_CODE_INLINE = /(?<!\\)`([^`\n]+)`/g;
+  var REGEX_MD_CODE_INLINE = /(?<![\\`])(`+)(?!`)(.+?)(?<!`)\1(?!`)/g;
   var REGEX_MD_MATH_INLINE = /(?<![\\$])\$([^\s$](?:[^$\n]*[^\s$\\])?)\$(?![\d$])/g;
   var REGEX_MD_H = /^(#{1,6})\s+(.+)$/;
   var REGEX_MD_H1 = /^ {0,3}=+[ \t]*$/;
@@ -124,7 +124,11 @@ var NewParser = (() => {
     }
     const blockLines = [];
     let j = i + 1;
-    while (j < lines.length && lines[j].trim() !== fence[1]) {
+    while (j < lines.length) {
+      const line = lines[j].trim();
+      if (line.length >= fence[1].length && line === fence[1][0].repeat(line.length)) {
+        break;
+      }
       blockLines.push(lines[j]);
       j++;
     }
@@ -444,8 +448,9 @@ var NewParser = (() => {
       if (match.index > last) {
         domMap.push(...parseInlineMarks(text.slice(last, match.index)));
       }
+      const code = match[2].startsWith(" ") && match[2].endsWith(" ") && /[^ ]/.test(match[2]) ? match[2].slice(1, -1) : match[2];
       domMap.push(
-        REGEX_MD_FILE_PATH.test(match[1]) ? { type: "link", href: match[1], tag: "file", children: [{ type: "text", value: match[1] }] } : { type: "code", value: match[1] }
+        REGEX_MD_FILE_PATH.test(code) ? { type: "link", href: code, tag: "file", children: [{ type: "text", value: code }] } : { type: "code", value: code }
       );
       last = REGEX_MD_CODE_INLINE.lastIndex;
     }
@@ -625,6 +630,7 @@ var NewParser = (() => {
   }
   function ParseLines(lines, nested = false) {
     const domMap = [];
+    let textLine = -1;
     let i = 0;
     while (i < lines.length) {
       const line = lines[i];
@@ -691,7 +697,13 @@ var NewParser = (() => {
         i = heading.next;
         continue;
       }
-      domMap.push({ type: "text", children: ParseInline(line) });
+      const last = domMap[domMap.length - 1];
+      if (last?.type === "text" && textLine === i - 1) {
+        last.children.push({ type: "text", value: "\n" }, ...ParseInline(line));
+      } else {
+        domMap.push({ type: "text", children: ParseInline(line) });
+      }
+      textLine = i;
       i++;
     }
     if (domMap[domMap.length - 1]?.type === "break") {
