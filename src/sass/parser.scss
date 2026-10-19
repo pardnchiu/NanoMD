@@ -99,9 +99,14 @@
   }
 }
 
-.nanomd :where(*:not(.mermaid *, .md-math *, .md-math-inline *)) {
+.nanomd :where(*:not(.mermaid *, .md-math *, .md-math-inline *, img, video)) {
   width: 100%;
   max-width: 100%;
+}
+
+.nanomd :where(img, video) {
+  max-width: 100%;
+  padding-inline: 0.125em;
 }
 
 .nanomd .md-h1,
@@ -117,9 +122,15 @@
 
 .nanomd .md-h1 {
   font-size: 1.75em;
+  padding-bottom: 0;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--gray-2);
 }
 .nanomd .md-h2 {
   font-size: 1.5em;
+  padding-bottom: 0;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--gray-2);
 }
 .nanomd .md-h3 {
   font-size: 1.25em;
@@ -201,7 +212,7 @@
   width: auto;
   max-width: 100%;
   font-family: inherit;
-  font-size: inherit;
+  font-size: 0.875em;
 }
 
 .nanomd table.md-table th,
@@ -209,6 +220,7 @@
   width: auto;
   min-width: 4em;
   max-width: none;
+  height: 2.75em;
   border: 1px solid var(--gray-2);
   padding: 3px 10px;
   text-align: left;
@@ -319,7 +331,7 @@
   background: var(--code-bg);
   border: 0.5px solid var(--code-border);
   border-radius: 0.25rem;
-  font-size: 0.85rem;
+  font-size: 0.875em;
   transition: 0.3s;
 }
 

@@ -14,7 +14,8 @@ import type { DependencyEndpoint, InitOptions, BlockNode } from "./types";
 export { OnCopyClick, Refresh } from "./refresh";
 export * as MDParser from "./index";
 
-const SCRIPT_URL = typeof document !== "undefined" && document.currentScript instanceof HTMLScriptElement ? document.currentScript.src : import.meta.url;
+const SCRIPT_ELEMENT = typeof document !== "undefined" && document.currentScript instanceof HTMLScriptElement ? document.currentScript : null;
+const SCRIPT_URL = SCRIPT_ELEMENT ? SCRIPT_ELEMENT.src : import.meta.url;
 
 export const DEFAULT_ENDPOINT: Required<DependencyEndpoint> = {
   mermaidjs: "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js",
@@ -31,7 +32,7 @@ export const PARSE_OPTIONS: { indent: number; fileEndpoint: string } = {
 
 const insertedDependencies = new Map<string, Promise<void>>();
 
-if (typeof document !== "undefined" && SCRIPT_URL) {
+if (typeof document !== "undefined" && SCRIPT_URL && SCRIPT_ELEMENT?.dataset.nanomdCss !== "off") {
   insertHead("style", new URL("parser.css", SCRIPT_URL).href).catch((err: Error) => console.error(err.message));
 }
 
