@@ -83,7 +83,14 @@ export function ParseLines(lines: string[], nested = false): Node[] {
     const line = lines[i];
 
     if (line.trim() === "") {
-      i++;
+      let next = i + 1;
+      while (next < lines.length && lines[next].trim() === "") {
+        next++;
+      }
+      if (domMap.length > 0 && domMap[domMap.length - 1].type !== "break") {
+        domMap.push({ type: "break" });
+      }
+      i = next;
       continue;
     }
 
@@ -138,6 +145,9 @@ export function ParseLines(lines: string[], nested = false): Node[] {
     domMap.push({ type: "text", children: ParseInline(line) });
 
     i++;
+  }
+  if (domMap[domMap.length - 1]?.type === "break") {
+    domMap.pop();
   }
   return domMap;
 }

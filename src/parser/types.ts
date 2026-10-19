@@ -21,6 +21,7 @@ export interface DependencyEnable {
 export type Node =
   | { type: "codeBlock"; lang?: string; value: string }
   | { type: "hr" }
+  | { type: "break" }
   | { type: "heading"; level: number; children: ChildNode[] }
   | { type: "html"; value: string }
   | { type: "blockquote"; tag?: BlockquoteTag; children: Node[] }
