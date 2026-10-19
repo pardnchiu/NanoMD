@@ -1,8 +1,11 @@
+import { PARSE_OPTIONS } from "./index";
 import type { Dependency } from "./types";
 
 const deps = globalThis as unknown as Dependency;
 
 let mermaidReady = false;
+
+let mermaidCount = 0;
 
 let copyHandler: ((success: boolean, pre: HTMLElement) => void) | null = null;
 
@@ -16,11 +19,36 @@ export function Refresh(container?: ParentNode): Promise<void> {
   }
 
   const root = container ?? document;
+  if (!(root as Node).isConnected) {
+    console.error("[Invalid] container: not attached to the document");
+    return Promise.resolve();
+  }
   bindCopy(root);
+  bindFile(root);
   renderChart(root);
   renderLatex(root);
   deps.PR?.prettyPrint();
   return renderMermaid(root);
+}
+
+function bindFile(root: ParentNode): void {
+  for (const e of root.querySelectorAll<HTMLAnchorElement>("a.md-file-link")) {
+    e.onclick = async (event) => {
+      event.preventDefault();
+      if (!PARSE_OPTIONS.fileEndpoint) {
+        return;
+      }
+      const url = PARSE_OPTIONS.fileEndpoint.replaceAll("{filepath}", encodeURIComponent(e.dataset.path ?? ""));
+      try {
+        const res = await fetch(url);
+        if (!res.ok) {
+          console.error(`[Upstream] ${url}: HTTP ${res.status}`);
+        }
+      } catch (err) {
+        console.error(`[Unavailable] ${url}: ${err instanceof Error ? err.message : err}`);
+      }
+    };
+  }
 }
 
 function bindCopy(root: ParentNode): void {
@@ -97,20 +125,19 @@ async function renderMermaid(root: ParentNode): Promise<void> {
     });
     mermaidReady = true;
   }
-  const nodes = await Promise.all(
-    [...root.querySelectorAll<HTMLElement>("pre.mermaid")].map(async (pre) => {
-      if (await mermaid.parse(pre.textContent ?? "", { suppressErrors: true })) {
-        return pre;
-      }
+  for (const pre of root.querySelectorAll<HTMLElement>(".md-mermaid:not([data-rendered]) > pre.mermaid")) {
+    const text = pre.textContent ?? "";
+    if (!(await mermaid.parse(text, { suppressErrors: true }))) {
       replaceWithCode(pre.parentElement, "pre.prettyprint");
-      return null;
-    }),
-  );
-  const valid = nodes.filter((node): node is HTMLElement => node !== null);
-  await mermaid.run({ nodes: valid, suppressErrors: true });
-  for (const e of valid) {
-    if (e.querySelector("svg")) {
-      e.parentElement?.setAttribute("data-rendered", "");
+      continue;
+    }
+    try {
+      const { svg, bindFunctions } = await mermaid.render(`nanomd-mermaid-${++mermaidCount}`, text);
+      pre.innerHTML = svg;
+      bindFunctions?.(pre);
+      pre.parentElement?.setAttribute("data-rendered", "");
+    } catch {
+      replaceWithCode(pre.parentElement, "pre.prettyprint");
     }
   }
 }

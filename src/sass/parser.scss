@@ -172,6 +172,10 @@
   text-decoration: none;
 }
 
+.nanomd .md-file-link {
+  cursor: pointer;
+}
+
 .nanomd .md-link:hover {
   text-decoration: underline;
 }
@@ -292,8 +296,9 @@
   display: none;
 }
 
-.nanomd .md-chart:not([data-rendered]) > canvas,
-.nanomd .md-latex:not([data-rendered]) > .md-math {
+.nanomd .md-mermaid:not([data-rendered]) > pre.mermaid,
+.nanomd .md-latex:not([data-rendered]) > .md-math,
+.nanomd .md-chart:not([data-rendered]) > canvas {
   display: block;
   height: 0;
   margin: 0;

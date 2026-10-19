@@ -142,6 +142,9 @@ function renderInline(node: InlineNode): string {
 function renderLink(node: Extract<InlineNode, { type: "link" }>): string {
   const children = renderInlines(node.children);
   if (node.tag === "file") {
+    if (!PARSE_OPTIONS.fileEndpoint) {
+      return children;
+    }
     return `<a class="md-link md-file-link" data-path="${escapeAttr(node.href)}">${children}</a>`;
   }
   const title = node.title ? ` title="${escapeAttr(node.title)}"` : "";

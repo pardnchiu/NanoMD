@@ -1,6 +1,7 @@
 export interface InitOptions {
   enable?: DependencyEnable;
   indent?: number;
+  fileEndpoint?: string;
 }
 
 export interface DependencyEndpoint {
@@ -32,7 +33,7 @@ export interface Dependency {
   mermaid?: {
     initialize(config: { startOnLoad: boolean; theme: string }): void;
     parse(text: string, options: { suppressErrors: boolean }): Promise<unknown>;
-    run(options: { nodes: HTMLElement[]; suppressErrors: boolean }): Promise<void>;
+    render(id: string, text: string): Promise<{ svg: string; bindFunctions?: (element: Element) => void }>;
   };
 }
 
