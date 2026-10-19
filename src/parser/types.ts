@@ -27,6 +27,7 @@ export type Node =
   | { type: "blockquote"; tag?: BlockquoteTag; children: Node[] }
   | { type: "table"; align: (TableAlign | null)[]; children: TableRow[] }
   | { type: "list"; ordered: boolean; children: ListItem[] }
+  | { type: "footnotes"; children: Footnote[] }
   | { type: "text"; children: ChildNode[] };
 
 // * ![a](x.png)
@@ -56,6 +57,7 @@ export type ChildNode =
       height?: string;
       children: ChildNode[];
     }
+  | { type: "footnoteRef"; id: string; index: number }
   | { type: MarkType; children: ChildNode[] };
 
 export interface TableRow {
@@ -72,6 +74,13 @@ export interface TableCell {
 export interface ListItem {
   type: "listItem";
   checked?: boolean;
+  children: Node[];
+}
+
+export interface Footnote {
+  type: "footnote";
+  id: string;
+  index: number;
   children: Node[];
 }
 

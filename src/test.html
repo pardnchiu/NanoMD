@@ -207,6 +207,18 @@ E = mc^2
 { "type": "unknown", "data": { "datasets": [{ "data": [1, 2, 3] }] } }
 \`\`\`
 
+註腳：第一個註腳[^1]、具名註腳[^note]、再次引用[^1]、大小寫不同[^NOTE]、沒有定義[^missing]、程式碼內不轉換 \`[^1]\`、跳脫 \\[^1]
+
+[^note]: 具名註腳內容，支援 **粗體**，並引用另一個註腳[^nested]
+    縮排接續的第二段
+
+[^1]: 第一個註腳的內容
+延續同一段的文字
+
+[^nested]: 由註腳內容引用的註腳
+
+[^unused]: 沒被引用的註腳不輸出
+
 <div onclick="alert(1)">raw HTML（onclick 應被移除）</div>
 <a href="javascript:alert(1)">javascript: href（應被移除）</a>`;
 

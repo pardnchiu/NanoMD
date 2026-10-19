@@ -3,6 +3,7 @@ import {
   REGEX_HTML_DOM,
   REGEX_MD_BLOCKQUOTE,
   REGEX_MD_CODE_FENCE,
+  REGEX_MD_FOOTNOTE_DEF,
   REGEX_MD_H,
   REGEX_MD_HR,
   REGEX_MD_LIST,
@@ -14,7 +15,7 @@ export function ParseListBlock(
   lines: string[],
   i: number,
 ): { node: Extract<Node, { type: "list" }>; next: number } | null {
-  const baseIndent = leadingWhitespace(lines[i]).width;
+  const baseIndent = LeadingWhitespace(lines[i]).width;
   if (!matchMarker(lines[i], baseIndent)) {
     return null;
   }
@@ -49,15 +50,15 @@ export function ParseListBlock(
         while (k < lines.length && lines[k].trim() === "") {
           k++;
         }
-        if (k < lines.length && leadingWhitespace(lines[k]).width >= marker.column) {
+        if (k < lines.length && LeadingWhitespace(lines[k]).width >= marker.column) {
           itemLines.push("");
           j++;
           continue;
         }
         break;
       }
-      if (leadingWhitespace(lines[j]).width >= marker.column) {
-        itemLines.push(stripIndent(lines[j], marker.column));
+      if (LeadingWhitespace(lines[j]).width >= marker.column) {
+        itemLines.push(StripIndent(lines[j], marker.column));
         j++;
         continue;
       }
@@ -68,6 +69,7 @@ export function ParseListBlock(
           REGEX_MD_HR.test(lines[j]) ||
           REGEX_MD_BLOCKQUOTE.test(lines[j]) ||
           REGEX_MD_CODE_FENCE.test(lines[j]) ||
+          REGEX_MD_FOOTNOTE_DEF.test(lines[j]) ||
           REGEX_HTML_DOM.test(lines[j]) ||
           lines[j].includes("|")
         )
@@ -91,7 +93,7 @@ export function ParseListBlock(
 }
 
 function matchMarker(line: string, baseIndent: number): { ordered: boolean; content: string; column: number } | null {
-  const { width, chars } = leadingWhitespace(line);
+  const { width, chars } = LeadingWhitespace(line);
   if (width < baseIndent || width > baseIndent + 3) {
     return null;
   }
@@ -106,7 +108,7 @@ function matchMarker(line: string, baseIndent: number): { ordered: boolean; cont
   return { ordered: match[1].endsWith("."), content: match[3], column };
 }
 
-function leadingWhitespace(line: string): { width: number; chars: number } {
+export function LeadingWhitespace(line: string): { width: number; chars: number } {
   let width = 0;
   let chars = 0;
   for (; chars < line.length; chars++) {
@@ -121,7 +123,7 @@ function leadingWhitespace(line: string): { width: number; chars: number } {
   return { width, chars };
 }
 
-function stripIndent(line: string, column: number): string {
+export function StripIndent(line: string, column: number): string {
   let width = 0;
   let k = 0;
   while (k < line.length && width < column) {

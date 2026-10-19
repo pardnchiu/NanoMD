@@ -42,6 +42,8 @@ var NewParser = (() => {
   var REGEX_MD_TABLE_ALIGN = /^(:)?-+(:)?$/;
   var REGEX_MD_LIST = /^([-*]|\d+\.)([ \t]+)(.*)$/;
   var REGEX_MD_LIST_TASK = /^\[([ xX])\][ \t]+(.*)$/;
+  var REGEX_MD_FOOTNOTE_DEF = /^ {0,3}\[\^([^\]\s]+)\]:[ \t]*(.*)$/;
+  var REGEX_MD_FOOTNOTE_REF = /\[\^([^\]\s]+)\]/g;
   var REGEX_FILE_PATH_1 = "[\\p{L}\\p{M}\\p{N}_.\\-\\/~]";
   var REGEX_FILE_PATH_2 = "[\\p{L}\\p{M}\\p{N}_.\\-~]+";
   var REGEX_FILE_EXT = "\\.[A-Za-z0-9]+";
@@ -143,11 +145,196 @@ var NewParser = (() => {
     return { node: { type: "codeBlock", value }, next: j + 1 };
   }
 
+  // src/parser/list.ts
+  function ParseListBlock(lines, i) {
+    const baseIndent = LeadingWhitespace(lines[i]).width;
+    if (!matchMarker(lines[i], baseIndent)) {
+      return null;
+    }
+    const items = [];
+    let ordered = null;
+    let j = i;
+    while (j < lines.length) {
+      if (j > i && lines[j].trim() === "") {
+        let k = j;
+        while (k < lines.length && lines[k].trim() === "") {
+          k++;
+        }
+        if (k < lines.length && matchMarker(lines[k], baseIndent)) {
+          j = k;
+        } else {
+          break;
+        }
+      }
+      const marker = matchMarker(lines[j], baseIndent);
+      if (!marker || ordered !== null && marker.ordered !== ordered) {
+        break;
+      }
+      ordered = marker.ordered;
+      const itemLines = [marker.content];
+      j++;
+      while (j < lines.length) {
+        if (lines[j].trim() === "") {
+          let k = j;
+          while (k < lines.length && lines[k].trim() === "") {
+            k++;
+          }
+          if (k < lines.length && LeadingWhitespace(lines[k]).width >= marker.column) {
+            itemLines.push("");
+            j++;
+            continue;
+          }
+          break;
+        }
+        if (LeadingWhitespace(lines[j]).width >= marker.column) {
+          itemLines.push(StripIndent(lines[j], marker.column));
+          j++;
+          continue;
+        }
+        if (!matchMarker(lines[j], baseIndent) && !(REGEX_MD_H.test(lines[j]) || REGEX_MD_HR.test(lines[j]) || REGEX_MD_BLOCKQUOTE.test(lines[j]) || REGEX_MD_CODE_FENCE.test(lines[j]) || REGEX_MD_FOOTNOTE_DEF.test(lines[j]) || REGEX_HTML_DOM.test(lines[j]) || lines[j].includes("|"))) {
+          itemLines.push(lines[j]);
+          j++;
+          continue;
+        }
+        break;
+      }
+      const task = itemLines[0].match(REGEX_MD_LIST_TASK);
+      if (task) {
+        itemLines[0] = task[2];
+      }
+      const children = ParseLines(itemLines, true);
+      items.push(task ? { type: "listItem", checked: task[1] !== " ", children } : { type: "listItem", children });
+    }
+    return { node: { type: "list", ordered: ordered ?? false, children: items }, next: j };
+  }
+  function matchMarker(line, baseIndent) {
+    const { width, chars } = LeadingWhitespace(line);
+    if (width < baseIndent || width > baseIndent + 3) {
+      return null;
+    }
+    const match = line.slice(chars).match(REGEX_MD_LIST);
+    if (!match) {
+      return null;
+    }
+    let column = width + match[1].length;
+    for (const char of match[2]) {
+      column += char === "	" ? PARSE_OPTIONS.indent - column % PARSE_OPTIONS.indent : 1;
+    }
+    return { ordered: match[1].endsWith("."), content: match[3], column };
+  }
+  function LeadingWhitespace(line) {
+    let width = 0;
+    let chars = 0;
+    for (; chars < line.length; chars++) {
+      if (line[chars] === " ") {
+        width += 1;
+      } else if (line[chars] === "	") {
+        width += PARSE_OPTIONS.indent - width % PARSE_OPTIONS.indent;
+      } else {
+        break;
+      }
+    }
+    return { width, chars };
+  }
+  function StripIndent(line, column) {
+    let width = 0;
+    let k = 0;
+    while (k < line.length && width < column) {
+      if (line[k] === " ") {
+        width += 1;
+      } else if (line[k] === "	") {
+        width += PARSE_OPTIONS.indent - width % PARSE_OPTIONS.indent;
+      } else {
+        break;
+      }
+      k++;
+    }
+    return line.slice(k);
+  }
+
+  // src/parser/footnote.ts
+  var footnoteDefinitions = /* @__PURE__ */ new Map();
+  function ParseFootnoteBlock(lines, i) {
+    const match = lines[i].match(REGEX_MD_FOOTNOTE_DEF);
+    if (!match) {
+      return null;
+    }
+    const contentLines = [match[2]];
+    let j = i + 1;
+    while (j < lines.length) {
+      if (lines[j].trim() === "") {
+        let k = j;
+        while (k < lines.length && lines[k].trim() === "") {
+          k++;
+        }
+        if (k < lines.length && LeadingWhitespace(lines[k]).width >= PARSE_OPTIONS.indent) {
+          contentLines.push("");
+          j++;
+          continue;
+        }
+        break;
+      }
+      if (LeadingWhitespace(lines[j]).width >= PARSE_OPTIONS.indent) {
+        contentLines.push(StripIndent(lines[j], PARSE_OPTIONS.indent));
+        j++;
+        continue;
+      }
+      if (!(REGEX_MD_FOOTNOTE_DEF.test(lines[j]) || REGEX_MD_LIST.test(lines[j].trimStart()) || REGEX_MD_H.test(lines[j]) || REGEX_MD_HR.test(lines[j]) || REGEX_MD_BLOCKQUOTE.test(lines[j]) || REGEX_MD_CODE_FENCE.test(lines[j]) || REGEX_HTML_DOM.test(lines[j]) || lines[j].includes("|"))) {
+        contentLines.push(lines[j]);
+        j++;
+        continue;
+      }
+      break;
+    }
+    const key = match[1].toLowerCase();
+    if (!footnoteDefinitions.has(key)) {
+      footnoteDefinitions.set(key, { id: match[1], children: ParseLines(contentLines, true) });
+    }
+    return { next: j };
+  }
+  function AppendFootnotes(domMap) {
+    const footnotes = /* @__PURE__ */ new Map();
+    const collectRefs = (nodes) => {
+      for (let k = 0; k < nodes.length; k++) {
+        const node = nodes[k];
+        if (node.type === "footnoteRef") {
+          const key = node.id.toLowerCase();
+          const definition = footnoteDefinitions.get(key);
+          if (!definition) {
+            nodes[k] = { type: "text", value: `[^${node.id}]` };
+            continue;
+          }
+          let footnote = footnotes.get(key);
+          if (!footnote) {
+            footnote = { type: "footnote", id: definition.id, index: footnotes.size + 1, children: definition.children };
+            footnotes.set(key, footnote);
+          }
+          node.index = footnote.index;
+        } else if ("children" in node) {
+          collectRefs(node.children);
+        }
+      }
+    };
+    collectRefs(domMap);
+    for (const footnote of footnotes.values()) {
+      collectRefs(footnote.children);
+    }
+    if (footnotes.size > 0) {
+      domMap.push({ type: "footnotes", children: [...footnotes.values()] });
+    }
+  }
+  function ResetFootnote() {
+    footnoteDefinitions.clear();
+  }
+
   // src/parser/link.ts
   function ParseLink(text) {
     const links = [];
     const mask = text.replace(/\u0000/g, "").replace(REGEX_MD_ESCAPE, (_, char) => {
       links.push({ type: "text", value: char });
+      return `\0${links.length - 1}\0`;
+    }).replace(REGEX_MD_FOOTNOTE_REF, (_, id) => {
+      links.push({ type: "footnoteRef", id, index: 0 });
       return `\0${links.length - 1}\0`;
     }).replace(REGEX_MD_LINK, (...args) => {
       const { node, trail } = parseMeta(args[args.length - 1]);
@@ -285,113 +472,6 @@ var NewParser = (() => {
     return null;
   }
 
-  // src/parser/list.ts
-  function ParseListBlock(lines, i) {
-    const baseIndent = leadingWhitespace(lines[i]).width;
-    if (!matchMarker(lines[i], baseIndent)) {
-      return null;
-    }
-    const items = [];
-    let ordered = null;
-    let j = i;
-    while (j < lines.length) {
-      if (j > i && lines[j].trim() === "") {
-        let k = j;
-        while (k < lines.length && lines[k].trim() === "") {
-          k++;
-        }
-        if (k < lines.length && matchMarker(lines[k], baseIndent)) {
-          j = k;
-        } else {
-          break;
-        }
-      }
-      const marker = matchMarker(lines[j], baseIndent);
-      if (!marker || ordered !== null && marker.ordered !== ordered) {
-        break;
-      }
-      ordered = marker.ordered;
-      const itemLines = [marker.content];
-      j++;
-      while (j < lines.length) {
-        if (lines[j].trim() === "") {
-          let k = j;
-          while (k < lines.length && lines[k].trim() === "") {
-            k++;
-          }
-          if (k < lines.length && leadingWhitespace(lines[k]).width >= marker.column) {
-            itemLines.push("");
-            j++;
-            continue;
-          }
-          break;
-        }
-        if (leadingWhitespace(lines[j]).width >= marker.column) {
-          itemLines.push(stripIndent(lines[j], marker.column));
-          j++;
-          continue;
-        }
-        if (!matchMarker(lines[j], baseIndent) && !(REGEX_MD_H.test(lines[j]) || REGEX_MD_HR.test(lines[j]) || REGEX_MD_BLOCKQUOTE.test(lines[j]) || REGEX_MD_CODE_FENCE.test(lines[j]) || REGEX_HTML_DOM.test(lines[j]) || lines[j].includes("|"))) {
-          itemLines.push(lines[j]);
-          j++;
-          continue;
-        }
-        break;
-      }
-      const task = itemLines[0].match(REGEX_MD_LIST_TASK);
-      if (task) {
-        itemLines[0] = task[2];
-      }
-      const children = ParseLines(itemLines, true);
-      items.push(task ? { type: "listItem", checked: task[1] !== " ", children } : { type: "listItem", children });
-    }
-    return { node: { type: "list", ordered: ordered ?? false, children: items }, next: j };
-  }
-  function matchMarker(line, baseIndent) {
-    const { width, chars } = leadingWhitespace(line);
-    if (width < baseIndent || width > baseIndent + 3) {
-      return null;
-    }
-    const match = line.slice(chars).match(REGEX_MD_LIST);
-    if (!match) {
-      return null;
-    }
-    let column = width + match[1].length;
-    for (const char of match[2]) {
-      column += char === "	" ? PARSE_OPTIONS.indent - column % PARSE_OPTIONS.indent : 1;
-    }
-    return { ordered: match[1].endsWith("."), content: match[3], column };
-  }
-  function leadingWhitespace(line) {
-    let width = 0;
-    let chars = 0;
-    for (; chars < line.length; chars++) {
-      if (line[chars] === " ") {
-        width += 1;
-      } else if (line[chars] === "	") {
-        width += PARSE_OPTIONS.indent - width % PARSE_OPTIONS.indent;
-      } else {
-        break;
-      }
-    }
-    return { width, chars };
-  }
-  function stripIndent(line, column) {
-    let width = 0;
-    let k = 0;
-    while (k < line.length && width < column) {
-      if (line[k] === " ") {
-        width += 1;
-      } else if (line[k] === "	") {
-        width += PARSE_OPTIONS.indent - width % PARSE_OPTIONS.indent;
-      } else {
-        break;
-      }
-      k++;
-    }
-    return line.slice(k);
-  }
-
   // src/parser/tableBlock.ts
   function ParseTableBlock(lines, i) {
     const line = lines[i];
@@ -488,7 +568,10 @@ var NewParser = (() => {
     return Promise.all(loads);
   }
   function Parse(content) {
-    return ParseLines(content.split("\n"));
+    ResetFootnote();
+    const domMap = ParseLines(content.split("\n"));
+    AppendFootnotes(domMap);
+    return domMap;
   }
   function insertHead(type, url) {
     const inserted = insertedDependencies.get(url);
@@ -521,7 +604,14 @@ var NewParser = (() => {
     while (i < lines.length) {
       const line = lines[i];
       if (line.trim() === "") {
-        i++;
+        let next = i + 1;
+        while (next < lines.length && lines[next].trim() === "") {
+          next++;
+        }
+        if (domMap.length > 0 && domMap[domMap.length - 1].type !== "break") {
+          domMap.push({ type: "break" });
+        }
+        i = next;
         continue;
       }
       const codeBlock = ParseCodeBlock(lines, i);
@@ -552,6 +642,13 @@ var NewParser = (() => {
         i = blockquote.next;
         continue;
       }
+      if (!nested) {
+        const footnote = ParseFootnoteBlock(lines, i);
+        if (footnote) {
+          i = footnote.next;
+          continue;
+        }
+      }
       const list = ParseListBlock(lines, i);
       if (list) {
         domMap.push(list.node);
@@ -566,6 +663,9 @@ var NewParser = (() => {
       }
       domMap.push({ type: "text", children: ParseInline(line) });
       i++;
+    }
+    if (domMap[domMap.length - 1]?.type === "break") {
+      domMap.pop();
     }
     return domMap;
   }

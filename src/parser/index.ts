@@ -1,5 +1,6 @@
 import { ParseBlockquote } from "./blockquote";
 import { ParseCodeBlock } from "./codeBlock";
+import { AppendFootnotes, ParseFootnoteBlock, ResetFootnote } from "./footnote";
 import { ParseHeading } from "./heading";
 import { ParseInline } from "./inline";
 import { ParseListBlock } from "./list";
@@ -45,7 +46,10 @@ export function Init(options: InitOptions = {}, endpoint: DependencyEndpoint = {
 }
 
 export function Parse(content: string): Node[] {
-  return ParseLines(content.split("\n"));
+  ResetFootnote();
+  const domMap = ParseLines(content.split("\n"));
+  AppendFootnotes(domMap);
+  return domMap;
 }
 
 function insertHead(type: "script" | "style", url: string): Promise<void> {
@@ -126,6 +130,14 @@ export function ParseLines(lines: string[], nested = false): Node[] {
       domMap.push(blockquote.node);
       i = blockquote.next;
       continue;
+    }
+
+    if (!nested) {
+      const footnote = ParseFootnoteBlock(lines, i);
+      if (footnote) {
+        i = footnote.next;
+        continue;
+      }
     }
 
     const list = ParseListBlock(lines, i);
