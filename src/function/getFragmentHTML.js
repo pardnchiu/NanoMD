@@ -1,5 +1,0 @@
-function getFragmentHTML(temp) {
-  const dom = createElement(_div);
-  dom[_appendChild](temp);
-  return dom[_innerHTML];
-}

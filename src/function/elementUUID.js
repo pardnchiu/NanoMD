@@ -1,4 +1,0 @@
-function elementUUID(target = "") {
-  let key = "{{" + (target[_trim]() || _auto) + "-" + UUID() + "}}";
-  return key;
-}

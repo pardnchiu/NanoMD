@@ -1,3 +1,0 @@
-function getRegex(pattern, falgs = "") {
-  return new $RegExp(pattern, falgs);
-}

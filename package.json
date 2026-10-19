@@ -1,26 +1,36 @@
 {
   "name": "@pardnchiu/nanomd",
   "version": "1.11.6",
-  "description": "NanoMD is a lightweight Markdown editing and viewing library built on pure JavaScript and native APIs. Can be easily embedded into websites, offers rich features, and supports real-time previewing.",
-  "main": "dist/NanoMD.js",
-  "module": "dist/NanoMD.esm.js",
-  "types": "src/interface.ts",
+  "description": "NanoMD is a lightweight Markdown parser that outputs an AST and HTML, with optional rendering for Mermaid, KaTeX, Chart.js and code highlighting.",
+  "main": "dist/parser.js",
+  "module": "dist/parser.esm.js",
+  "types": "dist/types/esm.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/esm.d.ts",
+      "import": "./dist/parser.esm.js",
+      "default": "./dist/parser.js"
+    },
+    "./parser.css": "./dist/parser.css"
+  },
   "scripts": {
-    "build:debug": "npx terser src/*.js src/**/*.js -o dist/NanoMD.debug.js",
-    "build:min": "npx terser src/*.js src/**/*.js -c -m -o dist/NanoMD.js --config-file terser.config.json",
-    "build:esm": "npx terser src/*.js src/**/*.js -c -m -o dist/NanoMD.esm.js --config-file terser.config.json && echo 'export const editor = window.MDEditor; export const MDEditor = window.MDEditor; export const viewer = window.MDViewer; export const MDViewer = window.MDViewer; export const MDParser = window.MDParser;' >> dist/NanoMD.esm.js",
-    "build:once": "npm-run-all build:debug build:min build:esm",
-    "build": "chokidar src/*.js src/**/*.js src/**/**/*.js -c 'npm run build:once'",
+    "build:check": "tsc -p src/parser",
+    "build:iife": "esbuild src/parser/index.ts --bundle --format=iife --global-name=MDParser --target=es2022 --minify --outfile=dist/parser.js",
+    "build:debug": "esbuild src/parser/index.ts --bundle --format=iife --global-name=MDParser --target=es2022 --outfile=dist/parser.debug.js",
+    "build:esm": "esbuild src/parser/esm.ts --bundle --format=esm --target=es2022 --minify --outfile=dist/parser.esm.js",
+    "build:types": "tsc -p src/parser --noEmit false --declaration --emitDeclarationOnly --outDir dist/types",
+    "build:once": "npm-run-all build:check build:iife build:debug build:esm build:types",
+    "build": "chokidar \"src/parser/*.ts\" -c \"npm run build:once\"",
     "sass:library": "sass src/sass:dist/ -w --style compressed --no-source-map",
-    "sass": "npm-run-all sass:library",
-    "build:parser": "tsc -p src/parser && esbuild src/parser/index.ts --bundle --format=iife --global-name=NewParser --target=es2022 --outfile=src/parser.js"
+    "sass": "npm-run-all sass:library"
   },
   "publishConfig": {
     "access": "public"
   },
   "files": [
     "dist",
-    "!dist/NanoMD.debug.js",
+    "!dist/parser.debug.js",
+    "!dist/test.html",
     "LICENSE",
     "README.md"
   ],
@@ -30,8 +40,6 @@
   },
   "keywords": [
     "markdown",
-    "markdown-editor",
-    "markdown-viewer",
     "markdown-parser",
     "javascript-library",
     "pure-javascript",
@@ -56,7 +64,6 @@
     "esbuild": "0.28.2",
     "npm-run-all": "^4.1.5",
     "sass": "1.62.0",
-    "terser": "5.31.3",
     "typescript": "7.0.2"
   }
 }

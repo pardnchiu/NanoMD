@@ -1,6 +1,0 @@
-function getElementAttributes(dom) {
-  return [...dom.attributes].reduce((acc, e) => {
-    acc[e[_name]] = e[_value][_trim]();
-    return acc;
-  }, {});
-}

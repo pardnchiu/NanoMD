@@ -1,7 +1,0 @@
-function removeEmptyTextNode(element) {
-  return $Array[_from](element[_childNodes]).filter(
-    (e) =>
-      e[_nodeType] === $Node[_ELEMENT_NODE] ||
-      (e[_nodeType] === $Node[_TEXT_NODE] && e[_textContent] && e[_textContent][_trim]()[_length] > 0),
-  );
-}
