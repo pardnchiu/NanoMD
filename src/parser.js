@@ -561,6 +561,10 @@ var NewParser = (() => {
     return lineTrim.split("|").map((cell) => cell.trim());
   }
 
+  // src/parser/types.ts
+  var AST = class extends Array {
+  };
+
   // src/parser/index.ts
   var DEFAULT_ENDPOINT = {
     mermaidjs: "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js",
@@ -601,7 +605,7 @@ var NewParser = (() => {
     const domMap = ParseLines(content.split("\n"));
     AppendFootnotes(domMap);
     RestoreLinkRefs(domMap);
-    return domMap;
+    return AST.from(domMap);
   }
   function insertHead(type, url) {
     const inserted = insertedDependencies.get(url);

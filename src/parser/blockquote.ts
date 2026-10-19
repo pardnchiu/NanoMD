@@ -1,8 +1,8 @@
 import { ParseLines } from "./index";
 import { REGEX_MD_BLOCKQUOTE_TAG, REGEX_MD_BLOCKQUOTE } from "./regex";
-import type { BlockquoteTag, Node } from "./types";
+import type { BlockquoteTag, BlockNode } from "./types";
 
-export function ParseBlockquote(lines: string[], i: number, nested: boolean): { node: Extract<Node, { type: "blockquote" }>; next: number } | null {
+export function ParseBlockquote(lines: string[], i: number, nested: boolean): { node: Extract<BlockNode, { type: "blockquote" }>; next: number } | null {
   const quoteLines: string[] = [];
   let j = i;
   while (j < lines.length) {

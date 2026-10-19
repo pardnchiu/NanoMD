@@ -18,17 +18,17 @@ export interface DependencyEnable {
   chartjs?: boolean;
 }
 
-export type Node =
+export type BlockNode =
   | { type: "codeBlock"; lang?: string; value: string }
   | { type: "hr" }
   | { type: "break" }
-  | { type: "heading"; level: number; children: ChildNode[] }
+  | { type: "heading"; level: number; children: InlineNode[] }
   | { type: "html"; value: string }
-  | { type: "blockquote"; tag?: BlockquoteTag; children: Node[] }
+  | { type: "blockquote"; tag?: BlockquoteTag; children: BlockNode[] }
   | { type: "table"; align: (TableAlign | null)[]; children: TableRow[] }
   | { type: "list"; ordered: boolean; children: ListItem[] }
   | { type: "footnotes"; children: Footnote[] }
-  | { type: "text"; children: ChildNode[] };
+  | { type: "text"; children: InlineNode[] };
 
 // * ![a](x.png)
 // * ![a](x.png "title")
@@ -45,7 +45,7 @@ export type Node =
 // * https://example.com
 // * ~/Desktop/a.md
 // * /Users/pardn/a/b.go
-export type ChildNode =
+export type InlineNode =
   | { type: "text"; value: string }
   | { type: "code"; value: string }
   | { type: "math"; value: string }
@@ -56,11 +56,11 @@ export type ChildNode =
       title?: string;
       width?: string;
       height?: string;
-      children: ChildNode[];
+      children: InlineNode[];
     }
   | { type: "footnoteRef"; id: string; index: number }
   | { type: "linkRef"; label: string; ref: string }
-  | { type: MarkType; children: ChildNode[] };
+  | { type: MarkType; children: InlineNode[] };
 
 export interface TableRow {
   type: "tableRow";
@@ -70,20 +70,20 @@ export interface TableRow {
 
 export interface TableCell {
   type: "tableCell";
-  children: ChildNode[];
+  children: InlineNode[];
 }
 
 export interface ListItem {
   type: "listItem";
   checked?: boolean;
-  children: Node[];
+  children: BlockNode[];
 }
 
 export interface Footnote {
   type: "footnote";
   id: string;
   index: number;
-  children: Node[];
+  children: BlockNode[];
 }
 
 export type BlockquoteTag = "note" | "tip" | "important" | "warning" | "caution";
@@ -93,3 +93,5 @@ export type TableAlign = "left" | "center" | "right";
 export type LinkTag = "youtube" | "vimeo" | "file" | "image" | "video";
 
 export type MarkType = "b" | "em" | "del" | "mark" | "sub" | "sup";
+
+export class AST extends Array<BlockNode> {}

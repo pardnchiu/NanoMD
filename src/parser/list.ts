@@ -9,12 +9,9 @@ import {
   REGEX_MD_LIST,
   REGEX_MD_LIST_TASK,
 } from "./regex";
-import type { ListItem, Node } from "./types";
+import type { ListItem, BlockNode } from "./types";
 
-export function ParseListBlock(
-  lines: string[],
-  i: number,
-): { node: Extract<Node, { type: "list" }>; next: number } | null {
+export function ParseListBlock(lines: string[], i: number): { node: Extract<BlockNode, { type: "list" }>; next: number } | null {
   const baseIndent = LeadingWhitespace(lines[i]).width;
   if (!matchMarker(lines[i], baseIndent)) {
     return null;

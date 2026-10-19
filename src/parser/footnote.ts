@@ -1,17 +1,9 @@
 import { PARSE_OPTIONS, ParseLines } from "./index";
 import { LeadingWhitespace, StripIndent } from "./list";
-import {
-  REGEX_HTML_DOM,
-  REGEX_MD_BLOCKQUOTE,
-  REGEX_MD_CODE_FENCE,
-  REGEX_MD_FOOTNOTE_DEF,
-  REGEX_MD_H,
-  REGEX_MD_HR,
-  REGEX_MD_LIST,
-} from "./regex";
-import type { ChildNode, Footnote, ListItem, Node, TableCell, TableRow } from "./types";
+import { REGEX_HTML_DOM, REGEX_MD_BLOCKQUOTE, REGEX_MD_CODE_FENCE, REGEX_MD_FOOTNOTE_DEF, REGEX_MD_H, REGEX_MD_HR, REGEX_MD_LIST } from "./regex";
+import type { InlineNode, Footnote, ListItem, BlockNode, TableCell, TableRow } from "./types";
 
-const footnoteMap = new Map<string, { id: string; children: Node[] }>();
+const footnoteMap = new Map<string, { id: string; children: BlockNode[] }>();
 
 export function ParseFootnoteBlock(lines: string[], i: number): { next: number } | null {
   const match = lines[i].match(REGEX_MD_FOOTNOTE_DEF);
@@ -63,9 +55,9 @@ export function ParseFootnoteBlock(lines: string[], i: number): { next: number }
   return { next: j };
 }
 
-export function AppendFootnotes(domMap: Node[]): void {
+export function AppendFootnotes(domMap: BlockNode[]): void {
   const footnotes = new Map<string, Footnote>();
-  const collectRefs = (nodes: (Node | ChildNode | TableRow | TableCell | ListItem | Footnote)[]): void => {
+  const collectRefs = (nodes: (BlockNode | InlineNode | TableRow | TableCell | ListItem | Footnote)[]): void => {
     for (let k = 0; k < nodes.length; k++) {
       const node = nodes[k];
       if (node.type === "footnoteRef") {

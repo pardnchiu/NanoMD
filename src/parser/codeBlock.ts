@@ -1,10 +1,7 @@
 import { REGEX_MD_CODE_BLOCK } from "./regex";
-import type { Node } from "./types";
+import type { BlockNode } from "./types";
 
-export function ParseCodeBlock(
-  lines: string[],
-  i: number,
-): { node: Extract<Node, { type: "codeBlock" }>; next: number } | null {
+export function ParseCodeBlock(lines: string[], i: number): { node: Extract<BlockNode, { type: "codeBlock" }>; next: number } | null {
   const fence = lines[i].trim().match(REGEX_MD_CODE_BLOCK);
   if (!fence) {
     return null;

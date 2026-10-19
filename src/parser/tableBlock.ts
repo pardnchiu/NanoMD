@@ -1,11 +1,8 @@
 import { ParseInline } from "./inline";
 import { REGEX_MD_TABLE_ALIGN } from "./regex";
-import type { Node, TableAlign, TableRow } from "./types";
+import type { BlockNode, TableAlign, TableRow } from "./types";
 
-export function ParseTableBlock(
-  lines: string[],
-  i: number,
-): { node: Extract<Node, { type: "table" }>; next: number } | null {
+export function ParseTableBlock(lines: string[], i: number): { node: Extract<BlockNode, { type: "table" }>; next: number } | null {
   const line = lines[i];
   if (!line.includes("|") || lines[i + 1] === undefined) {
     return null;

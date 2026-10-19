@@ -7,7 +7,8 @@ import { ParseLinkDefBlock, ResetLinkRef, RestoreLinkRefs } from "./link";
 import { ParseListBlock } from "./list";
 import { REGEX_HTML_DOM, REGEX_MD_HR } from "./regex";
 import { ParseTableBlock } from "./tableBlock";
-import type { DependencyEndpoint, InitOptions, Node } from "./types";
+import { AST } from "./types";
+import type { DependencyEndpoint, InitOptions, BlockNode } from "./types";
 
 export const DEFAULT_ENDPOINT: Required<DependencyEndpoint> = {
   mermaidjs: "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js",
@@ -46,13 +47,13 @@ export function Init(options: InitOptions = {}, endpoint: DependencyEndpoint = {
   return Promise.all(loads);
 }
 
-export function Parse(content: string): Node[] {
+export function Parse(content: string): AST {
   ResetFootnote();
   ResetLinkRef();
   const domMap = ParseLines(content.split("\n"));
   AppendFootnotes(domMap);
   RestoreLinkRefs(domMap);
-  return domMap;
+  return AST.from(domMap) as AST;
 }
 
 function insertHead(type: "script" | "style", url: string): Promise<void> {
@@ -81,8 +82,8 @@ function insertHead(type: "script" | "style", url: string): Promise<void> {
   return load;
 }
 
-export function ParseLines(lines: string[], nested = false): Node[] {
-  const domMap: Node[] = [];
+export function ParseLines(lines: string[], nested = false): BlockNode[] {
+  const domMap: BlockNode[] = [];
   let textLine = -1;
 
   let i = 0;

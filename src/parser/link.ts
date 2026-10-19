@@ -12,9 +12,9 @@ import {
   REGEX_VIMEO,
   REGEX_YOUTUBE,
 } from "./regex";
-import type { ChildNode, Footnote, LinkTag, ListItem, Node, TableCell, TableRow } from "./types";
+import type { InlineNode, Footnote, LinkTag, ListItem, BlockNode, TableCell, TableRow } from "./types";
 
-type LinkNode = Extract<ChildNode, { type: "link" }>;
+type LinkNode = Extract<InlineNode, { type: "link" }>;
 
 interface Link {
   alt?: string;
@@ -34,8 +34,8 @@ interface Link {
 
 const linkMap = new Map<string, { href: string; title?: string }>();
 
-export function ParseLink(text: string): { mask: string; links: ChildNode[] } {
-  const links: ChildNode[] = [];
+export function ParseLink(text: string): { mask: string; links: InlineNode[] } {
+  const links: InlineNode[] = [];
   // * mask links for later style parse, keep link's style be correct like ~~http://abc.de~~
   const mask = text
     .replace(/\u0000/g, "")
@@ -59,7 +59,7 @@ export function ParseLink(text: string): { mask: string; links: ChildNode[] } {
   return { mask, links };
 }
 
-function parseMeta(meta: Link): { node: ChildNode; trail: string } {
+function parseMeta(meta: Link): { node: InlineNode; trail: string } {
   if (meta.src !== undefined) {
     const node: LinkNode = {
       type: "link",
@@ -114,7 +114,7 @@ function parseMeta(meta: Link): { node: ChildNode; trail: string } {
   return { node: linkNode(bareURL, [{ type: "text", value: bareURL }]), trail };
 }
 
-function linkNode(href: string, children: ChildNode[], title?: string): LinkNode {
+function linkNode(href: string, children: InlineNode[], title?: string): LinkNode {
   let tag: LinkTag | undefined;
   if (REGEX_YOUTUBE.test(href)) {
     tag = "youtube";
@@ -128,8 +128,8 @@ function linkNode(href: string, children: ChildNode[], title?: string): LinkNode
   return node;
 }
 
-export function RestoreLinks(text: string, links: ChildNode[]): ChildNode[] {
-  const domMap: ChildNode[] = [];
+export function RestoreLinks(text: string, links: InlineNode[]): InlineNode[] {
+  const domMap: InlineNode[] = [];
   const parts = text.split(REGEX_MD_LINK_PLACEHOLDER);
   for (let k = 0; k < parts.length; k++) {
     if (k % 2 === 1) {
@@ -154,7 +154,7 @@ export function ParseLinkDefBlock(lines: string[], i: number): { next: number } 
   return { next: i + 1 };
 }
 
-export function RestoreLinkRefs(nodes: (Node | ChildNode | TableRow | TableCell | ListItem | Footnote)[]): void {
+export function RestoreLinkRefs(nodes: (BlockNode | InlineNode | TableRow | TableCell | ListItem | Footnote)[]): void {
   for (let k = 0; k < nodes.length; k++) {
     const node = nodes[k];
     if (node.type === "linkRef") {
