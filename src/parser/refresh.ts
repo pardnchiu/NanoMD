@@ -56,6 +56,7 @@ function renderChart(root: ParentNode): void {
   for (const e of root.querySelectorAll<HTMLCanvasElement>(".md-chart canvas")) {
     try {
       new Chart(e, JSON.parse(e.dataset.chart ?? ""));
+      e.parentElement?.setAttribute("data-rendered", "");
     } catch {
       replaceWithCode(e.parentElement, "pre");
     }
@@ -70,6 +71,7 @@ function renderLatex(root: ParentNode): void {
   for (const e of root.querySelectorAll<HTMLElement>(".md-math")) {
     try {
       katex.render(e.textContent ?? "", e, { displayMode: true, throwOnError: true });
+      e.parentElement?.setAttribute("data-rendered", "");
     } catch {
       replaceWithCode(e.parentElement, "pre.prettyprint");
     }
@@ -104,7 +106,13 @@ async function renderMermaid(root: ParentNode): Promise<void> {
       return null;
     }),
   );
-  await mermaid.run({ nodes: nodes.filter((node): node is HTMLElement => node !== null), suppressErrors: true });
+  const valid = nodes.filter((node): node is HTMLElement => node !== null);
+  await mermaid.run({ nodes: valid, suppressErrors: true });
+  for (const e of valid) {
+    if (e.querySelector("svg")) {
+      e.parentElement?.setAttribute("data-rendered", "");
+    }
+  }
 }
 
 function replaceWithCode(wrapper: HTMLElement | null, selector: string): void {

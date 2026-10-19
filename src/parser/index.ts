@@ -12,6 +12,9 @@ import { AST } from "./types";
 import type { DependencyEndpoint, InitOptions, BlockNode } from "./types";
 
 export { OnCopyClick, Refresh } from "./refresh";
+export * as MDParser from "./index";
+
+const SCRIPT_URL = typeof document !== "undefined" && document.currentScript instanceof HTMLScriptElement ? document.currentScript.src : import.meta.url;
 
 export const DEFAULT_ENDPOINT: Required<DependencyEndpoint> = {
   mermaidjs: "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js",
@@ -26,6 +29,10 @@ export const PARSE_OPTIONS: { indent: number } = {
 };
 
 const insertedDependencies = new Map<string, Promise<void>>();
+
+if (typeof document !== "undefined" && SCRIPT_URL) {
+  insertHead("style", new URL("parser.css", SCRIPT_URL).href).catch((err: Error) => console.error(err.message));
+}
 
 export function Init(options: InitOptions = {}, endpoint: DependencyEndpoint = {}): Promise<void[]> {
   PARSE_OPTIONS.indent = Number.isInteger(options.indent) && options.indent! > 0 ? options.indent! : 4;
