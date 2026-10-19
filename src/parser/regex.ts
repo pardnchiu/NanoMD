@@ -28,19 +28,20 @@ export const REGEX_MD_FILE_PATH = new RegExp(`^(?:${REGEX_FILE_PATH})$`, "u");
 export const REGEX_MD_FILE_PATH_TRAILING = /[./]+$/;
 export const REGEX_MD_URL_TRAILING = /[)\]}.,;:!?*_~、。，；：！？」』】》”）]+$/;
 export const REGEX_MD_LINK = new RegExp(
-  "!\\[(?<alt>[^\\]\\n]*)\\]\\((?<src>[^)\\s]+)(?:[ \\t]+(?<q1>[\"'])(?<imgTitle>[^)\\n]*?)\\k<q1>)?\\)" +
-    "(?:\\((?:(?<size>[0-9]+%?)|(?<width>[0-9]+%?)?[ \\t*x]+(?<height>[0-9]+%?)?)\\))?|" +
-    "\\[(?<label>[^\\]]+)\\]\\((?<href>https?:\\/\\/[^\\s)]+)(?:[ \\t]+(?<q2>[\"'])(?<linkTitle>[^)\\n]*?)\\k<q2>)?\\)|" +
-    `(?<![\\w/])(?<path>${REGEX_FILE_PATH})|` +
-    `(?<url>${REGEX_URL})`,
+  "!\\[(?<alt>[^\\]\\n]*)\\]\\((?<src>[^)\\s]+)(?:[ \\t]+(?<q1>[\"'])(?<imgTitle>[^)\\n]*?)\\k<q1>)?\\)" + // 1 ![alt](src "title")
+    "(?:\\((?:(?<size>[0-9]+%?)|(?<width>[0-9]+%?)?[ \\t*x]+(?<height>[0-9]+%?)?)\\))?|" + // (300x200) (50%x) (x200) (300)
+    "\\[(?<label>[^\\]]+)\\]\\((?<href>https?:\\/\\/[^\\s)]+|(?![A-Za-z][A-Za-z0-9+.\\-]*:)[^\\s)]+)(?:[ \\t]+(?<q2>[\"'])(?<linkTitle>[^)\\n]*?)\\k<q2>)?\\)|" + // 2 [label](href "title")
+    "\\[(?<refLabel>[^\\]]+)\\]\\[(?<ref>[^\\]]+)\\]|" + // 3 [label][ref]
+    `(?<![\\w/])(?<path>${REGEX_FILE_PATH})|` + // 4 ~/a.md /Users/a/b.go, prevent a/b/c and http://a/b
+    `(?<url>${REGEX_URL})`, // 5 https://example.com
   "gu",
 );
+export const REGEX_MD_LINK_DEF = /^ {0,3}\[(?!\^)([^\]]+)\]:[ \t]*(https?:\/\/\S+|(?![A-Za-z][A-Za-z0-9+.\-]*:)\S+)(?:[ \t]+(["'])(.*)\3)?[ \t]*$/;
 export const REGEX_MD_VIDEO = /\.(mp4|mov)$/i;
 export const REGEX_MD_IMAGE_SIZE_PERCENT = /%$/;
 export const REGEX_MD_LINK_PLACEHOLDER = /\u0000(\d+)\u0000/;
 export const REGEX_YOUTUBE = /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?/;
-export const REGEX_VIMEO =
-  /(?:https?:\/\/)?(?:www\.)?vimeo\.com\/(?:channels\/[\w]+\/|groups\/[\w]+\/videos\/|album\/\d+\/video\/|video\/|)(\d+)/;
+export const REGEX_VIMEO = /(?:https?:\/\/)?(?:www\.)?vimeo\.com\/(?:channels\/[\w]+\/|groups\/[\w]+\/videos\/|album\/\d+\/video\/|video\/|)(\d+)/;
 export const REGEX_MD_INLINE = new RegExp(
   [
     "\\*\\*\\*(.+?)\\*\\*\\*", // 1 ***bold em***
@@ -56,17 +57,5 @@ export const REGEX_MD_INLINE = new RegExp(
   ].join("|"),
   "g",
 );
-export const MD_INLINE_TYPES: (MarkType | "bem" | null)[] = [
-  null,
-  "bem",
-  "bem",
-  "b",
-  "em",
-  "b",
-  "em",
-  "del",
-  "mark",
-  "sub",
-  "sup",
-];
+export const MD_INLINE_TYPES: (MarkType | "bem" | null)[] = [null, "bem", "bem", "b", "em", "b", "em", "del", "mark", "sub", "sup"];
 export const REGEX_MD_ESCAPE = /\\([!-\/:-@\[-`{-~])/g; // \* => *, \` => `, \[ => [, \\ => \

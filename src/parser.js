@@ -54,9 +54,11 @@ var NewParser = (() => {
   var REGEX_MD_FILE_PATH_TRAILING = /[./]+$/;
   var REGEX_MD_URL_TRAILING = /[)\]}.,;:!?*_~、。，；：！？」』】》”）]+$/;
   var REGEX_MD_LINK = new RegExp(
-    `!\\[(?<alt>[^\\]\\n]*)\\]\\((?<src>[^)\\s]+)(?:[ \\t]+(?<q1>["'])(?<imgTitle>[^)\\n]*?)\\k<q1>)?\\)(?:\\((?:(?<size>[0-9]+%?)|(?<width>[0-9]+%?)?[ \\t*x]+(?<height>[0-9]+%?)?)\\))?|\\[(?<label>[^\\]]+)\\]\\((?<href>https?:\\/\\/[^\\s)]+)(?:[ \\t]+(?<q2>["'])(?<linkTitle>[^)\\n]*?)\\k<q2>)?\\)|(?<![\\w/])(?<path>${REGEX_FILE_PATH})|(?<url>${REGEX_URL})`,
+    `!\\[(?<alt>[^\\]\\n]*)\\]\\((?<src>[^)\\s]+)(?:[ \\t]+(?<q1>["'])(?<imgTitle>[^)\\n]*?)\\k<q1>)?\\)(?:\\((?:(?<size>[0-9]+%?)|(?<width>[0-9]+%?)?[ \\t*x]+(?<height>[0-9]+%?)?)\\))?|\\[(?<label>[^\\]]+)\\]\\((?<href>https?:\\/\\/[^\\s)]+|(?![A-Za-z][A-Za-z0-9+.\\-]*:)[^\\s)]+)(?:[ \\t]+(?<q2>["'])(?<linkTitle>[^)\\n]*?)\\k<q2>)?\\)|\\[(?<refLabel>[^\\]]+)\\]\\[(?<ref>[^\\]]+)\\]|(?<![\\w/])(?<path>${REGEX_FILE_PATH})|(?<url>${REGEX_URL})`,
+    // 5 https://example.com
     "gu"
   );
+  var REGEX_MD_LINK_DEF = /^ {0,3}\[(?!\^)([^\]]+)\]:[ \t]*(https?:\/\/\S+|(?![A-Za-z][A-Za-z0-9+.\-]*:)\S+)(?:[ \t]+(["'])(.*)\3)?[ \t]*$/;
   var REGEX_MD_VIDEO = /\.(mp4|mov)$/i;
   var REGEX_MD_IMAGE_SIZE_PERCENT = /%$/;
   var REGEX_MD_LINK_PLACEHOLDER = /\u0000(\d+)\u0000/;
@@ -87,19 +89,7 @@ var NewParser = (() => {
     ].join("|"),
     "g"
   );
-  var MD_INLINE_TYPES = [
-    null,
-    "bem",
-    "bem",
-    "b",
-    "em",
-    "b",
-    "em",
-    "del",
-    "mark",
-    "sub",
-    "sup"
-  ];
+  var MD_INLINE_TYPES = [null, "bem", "bem", "b", "em", "b", "em", "del", "mark", "sub", "sup"];
   var REGEX_MD_ESCAPE = /\\([!-\/:-@\[-`{-~])/g;
 
   // src/parser/blockquote.ts
@@ -329,6 +319,7 @@ var NewParser = (() => {
   }
 
   // src/parser/link.ts
+  var linkMap = /* @__PURE__ */ new Map();
   function ParseLink(text) {
     const links = [];
     const mask = text.replace(/\u0000/g, "").replace(REGEX_MD_MATH_INLINE, (_, value) => {
@@ -369,6 +360,9 @@ var NewParser = (() => {
         node.height = REGEX_MD_IMAGE_SIZE_PERCENT.test(meta.height) ? meta.height : `${meta.height}px`;
       }
       return { node, trail: "" };
+    }
+    if (meta.ref !== void 0 && meta.refLabel !== void 0) {
+      return { node: { type: "linkRef", label: meta.refLabel, ref: meta.ref }, trail: "" };
     }
     if (meta.href !== void 0 && meta.label !== void 0) {
       return {
@@ -413,6 +407,31 @@ var NewParser = (() => {
       }
     }
     return domMap;
+  }
+  function ParseLinkDefBlock(lines, i) {
+    const match = lines[i].match(REGEX_MD_LINK_DEF);
+    if (!match) {
+      return null;
+    }
+    const key = match[1].toLowerCase();
+    if (!linkMap.has(key)) {
+      linkMap.set(key, { href: match[2], title: match[4] });
+    }
+    return { next: i + 1 };
+  }
+  function RestoreLinkRefs(nodes) {
+    for (let k = 0; k < nodes.length; k++) {
+      const node = nodes[k];
+      if (node.type === "linkRef") {
+        const definition = linkMap.get(node.ref.toLowerCase());
+        nodes[k] = definition ? linkNode(definition.href, [{ type: "text", value: node.label }], definition.title) : { type: "text", value: `[${node.label}][${node.ref}]` };
+      } else if ("children" in node) {
+        RestoreLinkRefs(node.children);
+      }
+    }
+  }
+  function ResetLinkRef() {
+    linkMap.clear();
   }
 
   // src/parser/inline.ts
@@ -573,8 +592,10 @@ var NewParser = (() => {
   }
   function Parse(content) {
     ResetFootnote();
+    ResetLinkRef();
     const domMap = ParseLines(content.split("\n"));
     AppendFootnotes(domMap);
+    RestoreLinkRefs(domMap);
     return domMap;
   }
   function insertHead(type, url) {
@@ -652,6 +673,11 @@ var NewParser = (() => {
           i = footnote.next;
           continue;
         }
+      }
+      const linkDef = ParseLinkDefBlock(lines, i);
+      if (linkDef) {
+        i = linkDef.next;
+        continue;
       }
       const list = ParseListBlock(lines, i);
       if (list) {

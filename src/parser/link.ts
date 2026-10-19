@@ -4,6 +4,7 @@ import {
   REGEX_MD_FOOTNOTE_REF,
   REGEX_MD_IMAGE_SIZE_PERCENT,
   REGEX_MD_LINK,
+  REGEX_MD_LINK_DEF,
   REGEX_MD_LINK_PLACEHOLDER,
   REGEX_MD_MATH_INLINE,
   REGEX_MD_URL_TRAILING,
@@ -11,7 +12,7 @@ import {
   REGEX_VIMEO,
   REGEX_YOUTUBE,
 } from "./regex";
-import type { ChildNode, LinkTag } from "./types";
+import type { ChildNode, Footnote, LinkTag, ListItem, Node, TableCell, TableRow } from "./types";
 
 type LinkNode = Extract<ChildNode, { type: "link" }>;
 
@@ -25,9 +26,13 @@ interface Link {
   label?: string;
   href?: string;
   linkTitle?: string;
+  refLabel?: string;
+  ref?: string;
   path?: string;
   url?: string;
 }
+
+const linkMap = new Map<string, { href: string; title?: string }>();
 
 export function ParseLink(text: string): { mask: string; links: ChildNode[] } {
   const links: ChildNode[] = [];
@@ -82,6 +87,10 @@ function parseMeta(meta: Link): { node: ChildNode; trail: string } {
     return { node, trail: "" };
   }
 
+  if (meta.ref !== undefined && meta.refLabel !== undefined) {
+    return { node: { type: "linkRef", label: meta.refLabel, ref: meta.ref }, trail: "" };
+  }
+
   // * note: [](http://abc.de) fall back to bare link parse, not bug
   if (meta.href !== undefined && meta.label !== undefined) {
     return {
@@ -130,4 +139,35 @@ export function RestoreLinks(text: string, links: ChildNode[]): ChildNode[] {
     }
   }
   return domMap;
+}
+
+export function ParseLinkDefBlock(lines: string[], i: number): { next: number } | null {
+  const match = lines[i].match(REGEX_MD_LINK_DEF);
+  if (!match) {
+    return null;
+  }
+
+  const key = match[1].toLowerCase();
+  if (!linkMap.has(key)) {
+    linkMap.set(key, { href: match[2], title: match[4] });
+  }
+  return { next: i + 1 };
+}
+
+export function RestoreLinkRefs(nodes: (Node | ChildNode | TableRow | TableCell | ListItem | Footnote)[]): void {
+  for (let k = 0; k < nodes.length; k++) {
+    const node = nodes[k];
+    if (node.type === "linkRef") {
+      const definition = linkMap.get(node.ref.toLowerCase());
+      nodes[k] = definition
+        ? linkNode(definition.href, [{ type: "text", value: node.label }], definition.title)
+        : { type: "text", value: `[${node.label}][${node.ref}]` };
+    } else if ("children" in node) {
+      RestoreLinkRefs(node.children);
+    }
+  }
+}
+
+export function ResetLinkRef(): void {
+  linkMap.clear();
 }

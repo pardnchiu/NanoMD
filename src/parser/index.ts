@@ -3,6 +3,7 @@ import { ParseCodeBlock } from "./codeBlock";
 import { AppendFootnotes, ParseFootnoteBlock, ResetFootnote } from "./footnote";
 import { ParseHeading } from "./heading";
 import { ParseInline } from "./inline";
+import { ParseLinkDefBlock, ResetLinkRef, RestoreLinkRefs } from "./link";
 import { ParseListBlock } from "./list";
 import { REGEX_HTML_DOM, REGEX_MD_HR } from "./regex";
 import { ParseTableBlock } from "./tableBlock";
@@ -47,8 +48,10 @@ export function Init(options: InitOptions = {}, endpoint: DependencyEndpoint = {
 
 export function Parse(content: string): Node[] {
   ResetFootnote();
+  ResetLinkRef();
   const domMap = ParseLines(content.split("\n"));
   AppendFootnotes(domMap);
+  RestoreLinkRefs(domMap);
   return domMap;
 }
 
@@ -138,6 +141,12 @@ export function ParseLines(lines: string[], nested = false): Node[] {
         i = footnote.next;
         continue;
       }
+    }
+
+    const linkDef = ParseLinkDefBlock(lines, i);
+    if (linkDef) {
+      i = linkDef.next;
+      continue;
     }
 
     const list = ParseListBlock(lines, i);

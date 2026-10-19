@@ -59,6 +59,7 @@ export type ChildNode =
       children: ChildNode[];
     }
   | { type: "footnoteRef"; id: string; index: number }
+  | { type: "linkRef"; label: string; ref: string }
   | { type: MarkType; children: ChildNode[] };
 
 export interface TableRow {
