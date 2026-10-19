@@ -1,4 +1,32 @@
-export type MarkType = "b" | "em" | "del" | "mark" | "sub" | "sup";
+export interface InitOptions {
+  enable?: DependencyEnable;
+  indent?: number;
+}
+
+export interface DependencyEndpoint {
+  mermaidjs?: string;
+  katexjs?: string;
+  katexcss?: string;
+  googleprettifyjs?: string;
+  chartjs?: string;
+}
+
+export interface DependencyEnable {
+  mermaid?: boolean;
+  latex?: boolean;
+  highlight?: boolean;
+  chartjs?: boolean;
+}
+
+export type Node =
+  | { type: "codeBlock"; lang?: string; value: string }
+  | { type: "hr" }
+  | { type: "heading"; level: number; children: ChildNode[] }
+  | { type: "html"; value: string }
+  | { type: "blockquote"; tag?: BlockquoteTag; children: Node[] }
+  | { type: "table"; align: (TableAlign | null)[]; children: TableRow[] }
+  | { type: "list"; ordered: boolean; children: ListItem[] }
+  | { type: "text"; children: ChildNode[] };
 
 // * ![a](x.png)
 // * ![a](x.png "title")
@@ -29,12 +57,6 @@ export type ChildNode =
     }
   | { type: MarkType; children: ChildNode[] };
 
-export type LinkTag = "youtube" | "vimeo" | "file" | "image" | "video";
-
-export type BlockquoteTag = "note" | "tip" | "important" | "warning" | "caution";
-
-export type TableAlign = "left" | "center" | "right";
-
 export interface TableRow {
   type: "tableRow";
   header: boolean;
@@ -46,26 +68,16 @@ export interface TableCell {
   children: ChildNode[];
 }
 
-export type Node =
-  | { type: "codeBlock"; lang?: string; value: string }
-  | { type: "hr" }
-  | { type: "heading"; level: number; children: ChildNode[] }
-  | { type: "html"; value: string }
-  | { type: "blockquote"; tag?: BlockquoteTag; children: Node[] }
-  | { type: "table"; align: (TableAlign | null)[]; children: TableRow[] }
-  | { type: "text"; children: ChildNode[] };
-
-export interface DependencyEndpoint {
-  mermaidjs?: string;
-  katexjs?: string;
-  katexcss?: string;
-  googleprettifyjs?: string;
-  chartjs?: string;
+export interface ListItem {
+  type: "listItem";
+  checked?: boolean;
+  children: Node[];
 }
 
-export interface DependencyEnable {
-  mermaid?: boolean;
-  latex?: boolean;
-  highlight?: boolean;
-  chartjs?: boolean;
-}
+export type BlockquoteTag = "note" | "tip" | "important" | "warning" | "caution";
+
+export type TableAlign = "left" | "center" | "right";
+
+export type LinkTag = "youtube" | "vimeo" | "file" | "image" | "video";
+
+export type MarkType = "b" | "em" | "del" | "mark" | "sub" | "sup";

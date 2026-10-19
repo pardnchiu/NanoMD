@@ -2,6 +2,7 @@ import type { MarkType } from "./types";
 
 export const REGEX_HTML_DOM = /^\s*<\/?[A-Za-z][A-Za-z0-9-]*(?:\s[^<>]*)?\/?>/;
 export const REGEX_MD_CODE_BLOCK = /^```(\S*)$/;
+export const REGEX_MD_CODE_FENCE = /^\s*```/;
 export const REGEX_MD_CODE_LANG_MERMAID = /^mermaid/;
 export const REGEX_MD_CODE_LANG_LATEX = /^(latex|math)/;
 export const REGEX_MD_CODE_LANG_CHARTJS = /^chartjs/;
@@ -13,6 +14,8 @@ export const REGEX_MD_HR = /^ {0,3}([-*_])( *\1){2,}$/;
 export const REGEX_MD_BLOCKQUOTE = /^ {0,3}>[ \t]?(.*)$/;
 export const REGEX_MD_BLOCKQUOTE_TAG = /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][ \t]*$/i;
 export const REGEX_MD_TABLE_ALIGN = /^(:)?-+(:)?$/;
+export const REGEX_MD_LIST = /^([-*]|\d+\.)([ \t]+)(.*)$/;
+export const REGEX_MD_LIST_TASK = /^\[([ xX])\][ \t]+(.*)$/;
 const REGEX_FILE_PATH_1 = "[\\p{L}\\p{M}\\p{N}_.\\-\\/~]";
 const REGEX_FILE_PATH_2 = "[\\p{L}\\p{M}\\p{N}_.\\-~]+";
 const REGEX_FILE_EXT = "\\.[A-Za-z0-9]+";

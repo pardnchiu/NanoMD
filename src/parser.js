@@ -21,8 +21,9 @@ var NewParser = (() => {
   // src/parser/index.ts
   var index_exports = {};
   __export(index_exports, {
-    EXTERNAL_DEPENDENCIES: () => EXTERNAL_DEPENDENCIES,
+    DEFAULT_ENDPOINT: () => DEFAULT_ENDPOINT,
     Init: () => Init,
+    PARSE_OPTIONS: () => PARSE_OPTIONS,
     Parse: () => Parse,
     ParseLines: () => ParseLines
   });
@@ -30,6 +31,7 @@ var NewParser = (() => {
   // src/parser/regex.ts
   var REGEX_HTML_DOM = /^\s*<\/?[A-Za-z][A-Za-z0-9-]*(?:\s[^<>]*)?\/?>/;
   var REGEX_MD_CODE_BLOCK = /^```(\S*)$/;
+  var REGEX_MD_CODE_FENCE = /^\s*```/;
   var REGEX_MD_CODE_INLINE = /(?<!\\)`([^`\n]+)`/g;
   var REGEX_MD_H = /^(#{1,6})\s+(.+)$/;
   var REGEX_MD_H1 = /^ {0,3}=+[ \t]*$/;
@@ -38,6 +40,8 @@ var NewParser = (() => {
   var REGEX_MD_BLOCKQUOTE = /^ {0,3}>[ \t]?(.*)$/;
   var REGEX_MD_BLOCKQUOTE_TAG = /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][ \t]*$/i;
   var REGEX_MD_TABLE_ALIGN = /^(:)?-+(:)?$/;
+  var REGEX_MD_LIST = /^([-*]|\d+\.)([ \t]+)(.*)$/;
+  var REGEX_MD_LIST_TASK = /^\[([ xX])\][ \t]+(.*)$/;
   var REGEX_FILE_PATH_1 = "[\\p{L}\\p{M}\\p{N}_.\\-\\/~]";
   var REGEX_FILE_PATH_2 = "[\\p{L}\\p{M}\\p{N}_.\\-~]+";
   var REGEX_FILE_EXT = "\\.[A-Za-z0-9]+";
@@ -281,6 +285,113 @@ var NewParser = (() => {
     return null;
   }
 
+  // src/parser/list.ts
+  function ParseListBlock(lines, i) {
+    const baseIndent = leadingWhitespace(lines[i]).width;
+    if (!matchMarker(lines[i], baseIndent)) {
+      return null;
+    }
+    const items = [];
+    let ordered = null;
+    let j = i;
+    while (j < lines.length) {
+      if (j > i && lines[j].trim() === "") {
+        let k = j;
+        while (k < lines.length && lines[k].trim() === "") {
+          k++;
+        }
+        if (k < lines.length && matchMarker(lines[k], baseIndent)) {
+          j = k;
+        } else {
+          break;
+        }
+      }
+      const marker = matchMarker(lines[j], baseIndent);
+      if (!marker || ordered !== null && marker.ordered !== ordered) {
+        break;
+      }
+      ordered = marker.ordered;
+      const itemLines = [marker.content];
+      j++;
+      while (j < lines.length) {
+        if (lines[j].trim() === "") {
+          let k = j;
+          while (k < lines.length && lines[k].trim() === "") {
+            k++;
+          }
+          if (k < lines.length && leadingWhitespace(lines[k]).width >= marker.column) {
+            itemLines.push("");
+            j++;
+            continue;
+          }
+          break;
+        }
+        if (leadingWhitespace(lines[j]).width >= marker.column) {
+          itemLines.push(stripIndent(lines[j], marker.column));
+          j++;
+          continue;
+        }
+        if (!matchMarker(lines[j], baseIndent) && !(REGEX_MD_H.test(lines[j]) || REGEX_MD_HR.test(lines[j]) || REGEX_MD_BLOCKQUOTE.test(lines[j]) || REGEX_MD_CODE_FENCE.test(lines[j]) || REGEX_HTML_DOM.test(lines[j]) || lines[j].includes("|"))) {
+          itemLines.push(lines[j]);
+          j++;
+          continue;
+        }
+        break;
+      }
+      const task = itemLines[0].match(REGEX_MD_LIST_TASK);
+      if (task) {
+        itemLines[0] = task[2];
+      }
+      const children = ParseLines(itemLines, true);
+      items.push(task ? { type: "listItem", checked: task[1] !== " ", children } : { type: "listItem", children });
+    }
+    return { node: { type: "list", ordered: ordered ?? false, children: items }, next: j };
+  }
+  function matchMarker(line, baseIndent) {
+    const { width, chars } = leadingWhitespace(line);
+    if (width < baseIndent || width > baseIndent + 3) {
+      return null;
+    }
+    const match = line.slice(chars).match(REGEX_MD_LIST);
+    if (!match) {
+      return null;
+    }
+    let column = width + match[1].length;
+    for (const char of match[2]) {
+      column += char === "	" ? PARSE_OPTIONS.indent - column % PARSE_OPTIONS.indent : 1;
+    }
+    return { ordered: match[1].endsWith("."), content: match[3], column };
+  }
+  function leadingWhitespace(line) {
+    let width = 0;
+    let chars = 0;
+    for (; chars < line.length; chars++) {
+      if (line[chars] === " ") {
+        width += 1;
+      } else if (line[chars] === "	") {
+        width += PARSE_OPTIONS.indent - width % PARSE_OPTIONS.indent;
+      } else {
+        break;
+      }
+    }
+    return { width, chars };
+  }
+  function stripIndent(line, column) {
+    let width = 0;
+    let k = 0;
+    while (k < line.length && width < column) {
+      if (line[k] === " ") {
+        width += 1;
+      } else if (line[k] === "	") {
+        width += PARSE_OPTIONS.indent - width % PARSE_OPTIONS.indent;
+      } else {
+        break;
+      }
+      k++;
+    }
+    return line.slice(k);
+  }
+
   // src/parser/tableBlock.ts
   function ParseTableBlock(lines, i) {
     const line = lines[i];
@@ -343,31 +454,36 @@ var NewParser = (() => {
   }
 
   // src/parser/index.ts
-  var EXTERNAL_DEPENDENCIES = {
+  var DEFAULT_ENDPOINT = {
     mermaidjs: "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js",
     katexjs: "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js",
     katexcss: "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css",
     googleprettifyjs: "https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js",
     chartjs: "https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"
   };
+  var PARSE_OPTIONS = {
+    indent: 4
+  };
   var insertedDependencies = /* @__PURE__ */ new Map();
-  function Init(enable = {}, endpoint = {}) {
+  function Init(options = {}, endpoint = {}) {
+    PARSE_OPTIONS.indent = Number.isInteger(options.indent) && options.indent > 0 ? options.indent : 4;
     if (typeof document === "undefined") {
       return Promise.resolve([]);
     }
+    const enable = options.enable ?? {};
     const loads = [];
     if (enable.mermaid) {
-      loads.push(insertHead("script", endpoint.mermaidjs ?? EXTERNAL_DEPENDENCIES.mermaidjs));
+      loads.push(insertHead("script", endpoint.mermaidjs ?? DEFAULT_ENDPOINT.mermaidjs));
     }
     if (enable.latex) {
-      loads.push(insertHead("style", endpoint.katexcss ?? EXTERNAL_DEPENDENCIES.katexcss));
-      loads.push(insertHead("script", endpoint.katexjs ?? EXTERNAL_DEPENDENCIES.katexjs));
+      loads.push(insertHead("style", endpoint.katexcss ?? DEFAULT_ENDPOINT.katexcss));
+      loads.push(insertHead("script", endpoint.katexjs ?? DEFAULT_ENDPOINT.katexjs));
     }
     if (enable.highlight) {
-      loads.push(insertHead("script", endpoint.googleprettifyjs ?? EXTERNAL_DEPENDENCIES.googleprettifyjs));
+      loads.push(insertHead("script", endpoint.googleprettifyjs ?? DEFAULT_ENDPOINT.googleprettifyjs));
     }
     if (enable.chartjs) {
-      loads.push(insertHead("script", endpoint.chartjs ?? EXTERNAL_DEPENDENCIES.chartjs));
+      loads.push(insertHead("script", endpoint.chartjs ?? DEFAULT_ENDPOINT.chartjs));
     }
     return Promise.all(loads);
   }
@@ -434,6 +550,12 @@ var NewParser = (() => {
       if (blockquote) {
         domMap.push(blockquote.node);
         i = blockquote.next;
+        continue;
+      }
+      const list = ParseListBlock(lines, i);
+      if (list) {
+        domMap.push(list.node);
+        i = list.next;
         continue;
       }
       const heading = ParseHeading(lines, i);

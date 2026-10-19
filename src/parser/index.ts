@@ -2,11 +2,12 @@ import { ParseBlockquote } from "./blockquote";
 import { ParseCodeBlock } from "./codeBlock";
 import { ParseHeading } from "./heading";
 import { ParseInline } from "./inline";
+import { ParseListBlock } from "./list";
 import { REGEX_HTML_DOM, REGEX_MD_HR } from "./regex";
 import { ParseTableBlock } from "./tableBlock";
-import type { DependencyEnable, DependencyEndpoint, Node } from "./types";
+import type { DependencyEndpoint, InitOptions, Node } from "./types";
 
-export const EXTERNAL_DEPENDENCIES: Required<DependencyEndpoint> = {
+export const DEFAULT_ENDPOINT: Required<DependencyEndpoint> = {
   mermaidjs: "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js",
   katexjs: "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js",
   katexcss: "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css",
@@ -14,25 +15,31 @@ export const EXTERNAL_DEPENDENCIES: Required<DependencyEndpoint> = {
   chartjs: "https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js",
 };
 
+export const PARSE_OPTIONS: { indent: number } = {
+  indent: 4,
+};
+
 const insertedDependencies = new Map<string, Promise<void>>();
 
-export function Init(enable: DependencyEnable = {}, endpoint: DependencyEndpoint = {}): Promise<void[]> {
+export function Init(options: InitOptions = {}, endpoint: DependencyEndpoint = {}): Promise<void[]> {
+  PARSE_OPTIONS.indent = Number.isInteger(options.indent) && options.indent! > 0 ? options.indent! : 4;
   if (typeof document === "undefined") {
     return Promise.resolve([]);
   }
+  const enable = options.enable ?? {};
   const loads: Promise<void>[] = [];
   if (enable.mermaid) {
-    loads.push(insertHead("script", endpoint.mermaidjs ?? EXTERNAL_DEPENDENCIES.mermaidjs));
+    loads.push(insertHead("script", endpoint.mermaidjs ?? DEFAULT_ENDPOINT.mermaidjs));
   }
   if (enable.latex) {
-    loads.push(insertHead("style", endpoint.katexcss ?? EXTERNAL_DEPENDENCIES.katexcss));
-    loads.push(insertHead("script", endpoint.katexjs ?? EXTERNAL_DEPENDENCIES.katexjs));
+    loads.push(insertHead("style", endpoint.katexcss ?? DEFAULT_ENDPOINT.katexcss));
+    loads.push(insertHead("script", endpoint.katexjs ?? DEFAULT_ENDPOINT.katexjs));
   }
   if (enable.highlight) {
-    loads.push(insertHead("script", endpoint.googleprettifyjs ?? EXTERNAL_DEPENDENCIES.googleprettifyjs));
+    loads.push(insertHead("script", endpoint.googleprettifyjs ?? DEFAULT_ENDPOINT.googleprettifyjs));
   }
   if (enable.chartjs) {
-    loads.push(insertHead("script", endpoint.chartjs ?? EXTERNAL_DEPENDENCIES.chartjs));
+    loads.push(insertHead("script", endpoint.chartjs ?? DEFAULT_ENDPOINT.chartjs));
   }
   return Promise.all(loads);
 }
@@ -111,6 +118,13 @@ export function ParseLines(lines: string[], nested = false): Node[] {
     if (blockquote) {
       domMap.push(blockquote.node);
       i = blockquote.next;
+      continue;
+    }
+
+    const list = ParseListBlock(lines, i);
+    if (list) {
+      domMap.push(list.node);
+      i = list.next;
       continue;
     }
 
