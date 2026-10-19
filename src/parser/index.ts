@@ -2,6 +2,7 @@ import { ParseBlockquote } from "./blockquote";
 import { ParseCodeBlock } from "./codeBlock";
 import { AppendFootnotes, ParseFootnoteBlock, ResetFootnote } from "./footnote";
 import { ParseHeading } from "./heading";
+import "./html";
 import { ParseInline } from "./inline";
 import { ParseLinkDefBlock, ResetLinkRef, RestoreLinkRefs } from "./link";
 import { ParseListBlock } from "./list";
@@ -9,6 +10,8 @@ import { REGEX_HTML_DOM, REGEX_MD_HR } from "./regex";
 import { ParseTableBlock } from "./tableBlock";
 import { AST } from "./types";
 import type { DependencyEndpoint, InitOptions, BlockNode } from "./types";
+
+export { OnCopyClick, Refresh } from "./refresh";
 
 export const DEFAULT_ENDPOINT: Required<DependencyEndpoint> = {
   mermaidjs: "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js",

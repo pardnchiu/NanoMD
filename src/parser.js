@@ -23,9 +23,11 @@ var NewParser = (() => {
   __export(index_exports, {
     DEFAULT_ENDPOINT: () => DEFAULT_ENDPOINT,
     Init: () => Init,
+    OnCopyClick: () => OnCopyClick,
     PARSE_OPTIONS: () => PARSE_OPTIONS,
     Parse: () => Parse,
-    ParseLines: () => ParseLines
+    ParseLines: () => ParseLines,
+    Refresh: () => Refresh
   });
 
   // src/parser/regex.ts
@@ -91,6 +93,33 @@ var NewParser = (() => {
   );
   var MD_INLINE_TYPES = [null, "bem", "bem", "b", "em", "b", "em", "del", "mark", "sub", "sup"];
   var REGEX_MD_ESCAPE = /\\([!-\/:-@\[-`{-~])/g;
+  var REGEX_HTML_SCRIPT = /<\s*(script|style|iframe|object|embed|form|link|meta|base)\b[\s\S]*?<\s*\/\s*\1\s*>|<\s*\/?\s*(script|style|iframe|object|embed|form|link|meta|base)\b[^>]*>/gi;
+  var REGEX_HTML_EVENT = /\son[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi;
+  var REGEX_HTML_URL = /\s(href|src|xlink:href|action|formaction)\s*=\s*(?:"\s*(?:javascript|vbscript|data:text\/html)[^"]*"|'\s*(?:javascript|vbscript|data:text\/html)[^']*'|(?:javascript|vbscript|data:text\/html)[^\s>]*)/gi;
+  var REGEX_MD_VIDEO_MOV = /\.mov$/i;
+  var CODE_TYPES = [
+    "javascript",
+    "js",
+    "ts",
+    "html",
+    "css",
+    "xml",
+    "json",
+    "sql",
+    "java",
+    "python",
+    "ruby",
+    "php",
+    "cpp",
+    "csharp",
+    "swift",
+    "typescript",
+    "kotlin",
+    "go",
+    "rust",
+    "perl",
+    "bash"
+  ];
 
   // src/parser/blockquote.ts
   function ParseBlockquote(lines, i, nested) {
@@ -500,6 +529,166 @@ var NewParser = (() => {
     return null;
   }
 
+  // src/parser/types.ts
+  var AST = class extends Array {
+  };
+
+  // src/parser/html.ts
+  AST.prototype.html = function() {
+    return this.map(render).join("");
+  };
+  function render(node) {
+    switch (node.type) {
+      case "text":
+        return `<span class="md-line">${renderInlines(node.children)}</span>`;
+      case "hr":
+        return "<hr>";
+      case "break":
+        return "<br>";
+      case "heading":
+        return `<span class="md-h${node.level}">${renderInlines(node.children)}</span>`;
+      case "blockquote":
+        return renderBlockquote(node);
+      case "codeBlock":
+        return renderCodeBlock(node.value, node.lang ?? "");
+      case "html":
+        return node.value.replace(REGEX_HTML_SCRIPT, "").replace(REGEX_HTML_EVENT, "").replace(REGEX_HTML_URL, "");
+      case "table":
+        return renderTable(node);
+      case "list":
+        return renderList(node);
+      case "footnotes":
+        return renderFootnote(node);
+      default:
+        return "";
+    }
+  }
+  function renderInlines(nodes) {
+    return nodes.map(renderInline).join("");
+  }
+  function renderBlockquote(node) {
+    const children = node.children.map(render).join("\n");
+    if (!node.tag) {
+      return `<blockquote class="md-quote">${children}</blockquote>`;
+    }
+    const title = node.tag[0].toUpperCase() + node.tag.slice(1);
+    return `<blockquote class="md-quote md-alert md-alert-${node.tag}"><span class="md-alert-title">${title}</span>${children}</blockquote>`;
+  }
+  function renderCodeBlock(value, lang) {
+    const code = codeBlockHTML(value, lang);
+    if (lang === "mermaid") {
+      return `<div class="md-mermaid"><pre class="mermaid">${escapeHTML(value)}</pre>${code}</div>`;
+    }
+    if (lang === "math") {
+      return `<div class="md-latex"><div class="md-math">${escapeHTML(value)}</div>${code}</div>`;
+    }
+    if (lang === "chartjs") {
+      let config;
+      try {
+        config = JSON.parse(value);
+      } catch {
+        return code;
+      }
+      const isRecord = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
+      if (!isRecord(config) || typeof config.type !== "string" || !isRecord(config.data)) {
+        return code;
+      }
+      const chart = escapeAttr(JSON.stringify({ type: config.type, data: config.data }));
+      return `<div class="md-chart"><canvas data-chart="${chart}"></canvas>${code}</div>`;
+    }
+    return code;
+  }
+  function codeBlockHTML(value, lang) {
+    const rows = value.split("\n");
+    const indent = Math.floor(LeadingWhitespace(rows[0]).width / PARSE_OPTIONS.indent) * PARSE_OPTIONS.indent;
+    const items = rows.map((row) => `<li>${escapeHTML(StripIndent(row, indent))}</li>`).join("");
+    const name = lang ? ` name="${escapeAttr(lang)}"` : "";
+    const langClass = CODE_TYPES.includes(lang) ? ` class="language-${lang}"` : "";
+    return `<pre class="prettyprint"${name}><code${langClass}${name}><ol>${items}</ol></code><button class="copy"></button></pre>`;
+  }
+  function renderTable(node) {
+    const [head, ...rows] = node.children;
+    const renderRow = (row) => {
+      const tag = row.header ? "th" : "td";
+      const cells = row.children.map((cell, k) => {
+        const align = node.align[k];
+        return `<${tag}${align ? ` style="text-align:${align}"` : ""}>${renderInlines(cell.children)}</${tag}>`;
+      });
+      return `<tr>${cells.join("")}</tr>`;
+    };
+    return `<div class="md-table-wrap"><table class="md-table"><thead>${renderRow(head)}</thead><tbody>${rows.map(renderRow).join("")}</tbody></table></div>`;
+  }
+  function renderList(node) {
+    const tag = node.ordered ? "ol" : "ul";
+    return `<${tag} class="md-list">${node.children.map(renderListItem).join("")}</${tag}>`;
+  }
+  function renderListItem(item) {
+    const children = item.children.map(render).join("\n");
+    if (item.checked === void 0) {
+      return `<li>${children}</li>`;
+    }
+    return `<li class="md-task"><input type="checkbox" disabled${item.checked ? " checked" : ""}>${children}</li>`;
+  }
+  function renderFootnote(node) {
+    const items = node.children.map((footnote) => `<li id="md-fn-${footnote.index}">${footnote.children.map(render).join("\n")}</li>`);
+    return `<section class="md-footnotes"><ol>${items.join("")}</ol></section>`;
+  }
+  function renderInline(node) {
+    switch (node.type) {
+      case "text":
+        return escapeHTML(node.value);
+      case "code":
+        return `<code>${escapeHTML(node.value)}</code>`;
+      case "math":
+        return `<span class="md-math-inline">${escapeHTML(node.value)}</span>`;
+      case "b":
+        return `<span class="md-bold">${renderInlines(node.children)}</span>`;
+      case "em":
+      case "del":
+      case "mark":
+      case "sub":
+      case "sup":
+        return `<${node.type}>${renderInlines(node.children)}</${node.type}>`;
+      case "footnoteRef":
+        return `<sup class="md-footnote-ref"><a href="#md-fn-${node.index}">${node.index}</a></sup>`;
+      case "link":
+        return renderLink(node);
+      default:
+        return "";
+    }
+  }
+  function renderLink(node) {
+    const children = renderInlines(node.children);
+    if (node.tag === "file") {
+      return `<a class="md-link md-file-link" data-path="${escapeAttr(node.href)}">${children}</a>`;
+    }
+    const title = node.title ? ` title="${escapeAttr(node.title)}"` : "";
+    if (node.tag === "image" || node.tag === "video") {
+      const style = [node.width && `width:${node.width}`, node.height && `height:${node.height}`].filter(Boolean);
+      const styleAttr = style.length ? ` style="${escapeAttr(style.join(";"))}"` : "";
+      if (node.tag === "video") {
+        const type = REGEX_MD_VIDEO_MOV.test(node.href) ? "video/quicktime" : "video/mp4";
+        return `<video class="md-img" controls${title}${styleAttr}><source src="${escapeAttr(node.href)}" type="${type}"></video>`;
+      }
+      const alt = node.children.map((child) => "value" in child ? child.value : "").join("");
+      return `<img class="md-img" src="${escapeAttr(node.href)}" alt="${escapeAttr(alt)}"${title}${styleAttr}>`;
+    }
+    const link = `<a href="${escapeAttr(node.href)}"${title} target="_blank" rel="noopener" class="md-link">${children}</a>`;
+    if (node.tag === "youtube") {
+      return `${link}<iframe class="md-embed" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube.com/embed/${node.href.match(REGEX_YOUTUBE)[1]}" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+    }
+    if (node.tag === "vimeo") {
+      return `${link}<iframe class="md-embed" loading="lazy" src="https://player.vimeo.com/video/${node.href.match(REGEX_VIMEO)[1]}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+    }
+    return link;
+  }
+  function escapeHTML(text) {
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  }
+  function escapeAttr(text) {
+    return escapeHTML(text).replace(/"/g, "&quot;");
+  }
+
   // src/parser/tableBlock.ts
   function ParseTableBlock(lines, i) {
     const line = lines[i];
@@ -561,9 +750,108 @@ var NewParser = (() => {
     return lineTrim.split("|").map((cell) => cell.trim());
   }
 
-  // src/parser/types.ts
-  var AST = class extends Array {
-  };
+  // src/parser/refresh.ts
+  var deps = globalThis;
+  var mermaidReady = false;
+  var copyHandler = null;
+  function OnCopyClick(handler) {
+    copyHandler = handler;
+  }
+  function Refresh(container) {
+    if (typeof document === "undefined") {
+      return Promise.resolve();
+    }
+    const root = container ?? document;
+    bindCopy(root);
+    renderChart(root);
+    renderLatex(root);
+    deps.PR?.prettyPrint();
+    return renderMermaid(root);
+  }
+  function bindCopy(root) {
+    for (const e of root.querySelectorAll("pre.prettyprint button.copy")) {
+      e.onclick = async () => {
+        const pre = e.parentElement;
+        const text = [...pre.querySelectorAll("li")].map((li) => li.textContent).join("\n");
+        let success = true;
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch (err) {
+          console.error(`[Denied] clipboard: ${err instanceof Error ? err.message : err}`);
+          success = false;
+        }
+        copyHandler?.(success, pre);
+      };
+    }
+  }
+  function renderChart(root) {
+    const Chart = deps.Chart;
+    if (!Chart) {
+      return;
+    }
+    for (const e of Object.values(Chart.instances)) {
+      if (e.canvas.isConnected) {
+        continue;
+      }
+      e.destroy();
+    }
+    for (const e of root.querySelectorAll(".md-chart canvas")) {
+      try {
+        new Chart(e, JSON.parse(e.dataset.chart ?? ""));
+      } catch {
+        replaceWithCode(e.parentElement, "pre");
+      }
+    }
+  }
+  function renderLatex(root) {
+    const katex = deps.katex;
+    if (!katex) {
+      return;
+    }
+    for (const e of root.querySelectorAll(".md-math")) {
+      try {
+        katex.render(e.textContent ?? "", e, { displayMode: true, throwOnError: true });
+      } catch {
+        replaceWithCode(e.parentElement, "pre.prettyprint");
+      }
+    }
+    for (const e of root.querySelectorAll(".md-math-inline")) {
+      try {
+        katex.render(e.textContent ?? "", e, { displayMode: false, throwOnError: true });
+      } catch {
+        e.replaceWith(`$${e.textContent}$`);
+      }
+    }
+  }
+  async function renderMermaid(root) {
+    const mermaid = deps.mermaid;
+    if (!mermaid) {
+      return;
+    }
+    if (!mermaidReady) {
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "default"
+      });
+      mermaidReady = true;
+    }
+    const nodes = await Promise.all(
+      [...root.querySelectorAll("pre.mermaid")].map(async (pre) => {
+        if (await mermaid.parse(pre.textContent ?? "", { suppressErrors: true })) {
+          return pre;
+        }
+        replaceWithCode(pre.parentElement, "pre.prettyprint");
+        return null;
+      })
+    );
+    await mermaid.run({ nodes: nodes.filter((node) => node !== null), suppressErrors: true });
+  }
+  function replaceWithCode(wrapper, selector) {
+    const code = wrapper?.querySelector(selector);
+    if (wrapper && code) {
+      wrapper.replaceWith(code);
+    }
+  }
 
   // src/parser/index.ts
   var DEFAULT_ENDPOINT = {

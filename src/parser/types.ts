@@ -18,6 +18,24 @@ export interface DependencyEnable {
   chartjs?: boolean;
 }
 
+export interface Dependency {
+  Chart?: {
+    new (canvas: HTMLCanvasElement, config: unknown): unknown;
+    instances: Record<string, { canvas: HTMLCanvasElement; destroy(): void }>;
+  };
+  katex?: {
+    render(tex: string, element: HTMLElement, options: { displayMode: boolean; throwOnError: boolean }): void;
+  };
+  PR?: {
+    prettyPrint(): void;
+  };
+  mermaid?: {
+    initialize(config: { startOnLoad: boolean; theme: string }): void;
+    parse(text: string, options: { suppressErrors: boolean }): Promise<unknown>;
+    run(options: { nodes: HTMLElement[]; suppressErrors: boolean }): Promise<void>;
+  };
+}
+
 export type BlockNode =
   | { type: "codeBlock"; lang?: string; value: string }
   | { type: "hr" }
@@ -93,5 +111,9 @@ export type TableAlign = "left" | "center" | "right";
 export type LinkTag = "youtube" | "vimeo" | "file" | "image" | "video";
 
 export type MarkType = "b" | "em" | "del" | "mark" | "sub" | "sup";
+
+export interface AST {
+  html(): string;
+}
 
 export class AST extends Array<BlockNode> {}

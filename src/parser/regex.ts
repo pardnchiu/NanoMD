@@ -59,3 +59,32 @@ export const REGEX_MD_INLINE = new RegExp(
 );
 export const MD_INLINE_TYPES: (MarkType | "bem" | null)[] = [null, "bem", "bem", "b", "em", "b", "em", "del", "mark", "sub", "sup"];
 export const REGEX_MD_ESCAPE = /\\([!-\/:-@\[-`{-~])/g; // \* => *, \` => `, \[ => [, \\ => \
+export const REGEX_HTML_SCRIPT =
+  /<\s*(script|style|iframe|object|embed|form|link|meta|base)\b[\s\S]*?<\s*\/\s*\1\s*>|<\s*\/?\s*(script|style|iframe|object|embed|form|link|meta|base)\b[^>]*>/gi;
+export const REGEX_HTML_EVENT = /\son[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi;
+export const REGEX_HTML_URL =
+  /\s(href|src|xlink:href|action|formaction)\s*=\s*(?:"\s*(?:javascript|vbscript|data:text\/html)[^"]*"|'\s*(?:javascript|vbscript|data:text\/html)[^']*'|(?:javascript|vbscript|data:text\/html)[^\s>]*)/gi;
+export const REGEX_MD_VIDEO_MOV = /\.mov$/i;
+export const CODE_TYPES = [
+  "javascript",
+  "js",
+  "ts",
+  "html",
+  "css",
+  "xml",
+  "json",
+  "sql",
+  "java",
+  "python",
+  "ruby",
+  "php",
+  "cpp",
+  "csharp",
+  "swift",
+  "typescript",
+  "kotlin",
+  "go",
+  "rust",
+  "perl",
+  "bash",
+];
