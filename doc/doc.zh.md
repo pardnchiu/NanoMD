@@ -1,36 +1,41 @@
 # NanoMD - 技術文件
 
+最後更新：2026-10-20
+
 > 返回 [README](./README.zh.md)
 
 ## 前置需求
 
-- 支援 ES2022 私有類別欄位（`#field`）的現代瀏覽器：Chrome、Firefox、Safari、Edge
-- 可連線至 `cdn.jsdelivr.net`、`fonts.googleapis.com`、`fonts.gstatic.com`：載入時會自動插入 Material Symbols、Mermaid 11.4.1、code-prettify 與 `NanoMD.css`
-- Node.js 僅在從原始碼建置時需要
+- 支援 ES2022 與 RegExp lookbehind、`\p{L}` 的瀏覽器：Chrome、Edge、Firefox、Safari 16.4+
+- 在 Node.js 使用 ESM 時需 Node.js 22 以上；Node／Worker 只需要 `Parse()` 與 `html()`，不需要 DOM
+- 啟用 Mermaid、KaTeX、Chart.js、code-prettify 時需可連線至 `cdn.jsdelivr.net`（可用 `Init()` 的 endpoint 改為自架網址）
+- 從原始碼建置時需 Node.js 22 以上
 
 ## 安裝
 
-### CDN
+### CDN（IIFE）
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@latest/dist/NanoMD.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@2.0.0/dist/parser.js"></script>
 ```
 
-`NanoMD.js` 會自行把 `NanoMD.css` 插入 `<head>`，不需要額外的 `<link>`。`MDEditor`、`MDViewer`、`MDParser` 三個類別掛在 `window` 上。
+載入後提供全域 `MDParser`，並自動在 `<head>` 插入與 `parser.js` 同目錄的 `parser.css`。
 
-### npm
+### npm（ESM）
 
 ```bash
 npm i @pardnchiu/nanomd
 ```
 
-### ESM
-
 ```javascript
-import { MDEditor, MDViewer, MDParser } from "@pardnchiu/nanomd";
+import { MDParser } from "@pardnchiu/nanomd";
 ```
 
-`dist/NanoMD.esm.js` 是同一份 bundle 加上 `export`，另提供小寫別名 `editor`（= `MDEditor`）與 `viewer`（= `MDViewer`）。
+`dist/parser.esm.js` 同時提供具名匯出（`Parse`、`Init`、`Refresh`、`OnCopyClick`...）。打包工具會改變 `import.meta.url`，若自動載入的 `parser.css` 找不到，請自行引入：
+
+```javascript
+import "@pardnchiu/nanomd/parser.css";
+```
 
 ### 從原始碼建置
 
@@ -41,220 +46,185 @@ npm install
 npm run build:once
 ```
 
-`build:once` 產生 `dist/NanoMD.debug.js`、`dist/NanoMD.js`（terser 壓縮）與 `dist/NanoMD.esm.js`；`npm run build` 監看 `src/` 自動重建，`npm run sass` 監看並編譯 SCSS。
+`build:once` 依序執行型別檢查、產出 `dist/parser.js`（IIFE 壓縮）、`dist/parser.debug.js`（IIFE 未壓縮）、`dist/parser.esm.js`（ESM）、`dist/types/`（`.d.ts`）與 `dist/parser.css`；`npm run build` 監看 `src/parser/*.ts` 與 `src/sass/*.scss` 並自動重建。
+
+## 設定
+
+### Init 選項
+
+`Init(options, endpoint)` 設定縮排寬度並載入外部依賴，回傳的 Promise 在所有依賴載入完成後 resolve。
+
+| 選項 | 型別 | 預設 | 說明 |
+|---|---|---|---|
+| `indent` | `number` | `4` | tab 換算的欄寬，影響巢狀清單與程式碼區塊縮排對齊 |
+| `fileEndpoint` | `string` | `""` | 點擊檔案路徑時呼叫的網址，`{filepath}` 會替換為編碼後的路徑（如 `http://localhost:3000/v1/file/open?path={filepath}`）；未設定或缺少 `{filepath}` 時，路徑輸出為純文字 |
+| `enable.mermaid` | `boolean` | `false` | 載入 Mermaid，渲染 ` ```mermaid ` 區塊 |
+| `enable.latex` | `boolean` | `false` | 載入 KaTeX（JS＋CSS），渲染 ` ```math ` 與 `$...$` |
+| `enable.highlight` | `boolean` | `false` | 載入 code-prettify，為程式碼區塊上色 |
+| `enable.chartjs` | `boolean` | `false` | 載入 Chart.js，渲染 ` ```chartjs ` 區塊 |
+
+### 依賴網址
+
+第二個參數可覆寫任一依賴網址，未指定的沿用 `DEFAULT_ENDPOINT`：
+
+| 鍵 | 預設 |
+|---|---|
+| `mermaidjs` | `https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js` |
+| `katexjs` | `https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js` |
+| `katexcss` | `https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css` |
+| `googleprettifyjs` | `https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js` |
+| `chartjs` | `https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js` |
+
+KaTeX 的字型以相對路徑寫在 CSS 內，自架時 `fonts/` 需與 `katex.min.css` 放在同一層，且 `katexjs`、`katexcss` 應指向同一版本。
+
+### 樣式
+
+| 項目 | 說明 |
+|---|---|
+| 容器 | 輸出 HTML 放在 `class="nanomd"` 的元素內才會套用樣式 |
+| 深色模式 | 預設跟隨 `prefers-color-scheme`；`data-mode="dark"` 強制深色、`data-mode="light"` 強制淺色 |
+| 撐滿父元素 | `data-fill="1"` 讓容器絕對定位並填滿最近的定位祖先 |
+| 依賴區塊 | mermaid／math／chartjs 未經 `Refresh` 渲染時只顯示一般程式碼區塊；渲染成功後外殼標上 `data-rendered`，改顯示圖表、公式或圖形 |
+| 主題變數 | 在 `.nanomd` 上覆寫 `--text`、`--accent`、`--code-bg`、`--mark`、`--alert-note`... 等 CSS 變數 |
 
 ## 使用方式
 
-### 基礎：只渲染 Markdown
+### 基礎：渲染一段 Markdown
 
 ```html
-<section id="viewer"></section>
+<div id="preview" class="nanomd"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@latest/dist/NanoMD.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@2.0.0/dist/parser.js"></script>
 <script>
-const viewer = new MDViewer({
-    id: "viewer",
-    emptyContent: "# Hello\n\n這是 **NanoMD**。",
-    style: { mode: "auto", fill: false }
-});
+  const preview = document.getElementById("preview");
+  preview.innerHTML = MDParser.Parse("# Hello\n\n這是 **NanoMD**。").html();
 </script>
 ```
 
-### 基礎：編輯器與預覽器
-
-```html
-<div style="position: relative; height: 480px;"><section id="editor"></section></div>
-<div style="position: relative; height: 480px;"><section id="viewer"></section></div>
-
-<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@latest/dist/NanoMD.js"></script>
-<script>
-const editor = new MDEditor({
-    id: "editor",
-    defaultContent: "# Hello\n\nStart editing..."
-});
-
-const viewer = new MDViewer({
-    id: "viewer",
-    sync: { editor: editor, delay: 300, scroll: true }
-});
-</script>
-```
-
-`style.fill` 預設為 `true`，容器會以絕對定位填滿父元素，因此父元素需設定 `position` 與高度。
-
-### 進階：只轉換字串
+### 基礎：在 Node.js 輸出 HTML（SSR）
 
 ```javascript
-const parser = new MDParser({ standard: false });
-const html = parser.parse("```js\nconst a = 1;\n```\n\n> [!TIP]\n> 擴充語法");
+import { MDParser } from "@pardnchiu/nanomd";
 
-document.querySelector("#out").innerHTML = html;
-if (typeof PR !== "undefined") {
-    PR.prettyPrint();
+const html = MDParser.Parse("## 標題\n\n- [x] 完成\n- [ ] 待辦").html();
+console.log(html);
+```
+
+Node 沒有 DOM，`Init()` 只會設定 `indent`，不會載入任何依賴；`Refresh()` 直接回傳。
+
+### 進階：啟用 Mermaid、KaTeX、Chart.js 與上色
+
+```javascript
+import { MDParser } from "@pardnchiu/nanomd";
+
+const preview = document.getElementById("preview");
+
+function render(markdown) {
+  preview.innerHTML = MDParser.Parse(markdown).html();
+  return MDParser.Refresh(preview);
 }
+
+render(source);
+MDParser.Init({ enable: { mermaid: true, latex: true, highlight: true, chartjs: true } })
+  .then(() => render(source))
+  .catch((err) => console.error(err.message));
 ```
 
-`MDParser` 預設 `standard: true`，會略過 fenced code block、Mermaid、標記／上下標與提示框；要與 `MDViewer` 輸出一致需傳 `standard: false`。輸出不會過濾 HTML，寫入 `innerHTML` 前請自行處理不受信任的內容。
+依賴載入失敗時，Promise 以 `[Unavailable] <url>: failed to load` reject；尚未載入的依賴不會被渲染，對應區塊只顯示一般程式碼區塊。
 
-### 進階：儲存與圖片上傳
+### 進階：即時預覽（防抖）
 
 ```javascript
-const editor = new MDEditor({
-    id: "editor",
-    event: {
-        save: async (text) => {
-            try {
-                const res = await fetch("/api/save", { method: "POST", body: text });
-                if (!res.ok) {
-                    throw new Error(`HTTP ${res.status}`);
-                }
-            } catch (err) {
-                console.error("儲存失敗", err);
-            }
-        },
-        upload: async () => {
-            try {
-                const res = await fetch("/api/upload", { method: "POST" });
-                if (!res.ok) {
-                    throw new Error(`HTTP ${res.status}`);
-                }
-                const { url, name } = await res.json();
-                return { href: url, alt: name };
-            } catch (err) {
-                console.error("上傳失敗", err);
-                return { href: "", alt: "" };
-            }
-        }
-    }
+const input = document.querySelector("textarea");
+let timer;
+
+input.addEventListener("input", () => {
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    preview.innerHTML = MDParser.Parse(input.value).html();
+    MDParser.Refresh(preview).catch((err) => console.error(err.message));
+  }, 300);
 });
 ```
 
-`Cmd/Ctrl+S` 觸發 `save()`；設定 `event.upload` 後工具列出現上傳按鈕。`upload()` 的 rejection 不會被攔截，需自行處理；回傳空的 `href` 時不插入任何內容。
-
-### 進階：跟隨系統主題與 Hashtag
+### 進階：取得 AST 交給其他渲染器
 
 ```javascript
-const viewer = new MDViewer({
-    id: "viewer",
-    sync: { editor: editor },
-    hashtag: { path: "/search?tag=", target: "_blank" }
-});
+const ast = MDParser.Parse(source);
+const json = JSON.stringify(ast);
+```
 
-matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
-    const mode = e.matches ? "dark" : "light";
-    editor.changeMode(mode);
-    viewer.changeMode(mode);
+`ast` 是陣列（繼承 `Array`），`html()` 掛在 prototype 上，不會出現在 JSON 內。
+
+### 進階：複製按鈕回饋
+
+```javascript
+MDParser.OnCopyClick((success, pre) => {
+  pre.classList.add(success ? "success" : "error");
+  setTimeout(() => pre.classList.remove("success", "error"), 1000);
 });
 ```
 
-`style.mode: "auto"` 只在 bundle 載入時讀取一次系統偏好；之後要跟隨切換需自行監聽並呼叫兩邊的 `changeMode()`。
-
-### 進階：匯入與匯出
-
-```html
-<input type="file" accept=".md" onchange="editor.openfile(this.files[0])">
-<button onclick="editor.download('md')">匯出 Markdown</button>
-<button onclick="editor.download('html')">匯出 HTML</button>
-```
+`parser.css` 依 `pre` 上的 `success` class 把按鈕文字從 `copy` 換成 `copied`，`success`／`error` 也會切換程式碼底色。
 
 ## API 參考
 
-### MDEditor 選項
+### 匯出
 
-| 選項 | 型別 | 預設 | 說明 |
-|---|---|---|---|
-| `id` | `string` | 無 | 容器元素 ID；找不到時建立未掛載的 `<section>`，從 `editor.body` 取得後自行插入 |
-| `defaultContent` | `string` | `""` | 初始 Markdown |
-| `hotKey` | `boolean` | `true` | 啟用格式化快捷鍵；復原、儲存、Tab 等編輯鍵不受影響 |
-| `autosave` | `boolean` | `true` | 輸入後更新預覽；`false` 時只有 `save()` 會更新 |
-| `preventRefresh` | `boolean` | `false` | 註冊 `beforeunload` 並攔截 `F5`、`Cmd/Ctrl+R` |
-| `tabPin` | `boolean` | `false` | 工具列常駐顯示 |
-| `style.mode` | `string` | `"auto"` | `"auto"`／`"light"`／`"dark"` |
-| `style.fill` | `boolean` | `true` | 填滿父元素 |
-| `style.fontFamily` | `string` | `"'Roboto Mono', monospace"` | 編輯器字型 |
-| `style.showRow` | `boolean` | `true` | 顯示行號 |
-| `style.placeholder.text` | `string` | `"Type here ..."` | 空白提示文字 |
-| `style.placeholder.color` | `string` | `"#bfbfbf"` | 提示文字顏色 |
-| `style.focus.backgroundColor` | `string` | `"#0000ff1a"` | 目前所在行背景 |
-| `style.focus.color` | `string` | `"#0000ffff"` | 目前所在行文字與游標顏色 |
-| `event.save` | `function(text)` | 無 | 儲存回呼 |
-| `event.upload` | `async function()` | 無 | 回傳 `{ href, alt }`，設定後工具列顯示上傳按鈕 |
-
-### MDEditor 方法與屬性
-
-| 名稱 | 說明 |
-|---|---|
-| `body` | 編輯器容器（`contentEditable`），每一行是一個 `<div>` |
-| `text` | 唯讀，所有行的文字以 `\n` 連接 |
-| `viewer` | 綁定的 `MDViewer`，由預覽器的 `sync.editor` 自動設定 |
-| `init(text?, withFocus = true, set = true)` | 以 `text` 重建所有行；不會自動更新預覽 |
-| `clear()` | 清空並更新預覽 |
-| `selectAll()` | 選取全部內容 |
-| `save()` | 依 `autosave` 與 `event.save` 執行儲存流程；未設定 `event.save` 時開啟匯出對話框 |
-| `unsave()` | 將編輯器與預覽器的 `data-saved` 設為 `0` |
-| `undo()`／`redo()` | 復原／重做 |
-| `openfile(file)` | 以 `FileReader` 讀入 `File` 並更新預覽 |
-| `download(type = "md")` | 匯出 `"md"` 或 `"html"` 檔案 |
-| `changeMode(mode = "light")` | 直接寫入 `data-mode` |
-| `bold(event)`、`italic(event)`、`strikethrough(event)`、`underline(event)`、`marker(event)`、`sup(event)`、`sub(event)`、`code(event)` | 插入行內格式；`event.metaKey` 或 `event.ctrlKey` 為真時輸出 HTML 標籤，否則輸出 Markdown 標記；從程式呼叫請傳 `{}` |
-| `heading(event, num)` | `num` 為 `1`-`6` 插入標題，`0` 移除既有 `#` |
-| `blockquote()`、`ul()`、`ol()` | 對選取的每一行加上 `> `、`- `、`1. ` |
-| `link(title, href)` | 插入 `[title](href)` |
-| `image(src, alt, title)` | 插入 `![title 或 alt](src)` |
-
-### MDViewer 選項
-
-| 選項 | 型別 | 預設 | 說明 |
-|---|---|---|---|
-| `id` | `string` | 無 | 容器元素 ID；找不到時建立未掛載的 `<section>` |
-| `emptyContent` | `string` | `""` | 沒有 `init()` 參數且編輯器無文字時渲染的 Markdown |
-| `style.mode` | `string` | `"auto"` | `"auto"`／`"light"`／`"dark"` |
-| `style.fill` | `boolean` | `true` | 填滿父元素 |
-| `style.fontFamily` | `string` | `"sans-serif"` | 預覽字型 |
-| `sync.editor` | `MDEditor` | `null` | 綁定的編輯器 |
-| `sync.delay` | `number` | `300` | 渲染延遲（毫秒）；`0` 視為 `300` |
-| `sync.scroll` | `boolean` | `false` | 編輯器滾輪同步捲動預覽器 |
-| `hashtag.path` | `string` | `""` | `#tag` 連結前綴；空字串不轉換 |
-| `hashtag.target` | `string` | `""` | `"_blank"` 開新分頁，其餘為 `_self` |
-
-### MDViewer 方法與屬性
-
-| 名稱 | 說明 |
-|---|---|
-| `body` | 預覽器容器 |
-| `editor` | 綁定的編輯器；可在建構後指定 |
-| `init(txt = "")` | 延遲 `sync.delay` 後渲染 `txt`、編輯器文字或 `emptyContent`，並執行程式碼高亮與 Mermaid |
-| `clear()` | 清空容器 |
-| `unsave()` | 將 `data-saved` 設為 `0` |
-| `changeMode(mode = "light")` | 直接寫入 `data-mode` |
-
-### MDParser
-
-| 名稱 | 說明 |
-|---|---|
-| `new MDParser({ standard = true, text = "" })` | `standard` 為 `true` 時只處理標準語法；`text` 為 `parse()` 無參數時使用的預設文字 |
-| `parse(text?)` | 回傳 HTML 字串；不建立 DOM 容器，但仍需瀏覽器環境 |
-
-### 快捷鍵
-
-| 組合 | 動作 | 受 `hotKey` 控制 |
+| 名稱 | 簽章 | 說明 |
 |---|---|---|
-| `Cmd/Ctrl+B`／`I`／`U`／`M`／`K` | 粗體／斜體／底線／標記／程式碼 | 是 |
-| `Cmd/Ctrl+Shift+X` | 刪除線 | 是 |
-| `Cmd/Ctrl+↑`／`↓` | 上標／下標 | 是 |
-| `Cmd/Ctrl+Z`／`Cmd/Ctrl+Shift+Z` | 復原／重做 | 否 |
-| `Cmd/Ctrl+S` | `save()` | 否 |
-| `Cmd/Ctrl+A` | 只選取編輯器內容 | 否 |
-| `Tab`／`Cmd/Ctrl+]` | 插入 4 個空白／每個選取行行首縮排 | 否 |
+| `MDParser` | 命名空間 | 以下所有匯出的集合；IIFE 的全域名稱 |
+| `Parse` | `(content: string) => AST` | 解析 Markdown，回傳 AST |
+| `AST.html` | `() => string` | 將 AST 輸出為 HTML 字串，含跳脫與 raw HTML 清洗 |
+| `Init` | `(options?: InitOptions, endpoint?: DependencyEndpoint) => Promise<void[]>` | 設定 `indent` 並載入啟用的依賴 |
+| `Refresh` | `(container?: ParentNode) => Promise<void>` | 在容器內綁定複製按鈕與檔案連結點擊、渲染 Chart.js、KaTeX、prettify、Mermaid；未傳入時處理整份 `document`；容器尚未放進頁面時不處理並記錄 `[Invalid]` |
+| `OnCopyClick` | `(handler: (success: boolean, pre: HTMLElement) => void) => void` | 註冊複製按鈕的結果回呼；只保留最後一次註冊 |
+| `DEFAULT_ENDPOINT` | `Required<DependencyEndpoint>` | 依賴的預設網址 |
+| `PARSE_OPTIONS` | `{ indent: number }` | 目前的解析設定 |
+| `ParseLines` | `(lines: string[], nested?: boolean) => BlockNode[]` | 區塊解析器本體，不處理註腳與參照連結 |
 
-### 已知限制（v1.11.6）
+### 區塊節點（BlockNode）
 
-| 現象 | 原因 |
+| `type` | 欄位 | 對應語法 |
+|---|---|---|
+| `text` | `children: InlineNode[]` | 一般段落；相鄰行以值為 `"\n"` 的 `text` 節點連接 |
+| `heading` | `level`、`children` | `#`～`######`、Setext（`===`／`---`） |
+| `blockquote` | `tag?`、`children: BlockNode[]` | `>`；`tag` 為 `note`／`tip`／`important`／`warning`／`caution` |
+| `list` | `ordered`、`children: ListItem[]` | `-`、`*`、`1.`；`ListItem.checked` 對應任務清單 |
+| `table` | `align`、`children: TableRow[]` | GFM 表格，含 `:---`／`:---:`／`---:` 對齊 |
+| `codeBlock` | `lang?`、`value` | ` ``` `／`~~~`（3 個以上、可巢狀）；`lang` 為 `mermaid`／`math`／`chartjs` 時另行渲染 |
+| `html` | `value` | 以 HTML 標籤開頭的行 |
+| `hr` | — | `***`、`---`、`___` |
+| `break` | — | 空行，連續空行合併為一個 |
+| `footnotes` | `children: Footnote[]` | 文末註腳區，依首次引用順序編號 |
+
+### 行內節點（InlineNode）
+
+| `type` | 欄位 | 對應語法 |
+|---|---|---|
+| `text` | `value` | 純文字 |
+| `b`、`em`、`del`、`mark`、`sub`、`sup` | `children` | `**`／`__`、`*`／`_`、`~~`、`==`、`~x~`、`^x^`；`***` 為 `b` 包 `em` |
+| `code` | `value` | 任意長度反引號，開頭與結尾數量相同 |
+| `math` | `value` | `$...$` |
+| `link` | `href`、`tag?`、`title?`、`width?`、`height?`、`children` | 行內與參照式連結、相對路徑、裸網址、檔案路徑、`![]()` 圖片與影片；`tag` 為 `image`／`video`／`youtube`／`vimeo`／`file` |
+| `footnoteRef` | `id`、`index` | `[^id]` |
+
+圖片尺寸寫在 `![alt](src)` 後：`(300x200)`、`(50%x)`、`(x120)`、`(120)`；副檔名 `.mp4`／`.mov` 輸出為 `<video>`。
+
+### 主要 CSS class
+
+| class | 元素 |
 |---|---|
-| 文字中的 `$` 輸出成 `@dollar@` | 轉換管線還原表對應錯誤 |
-| `MDViewer` 未設 `hashtag.path` 時不產生 YouTube／Vimeo 預覽卡 | `transToHTML()` 把 hashtag path 傳入 `setLink()` 的 `isDefault` 參數；`MDParser` 不受影響 |
-| 經 `init(text)` 建立的行（`defaultContent`、`openfile()`、`undo()`／`redo()`）在預覽中可能無法套用標記、上下標與提示框 | `init()` 先 `escapeHTML()` 再以純文字寫入，行內存的是字面的 `&nbsp;` |
-| Vimeo 連結會阻塞主執行緒 | 縮圖以同步 XHR 取得 |
+| `md-line` | 段落 |
+| `md-h1`～`md-h6` | 標題 |
+| `md-bold` | 粗體 |
+| `md-quote`、`md-alert`、`md-alert-{tag}`、`md-alert-title` | 引言與提示框 |
+| `md-list`、`md-task` | 清單與任務項目 |
+| `md-table-wrap`、`md-table` | 表格 |
+| `md-link`、`md-file-link`、`md-img`、`md-embed` | 連結、檔案連結（`data-path`，僅在設定 `fileEndpoint` 時輸出）、圖片／影片、內嵌播放器 |
+| `md-mermaid`、`md-latex`、`md-math`、`md-math-inline`、`md-chart` | 依賴渲染外殼 |
+| `md-footnote-ref`、`md-footnotes` | 註腳引用與註腳區（錨點 `#md-fn-{index}`） |
+| `prettyprint`、`copy` | 程式碼區塊與複製按鈕 |
 
 ***
 

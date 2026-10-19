@@ -1,25 +1,36 @@
 {
   "name": "@pardnchiu/nanomd",
-  "version": "1.11.6",
-  "description": "NanoMD is a lightweight Markdown editing and viewing library built on pure JavaScript and native APIs. Can be easily embedded into websites, offers rich features, and supports real-time previewing.",
-  "main": "dist/NanoMD.js",
-  "module": "dist/NanoMD.esm.js",
-  "types": "src/interface.ts",
+  "version": "2.0.0",
+  "description": "A TypeScript Markdown parser with a JSON AST, on-demand Mermaid/KaTeX/Chart.js rendering, and sanitized HTML output",
+  "type": "module",
+  "main": "dist/parser.js",
+  "module": "dist/parser.esm.js",
+  "types": "dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/parser.esm.js",
+      "default": "./dist/parser.esm.js"
+    },
+    "./parser.css": "./dist/parser.css"
+  },
   "scripts": {
-    "build:debug": "npx terser src/*.js src/**/*.js -o dist/NanoMD.debug.js",
-    "build:min": "npx terser src/*.js src/**/*.js -c -m -o dist/NanoMD.js --config-file terser.config.json",
-    "build:esm": "npx terser src/*.js src/**/*.js -c -m -o dist/NanoMD.esm.js --config-file terser.config.json && echo 'export const editor = window.MDEditor; export const MDEditor = window.MDEditor; export const viewer = window.MDViewer; export const MDViewer = window.MDViewer; export const MDParser = window.MDParser;' >> dist/NanoMD.esm.js",
-    "build:once": "npm-run-all build:debug build:min build:esm",
-    "build": "chokidar src/*.js src/**/*.js src/**/**/*.js -c 'npm run build:once'",
-    "sass:library": "sass src/sass:dist/ -w --style compressed --no-source-map",
-    "sass": "npm-run-all sass:library"
+    "build:check": "tsc -p src/parser",
+    "build:iife": "esbuild src/parser/index.ts --bundle --format=iife --global-name=MDParser --target=es2022 --minify --outfile=dist/parser.js --log-override:empty-import-meta=silent",
+    "build:debug": "esbuild src/parser/index.ts --bundle --format=iife --global-name=MDParser --target=es2022 --outfile=dist/parser.debug.js --log-override:empty-import-meta=silent",
+    "build:esm": "esbuild src/parser/index.ts --bundle --format=esm --target=es2022 --minify --outfile=dist/parser.esm.js",
+    "build:types": "tsc -p src/parser --noEmit false --declaration --emitDeclarationOnly --outDir dist/types",
+    "build:css": "sass src/sass:dist/ --style compressed --no-source-map",
+    "build:once": "npm-run-all build:check build:iife build:debug build:esm build:types build:css",
+    "build": "chokidar \"src/parser/*.ts\" \"src/sass/*.scss\" -c \"npm run build:once\""
   },
   "publishConfig": {
     "access": "public"
   },
   "files": [
     "dist",
-    "!dist/NanoMD.debug.js",
+    "!dist/parser.debug.js",
+    "!dist/test.html",
     "LICENSE",
     "README.md"
   ],
@@ -29,12 +40,15 @@
   },
   "keywords": [
     "markdown",
-    "markdown-editor",
-    "markdown-viewer",
     "markdown-parser",
-    "javascript-library",
-    "pure-javascript",
-    "native-api",
+    "markdown-to-html",
+    "markdown-ast",
+    "gfm",
+    "footnotes",
+    "mermaid",
+    "katex",
+    "chartjs",
+    "typescript",
     "邱敬幃",
     "Pardn Chiu",
     "pardnchiu"
@@ -52,8 +66,9 @@
   "homepage": "https://nanomd.pardn.io/",
   "devDependencies": {
     "chokidar-cli": "3.0.0",
+    "esbuild": "0.28.2",
     "npm-run-all": "^4.1.5",
     "sass": "1.62.0",
-    "terser": "5.31.3"
+    "typescript": "7.0.2"
   }
 }
