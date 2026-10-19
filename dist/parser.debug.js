@@ -748,10 +748,24 @@ var MDParser = (() => {
     if (lineTrim.startsWith("|")) {
       lineTrim = lineTrim.slice(1);
     }
-    if (lineTrim.endsWith("|")) {
+    if (lineTrim.endsWith("|") && !lineTrim.endsWith("\\|")) {
       lineTrim = lineTrim.slice(0, -1);
     }
-    return lineTrim.split("|").map((cell) => cell.trim());
+    const cells = [];
+    let cell = "";
+    for (let k = 0; k < lineTrim.length; k++) {
+      if (lineTrim[k] === "\\" && lineTrim[k + 1] === "|") {
+        cell += "|";
+        k++;
+      } else if (lineTrim[k] === "|") {
+        cells.push(cell.trim());
+        cell = "";
+      } else {
+        cell += lineTrim[k];
+      }
+    }
+    cells.push(cell.trim());
+    return cells;
   }
 
   // src/parser/refresh.ts
@@ -891,7 +905,8 @@ var MDParser = (() => {
 
   // src/parser/index.ts
   var import_meta = {};
-  var SCRIPT_URL = typeof document !== "undefined" && document.currentScript instanceof HTMLScriptElement ? document.currentScript.src : import_meta.url;
+  var SCRIPT_ELEMENT = typeof document !== "undefined" && document.currentScript instanceof HTMLScriptElement ? document.currentScript : null;
+  var SCRIPT_URL = SCRIPT_ELEMENT ? SCRIPT_ELEMENT.src : import_meta.url;
   var DEFAULT_ENDPOINT = {
     mermaidjs: "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js",
     katexjs: "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js",
@@ -904,7 +919,7 @@ var MDParser = (() => {
     fileEndpoint: ""
   };
   var insertedDependencies = /* @__PURE__ */ new Map();
-  if (typeof document !== "undefined" && SCRIPT_URL) {
+  if (typeof document !== "undefined" && SCRIPT_URL && SCRIPT_ELEMENT?.dataset.nanomdCss !== "off") {
     insertHead("style", new URL("parser.css", SCRIPT_URL).href).catch((err) => console.error(err.message));
   }
   function Init(options = {}, endpoint = {}) {

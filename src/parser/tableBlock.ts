@@ -62,8 +62,22 @@ function splitCells(line: string): string[] {
   if (lineTrim.startsWith("|")) {
     lineTrim = lineTrim.slice(1);
   }
-  if (lineTrim.endsWith("|")) {
+  if (lineTrim.endsWith("|") && !lineTrim.endsWith("\\|")) {
     lineTrim = lineTrim.slice(0, -1);
   }
-  return lineTrim.split("|").map((cell) => cell.trim());
+  const cells: string[] = [];
+  let cell = "";
+  for (let k = 0; k < lineTrim.length; k++) {
+    if (lineTrim[k] === "\\" && lineTrim[k + 1] === "|") {
+      cell += "|";
+      k++;
+    } else if (lineTrim[k] === "|") {
+      cells.push(cell.trim());
+      cell = "";
+    } else {
+      cell += lineTrim[k];
+    }
+  }
+  cells.push(cell.trim());
+  return cells;
 }
