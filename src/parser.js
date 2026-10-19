@@ -30,9 +30,10 @@ var NewParser = (() => {
 
   // src/parser/regex.ts
   var REGEX_HTML_DOM = /^\s*<\/?[A-Za-z][A-Za-z0-9-]*(?:\s[^<>]*)?\/?>/;
-  var REGEX_MD_CODE_BLOCK = /^```(\S*)$/;
-  var REGEX_MD_CODE_FENCE = /^\s*```/;
+  var REGEX_MD_CODE_BLOCK = /^(```|~~~)(\S*)$/;
+  var REGEX_MD_CODE_FENCE = /^\s*(```|~~~)/;
   var REGEX_MD_CODE_INLINE = /(?<!\\)`([^`\n]+)`/g;
+  var REGEX_MD_MATH_INLINE = /(?<![\\$])\$([^\s$](?:[^$\n]*[^\s$\\])?)\$(?![\d$])/g;
   var REGEX_MD_H = /^(#{1,6})\s+(.+)$/;
   var REGEX_MD_H1 = /^ {0,3}=+[ \t]*$/;
   var REGEX_MD_H2 = /^ {0,3}-+[ \t]*$/;
@@ -133,12 +134,12 @@ var NewParser = (() => {
     }
     const blockLines = [];
     let j = i + 1;
-    while (j < lines.length && lines[j].trim() !== "```") {
+    while (j < lines.length && lines[j].trim() !== fence[1]) {
       blockLines.push(lines[j]);
       j++;
     }
     const value = blockLines.join("\n");
-    const lang = fence[1].toLowerCase();
+    const lang = fence[2].toLowerCase();
     if (lang && j < lines.length) {
       return { node: { type: "codeBlock", lang, value }, next: j + 1 };
     }
@@ -253,7 +254,7 @@ var NewParser = (() => {
   }
 
   // src/parser/footnote.ts
-  var footnoteDefinitions = /* @__PURE__ */ new Map();
+  var footnoteMap = /* @__PURE__ */ new Map();
   function ParseFootnoteBlock(lines, i) {
     const match = lines[i].match(REGEX_MD_FOOTNOTE_DEF);
     if (!match) {
@@ -287,8 +288,8 @@ var NewParser = (() => {
       break;
     }
     const key = match[1].toLowerCase();
-    if (!footnoteDefinitions.has(key)) {
-      footnoteDefinitions.set(key, { id: match[1], children: ParseLines(contentLines, true) });
+    if (!footnoteMap.has(key)) {
+      footnoteMap.set(key, { id: match[1], children: ParseLines(contentLines, true) });
     }
     return { next: j };
   }
@@ -299,7 +300,7 @@ var NewParser = (() => {
         const node = nodes[k];
         if (node.type === "footnoteRef") {
           const key = node.id.toLowerCase();
-          const definition = footnoteDefinitions.get(key);
+          const definition = footnoteMap.get(key);
           if (!definition) {
             nodes[k] = { type: "text", value: `[^${node.id}]` };
             continue;
@@ -324,13 +325,16 @@ var NewParser = (() => {
     }
   }
   function ResetFootnote() {
-    footnoteDefinitions.clear();
+    footnoteMap.clear();
   }
 
   // src/parser/link.ts
   function ParseLink(text) {
     const links = [];
-    const mask = text.replace(/\u0000/g, "").replace(REGEX_MD_ESCAPE, (_, char) => {
+    const mask = text.replace(/\u0000/g, "").replace(REGEX_MD_MATH_INLINE, (_, value) => {
+      links.push({ type: "math", value });
+      return `\0${links.length - 1}\0`;
+    }).replace(REGEX_MD_ESCAPE, (_, char) => {
       links.push({ type: "text", value: char });
       return `\0${links.length - 1}\0`;
     }).replace(REGEX_MD_FOOTNOTE_REF, (_, id) => {

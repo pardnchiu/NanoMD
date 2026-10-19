@@ -133,6 +133,22 @@ ___
 const a = "<b>不轉換</b>";
 \`\`\`
 
+~~~js
+const b = "~~~ 也是程式碼區塊";
+~~~
+
+~~~md
+~~~ 內可原樣放 \`\`\`，只有 ~~~ 能結束
+\`\`\`js
+const c = 1;
+\`\`\`
+~~~
+
+- 清單項目
+~~~
+清單後緊接 ~~~ 不會被併入項目
+~~~
+
 \`\`\`mermaid
 flowchart LR
   A[輸入 Markdown] --> B{是否為區塊?}
@@ -149,13 +165,13 @@ sequenceDiagram
   Parser-->>Editor: JSON
 \`\`\`
 
-\`\`\`latex
-E = mc^2
-\`\`\`
-
 \`\`\`math
 \\int_0^\\infty e^{-x^2} \\, dx = \\frac{\\sqrt{\\pi}}{2}
 \`\`\`
+
+行內數學式：$E=mc^2$、$\\frac{a}{b}$、$x_1 + x_2^{*}$、$\\{a, b\\}$、$\\frac{1}{$ 語法錯誤時顯示原文
+
+不轉換成數學式：價格 $5 與 $10、\\$跳脫\\$、\`$在程式碼內$\`、$ 前後有空白 $、$$a$$
 
 \`\`\`chartjs
 {
@@ -189,13 +205,28 @@ E = mc^2
 }
 \`\`\`
 
-不成立時以一般程式碼區塊輸出（mermaid 語法錯誤、LaTeX 語法錯誤、chartjs 缺 data、chartjs 未註冊的 type）：
+語言標籤需完全等於 mermaid／math／chartjs，以下皆為一般程式碼區塊：
+
+\`\`\`latex
+E = mc^2
+\`\`\`
+
+\`\`\`mathjax
+E = mc^2
+\`\`\`
+
+\`\`\`mermaid-js
+flowchart LR
+  A --> B
+\`\`\`
+
+不成立時以一般程式碼區塊輸出（mermaid 語法錯誤、math 語法錯誤、chartjs 缺 data、chartjs 未註冊的 type）：
 
 \`\`\`mermaid
 這不是 mermaid 語法
 \`\`\`
 
-\`\`\`latex
+\`\`\`math
 \\frac{1}{
 \`\`\`
 

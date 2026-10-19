@@ -48,6 +48,7 @@ export type Node =
 export type ChildNode =
   | { type: "text"; value: string }
   | { type: "code"; value: string }
+  | { type: "math"; value: string }
   | {
       type: "link";
       href: string;

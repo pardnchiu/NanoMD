@@ -12,13 +12,13 @@ export function ParseCodeBlock(
 
   const blockLines: string[] = [];
   let j = i + 1;
-  while (j < lines.length && lines[j].trim() !== "```") {
+  while (j < lines.length && lines[j].trim() !== fence[1]) {
     blockLines.push(lines[j]);
     j++;
   }
 
   const value = blockLines.join("\n");
-  const lang = fence[1].toLowerCase();
+  const lang = fence[2].toLowerCase();
   if (lang && j < lines.length) {
     return { node: { type: "codeBlock", lang, value }, next: j + 1 };
   }

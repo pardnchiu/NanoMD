@@ -5,6 +5,7 @@ import {
   REGEX_MD_IMAGE_SIZE_PERCENT,
   REGEX_MD_LINK,
   REGEX_MD_LINK_PLACEHOLDER,
+  REGEX_MD_MATH_INLINE,
   REGEX_MD_URL_TRAILING,
   REGEX_MD_VIDEO,
   REGEX_VIMEO,
@@ -33,6 +34,10 @@ export function ParseLink(text: string): { mask: string; links: ChildNode[] } {
   // * mask links for later style parse, keep link's style be correct like ~~http://abc.de~~
   const mask = text
     .replace(/\u0000/g, "")
+    .replace(REGEX_MD_MATH_INLINE, (_, value: string) => {
+      links.push({ type: "math", value });
+      return `\u0000${links.length - 1}\u0000`;
+    })
     .replace(REGEX_MD_ESCAPE, (_, char: string) => {
       links.push({ type: "text", value: char });
       return `\u0000${links.length - 1}\u0000`;
