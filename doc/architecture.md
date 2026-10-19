@@ -1,147 +1,163 @@
 # NanoMD - Architecture
 
+Last updated: 2026-10-20
+
 > Back to [README](../README.md)
 
 ## Overview
 
 ```mermaid
-graph LR
-    User[User input] --> Editor[MDEditor]
-    Editor -->|"init() triggers render"| Viewer[MDViewer]
-    Viewer -->|reads each row| Editor
-    Viewer -->|Markdown| Trans["transToHTML()"]
-    Parser[MDParser] -->|Markdown| Trans
-    Editor -->|"download('html')"| Trans
-    Trans -->|HTML string| Viewer
-    Trans -->|HTML string| Parser
-    Trans --> Funcs["set* transforms<br/>src/function/"]
-    Data["src/data.js<br/>CDN injection"] --> Runtime[Material Symbols / Mermaid / code-prettify / NanoMD.css]
-    Viewer --> Runtime
+graph TB
+    Input[Markdown text] --> Parse["Parse()"]
+    Parse --> Reset[Reset footnotes and link definitions]
+    Reset --> Lines[ParseLines block parsing]
+    Lines --> Inline[ParseInline inline parsing]
+    Lines --> Post[AppendFootnotes / RestoreLinkRefs]
+    Post --> AST[AST array]
+    AST --> JSON["JSON for native renderers (build your own)"]
+    AST --> HTML["AST.html() HTML string"]
+    HTML --> DOM[Written into a .nanomd container]
+    DOM --> Refresh["Refresh() dependency rendering"]
+    Init["Init() loads dependencies"] --> Refresh
+    Load[Module load] --> CSS[Inserts parser.css]
 ```
 
-None of the three components parses Markdown itself; all call the same `transToHTML()`. `MDViewer` passes its hashtag settings and always uses extended mode, `MDParser` passes its `standard` flag, and `MDEditor` calls it only when exporting HTML.
+## Module: Block Parsing (ParseLines)
 
-## Module: MDEditor
-
-A `contentEditable` editor where each row is a `<div>`; sub-modules handle the caret, selection, history, shortcuts and toolbar.
+Each line is classified in priority order; nested content (blockquotes, list items, footnotes) calls `ParseLines` recursively.
 
 ```mermaid
 graph TB
-    subgraph MDEditor["MDEditor (src/model/editor.js)"]
-        Core[MDEditor core<br/>init / save / download / formatting]
-        Caret[editorCaret<br/>caret row and offset]
-        Selection[editorSelection<br/>selection range]
-        History[editorHistory<br/>snapshot undo / redo stacks]
-        Keydown[editorKeydown<br/>key combo mapping]
-        Tab[editorTab<br/>floating toolbar]
-        Core --- Caret
-        Core --- Selection
-        Core --- History
-        Core --- Keydown
-        Core --- Tab
+    subgraph ParseLines
+        Line[Current line] --> Blank{Blank?}
+        Blank -->|Yes| Break[break node, consecutive blanks merged]
+        Blank -->|No| Code[ParseCodeBlock]
+        Code --> HTML[Raw HTML line]
+        HTML --> Table[ParseTableBlock]
+        Table --> HR[Horizontal rule]
+        HR --> Quote[ParseBlockquote with alerts]
+        Quote --> Foot[ParseFootnoteBlock top level only]
+        Foot --> LinkDef[ParseLinkDefBlock]
+        LinkDef --> List[ParseListBlock]
+        List --> Heading[ParseHeading ATX / Setext]
+        Heading --> Text[Plain line, adjacent lines merged into a paragraph]
     end
-    Keyboard[Keyboard events] --> Keydown
-    Tab -->|event.upload| Upload[User upload function]
-    Core -->|event.save| Save[User save function]
-    Core -->|"viewer.init()"| Viewer[MDViewer]
-    Core -->|export| File[.md / .html file]
+    Quote -.recursion.-> ParseLines
+    List -.recursion.-> ParseLines
+    Foot -.recursion.-> ParseLines
+    Text --> ParseInline[ParseInline]
 ```
 
-## Module: MDViewer
+## Module: Inline Parsing (ParseInline)
 
-A debounced preview container that wires copy buttons, code highlighting and Mermaid after each render.
+Code spans are cut out first; the remaining segments mask content that must not be styled with placeholders, then styles are matched.
 
 ```mermaid
 graph TB
-    subgraph MDViewer["MDViewer (src/model/viewer.js)"]
-        Init["init(txt)"]
-        Timer[Delay timer<br/>sync.delay]
-        Pick[Pick content<br/>txt / editor text / emptyContent]
-        Replace["replaceChildren()"]
-        Copy[Bind copy buttons]
-        Poll[Poll for PR every 50ms]
-        Init --> Timer --> Pick
-        Pick --> Trans["transToHTML()"]
-        Trans --> Replace --> Copy --> Poll
+    subgraph ParseInline
+        Seg[Text segment] --> CodeSpan[Cut code spans, any backtick length]
+        CodeSpan --> Path{Content is a path?}
+        Path -->|Yes| File[link tag=file]
+        Path -->|No| CodeNode[code node]
+        CodeSpan --> Mask[ParseLink masking]
+        Mask --> M1[Inline math $...$]
+        Mask --> M2[Escapes]
+        Mask --> M3["Footnote refs [^id]"]
+        Mask --> M4[Links / images / reference links / paths / bare URLs]
+        M4 --> Marks[Style matching bold italic strike mark sub sup]
+        Marks --> Restore[RestoreLinks restores placeholders]
     end
-    Editor[MDEditor] -->|wheel deltaY| Scroll[sync.scroll]
-    Scroll --> MDViewer
-    Poll --> PR["PR.prettyPrint()"]
-    Poll --> Mermaid["mermaid.run()"]
-    VDOM[vDOM<br/>kept but inactive] -.-> MDViewer
 ```
 
-## Module: Parsing Pipeline
+## Module: Post-Processing
 
-`transToHTML()` runs the transforms in a fixed order; converted fragments are isolated as `{{tag-uuid}}` placeholders and restored once at the end.
-
-```mermaid
-graph TB
-    subgraph Pipeline["transToHTML() (src/function/)"]
-        Escape[Escape pre-processing<br/>\\* → @ast@, $ → @dollar@]
-        Pre[setPreCode<br/>fenced code / Mermaid]
-        Code[setCode<br/>inline code]
-        Media[setMedia / setMediaDefault<br/>images, video]
-        Link[setLink / setLinkStandard<br/>links, YouTube / Vimeo]
-        Font[setFont / setFontStandard<br/>bold, marker, sub/sup]
-        Block[setHeading / setHr / setTable]
-        Quote[setBlockquote / setBlockquoteStandard<br/>quotes, alerts]
-        List[setList / setTabCode]
-        Tag[setHashtag]
-        Restore[Restore placeholders and escapes]
-        Escape --> Pre --> Code --> Media --> Link --> Font --> Block --> Quote --> List --> Tag --> Restore
-    end
-    UUID[replaceWithUUID<br/>elementUUIDMap] -.-> Pipeline
-    Standard{standard is true} -.->|skip extended transforms| Pipeline
-```
-
-## Module: Runtime Resources
+Nodes that need whole-document information are resolved once parsing finishes.
 
 ```mermaid
 graph LR
-    subgraph Data["src/data.js"]
-        Inject[Insert into head on load]
-        Dark[isDarkMode<br/>one-time matchMedia read]
+    subgraph PostProcessing
+        Refs[footnoteRef nodes] --> Number[Number by first reference]
+        Number --> Missing{Defined?}
+        Missing -->|No| BackText1["Restored as [^id] text"]
+        Missing -->|Yes| Section[footnotes block appended at the end]
+        LinkRef[linkRef nodes] --> Def{Defined?}
+        Def -->|Yes| Link[link node]
+        Def -->|No| BackText2["Restored as [label][ref] text"]
     end
-    Inject --> Fonts[Material Symbols]
-    Inject --> MermaidLib[Mermaid 11.4.1]
-    Inject --> Prettify[code-prettify]
-    Inject --> CSS[NanoMD.css]
-    Dark --> Mode[style.mode auto]
+```
+
+## Module: HTML Output (AST.html)
+
+`AST` extends `Array` and `html()` lives on its prototype; output is chosen by node type and escaping happens at output time.
+
+```mermaid
+graph TB
+    subgraph html
+        Node[BlockNode] --> Render[render]
+        Render --> Block[renderBlockquote / renderTable / renderList / renderFootnote]
+        Render --> CodeBlock[renderCodeBlock]
+        CodeBlock --> Wrap{lang}
+        Wrap -->|mermaid| MW[md-mermaid wrapper plus fallback code]
+        Wrap -->|math| LW[md-latex wrapper plus fallback code]
+        Wrap -->|chartjs| CW[md-chart canvas, invalid config outputs code]
+        Wrap -->|other| Pre[prettyprint code block]
+        Render --> Inline[renderInline / renderLink]
+        Inline --> FileLink{fileEndpoint set?}
+        FileLink -->|Yes| FileA[md-file-link anchor]
+        FileLink -->|No| FileText[Plain path text]
+        Render --> Raw[Raw HTML sanitization]
+    end
+    Escape[escapeHTML / escapeAttr] --> Inline
+    Escape --> Pre
+```
+
+## Module: Dependencies and Runtime (Init / Refresh)
+
+`Init` only loads; `Refresh` renders on DOM that is already in place. Both read dependencies only from globals that already exist.
+
+```mermaid
+graph TB
+    subgraph Init
+        Opt[options.enable] --> Insert[insertHead deduplicated by URL]
+        Insert --> M[mermaid.min.js]
+        Insert --> K[katex.min.js and katex.min.css]
+        Insert --> P[run_prettify.js]
+        Insert --> C[chart.umd.min.js]
+    end
+    subgraph Refresh
+        Guard{Container in the document?} -->|No| Skip[Log Invalid and skip]
+        Guard -->|Yes| Copy[bindCopy → OnCopyClick callback]
+        File[bindFile → fetch fileEndpoint]
+        Chart[renderChart, falls back to code]
+        Latex[renderLatex, block falls back to code, inline restores $...$]
+        PR[PR.prettyPrint]
+        Mermaid[renderMermaid, parse precheck then mermaid.render to SVG, falls back to code]
+        Done[Successful wrappers get data-rendered, hiding the fallback code]
+    end
+    Module[Module load] --> URL[currentScript.src or import.meta.url]
+    URL --> CSS[parser.css in the same directory]
 ```
 
 ## Data Flow
 
 ```mermaid
 sequenceDiagram
-    participant U as User
-    participant E as MDEditor
-    participant V as MDViewer
-    participant T as transToHTML
-    participant R as PR / mermaid
-    U->>E: Type (keyup)
-    E->>E: unsave(), write history
-    E->>V: init()
-    V->>V: Reset timer, wait sync.delay
-    V->>E: Read each row's innerText
-    V->>T: transToHTML(text, hashtag)
-    T-->>V: HTML string
-    V->>V: replaceChildren(), bind copy buttons
-    loop Every 50ms
-        V->>R: Check whether PR exists
-    end
-    V->>R: PR.prettyPrint(), mermaid.run()
-```
-
-## State Machine
-
-```mermaid
-stateDiagram-v2
-    [*] --> Synced: Construct
-    Synced --> Unsynced: Input (data-saved=0)
-    Unsynced --> PendingRender: viewer.init() (data-saved=1)
-    PendingRender --> Unsynced: Input within the delay
-    PendingRender --> Synced: Timer fires and renders
+    participant App as Caller
+    participant P as MDParser
+    participant DOM as .nanomd container
+    participant CDN as Dependency CDN
+    App->>P: Load parser.js
+    P->>DOM: Insert parser.css
+    App->>P: Parse(markdown)
+    P-->>App: AST
+    App->>P: ast.html()
+    P-->>App: HTML string
+    App->>DOM: innerHTML = HTML
+    App->>P: Init({ enable })
+    P->>CDN: Load enabled dependencies
+    CDN-->>P: Loaded
+    App->>P: Refresh(container)
+    P->>DOM: Copy buttons, charts, math, highlighting, Mermaid
 ```
 
 ***

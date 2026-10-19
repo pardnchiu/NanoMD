@@ -1,147 +1,163 @@
 # NanoMD - 架構
 
+最後更新：2026-10-20
+
 > 返回 [README](./README.zh.md)
 
 ## 概覽
 
 ```mermaid
-graph LR
-    User[使用者輸入] --> Editor[MDEditor]
-    Editor -->|"init() 觸發渲染"| Viewer[MDViewer]
-    Viewer -->|讀取每一行文字| Editor
-    Viewer -->|Markdown| Trans["transToHTML()"]
-    Parser[MDParser] -->|Markdown| Trans
-    Editor -->|"download('html')"| Trans
-    Trans -->|HTML 字串| Viewer
-    Trans -->|HTML 字串| Parser
-    Trans --> Funcs["set* 轉換函式<br/>src/function/"]
-    Data["src/data.js<br/>CDN 資源注入"] --> Runtime[Material Symbols / Mermaid / code-prettify / NanoMD.css]
-    Viewer --> Runtime
+graph TB
+    Input[Markdown 文字] --> Parse["Parse()"]
+    Parse --> Reset[重設註腳與連結定義]
+    Reset --> Lines[ParseLines 區塊解析]
+    Lines --> Inline[ParseInline 行內解析]
+    Lines --> Post[AppendFootnotes／RestoreLinkRefs]
+    Post --> AST[AST 陣列]
+    AST --> JSON[JSON 給原生渲染（自行開發）]
+    AST --> HTML["AST.html() HTML 字串"]
+    HTML --> DOM[寫入 .nanomd 容器]
+    DOM --> Refresh["Refresh() 依賴渲染"]
+    Init["Init() 載入依賴"] --> Refresh
+    Load[模組載入] --> CSS[自動插入 parser.css]
 ```
 
-三個元件都不自行解析 Markdown，全部呼叫同一個 `transToHTML()`：`MDViewer` 帶入 hashtag 設定並固定使用擴充模式，`MDParser` 帶入 `standard` 旗標，`MDEditor` 只在匯出 HTML 時呼叫。
+## Module: 區塊解析（ParseLines）
 
-## Module: MDEditor
-
-`contentEditable` 編輯器，每一行是一個 `<div>`，由子模組處理游標、選取、歷史、快捷鍵與工具列。
+逐行判斷區塊類型，判斷順序即優先權；巢狀內容（引言、清單項目、註腳）遞迴呼叫 `ParseLines`。
 
 ```mermaid
 graph TB
-    subgraph MDEditor["MDEditor（src/model/editor.js）"]
-        Core[MDEditor 核心<br/>init / save / download / 格式化方法]
-        Caret[editorCaret<br/>游標所在行與位移]
-        Selection[editorSelection<br/>選取範圍]
-        History[editorHistory<br/>快照式 undo / redo 堆疊]
-        Keydown[editorKeydown<br/>按鍵組合對應]
-        Tab[editorTab<br/>浮動工具列]
-        Core --- Caret
-        Core --- Selection
-        Core --- History
-        Core --- Keydown
-        Core --- Tab
+    subgraph ParseLines
+        Line[目前行] --> Blank{空行?}
+        Blank -->|是| Break[break 節點，連續空行合併]
+        Blank -->|否| Code[ParseCodeBlock]
+        Code --> HTML[raw HTML 行]
+        HTML --> Table[ParseTableBlock]
+        Table --> HR[水平線]
+        HR --> Quote[ParseBlockquote 含提示框]
+        Quote --> Foot[ParseFootnoteBlock 僅頂層]
+        Foot --> LinkDef[ParseLinkDefBlock]
+        LinkDef --> List[ParseListBlock]
+        List --> Heading[ParseHeading ATX／Setext]
+        Heading --> Text[一般行，相鄰行合併為段落]
     end
-    Keyboard[鍵盤事件] --> Keydown
-    Tab -->|event.upload| Upload[使用者上傳函式]
-    Core -->|event.save| Save[使用者儲存函式]
-    Core -->|"viewer.init()"| Viewer[MDViewer]
-    Core -->|匯出| File[.md / .html 檔案]
+    Quote -.遞迴.-> ParseLines
+    List -.遞迴.-> ParseLines
+    Foot -.遞迴.-> ParseLines
+    Text --> ParseInline[ParseInline]
 ```
 
-## Module: MDViewer
+## Module: 行內解析（ParseInline）
 
-延遲渲染的預覽容器，渲染後處理複製按鈕、程式碼高亮與 Mermaid。
+先切出行內程式碼，其餘片段以佔位符遮罩不可再被樣式比對的內容，再比對樣式。
 
 ```mermaid
 graph TB
-    subgraph MDViewer["MDViewer（src/model/viewer.js）"]
-        Init["init(txt)"]
-        Timer[延遲計時器<br/>sync.delay]
-        Pick[選擇內容<br/>txt / 編輯器文字 / emptyContent]
-        Replace["replaceChildren()"]
-        Copy[綁定複製按鈕]
-        Poll[每 50ms 檢查 PR]
-        Init --> Timer --> Pick
-        Pick --> Trans["transToHTML()"]
-        Trans --> Replace --> Copy --> Poll
+    subgraph ParseInline
+        Seg[文字片段] --> CodeSpan[切出行內程式碼 任意長度反引號]
+        CodeSpan --> Path{內容為路徑?}
+        Path -->|是| File[link tag=file]
+        Path -->|否| CodeNode[code 節點]
+        CodeSpan --> Mask[ParseLink 遮罩]
+        Mask --> M1[行內數學式 $...$]
+        Mask --> M2[跳脫字元]
+        Mask --> M3["註腳引用 [^id]"]
+        Mask --> M4[連結／圖片／參照連結／路徑／裸網址]
+        M4 --> Marks[樣式比對 粗斜體 刪除 標記 上下標]
+        Marks --> Restore[RestoreLinks 還原佔位符]
     end
-    Editor[MDEditor] -->|滾輪 deltaY| Scroll[sync.scroll]
-    Scroll --> MDViewer
-    Poll --> PR["PR.prettyPrint()"]
-    Poll --> Mermaid["mermaid.run()"]
-    VDOM[vDOM<br/>保留但未啟用] -.-> MDViewer
 ```
 
-## Module: 轉換管線
+## Module: 後處理
 
-`transToHTML()` 依固定順序執行轉換函式，已轉換的片段以 `{{tag-uuid}}` 佔位隔離，最後一次還原。
-
-```mermaid
-graph TB
-    subgraph Pipeline["transToHTML()（src/function/）"]
-        Escape[跳脫預處理<br/>\\* → @ast@、$ → @dollar@]
-        Pre[setPreCode<br/>fenced code / Mermaid]
-        Code[setCode<br/>行內 code]
-        Media[setMedia / setMediaDefault<br/>圖片、影片]
-        Link[setLink / setLinkStandard<br/>連結、YouTube / Vimeo]
-        Font[setFont / setFontStandard<br/>粗體、標記、上下標]
-        Block[setHeading / setHr / setTable]
-        Quote[setBlockquote / setBlockquoteStandard<br/>引用、提示框]
-        List[setList / setTabCode]
-        Tag[setHashtag]
-        Restore[還原佔位符與跳脫字元]
-        Escape --> Pre --> Code --> Media --> Link --> Font --> Block --> Quote --> List --> Tag --> Restore
-    end
-    UUID[replaceWithUUID<br/>elementUUIDMap] -.-> Pipeline
-    Standard{standard 為 true} -.->|略過擴充函式| Pipeline
-```
-
-## Module: 執行期資源
+解析完成後一次處理需要全文資訊的節點。
 
 ```mermaid
 graph LR
-    subgraph Data["src/data.js"]
-        Inject[載入時插入 head]
-        Dark[isDarkMode<br/>matchMedia 一次性讀取]
+    subgraph 後處理
+        Refs[footnoteRef 節點] --> Number[依首次引用編號]
+        Number --> Missing{有定義?}
+        Missing -->|否| BackText1["還原為 [^id] 文字"]
+        Missing -->|是| Section[footnotes 區塊附加到文末]
+        LinkRef[linkRef 節點] --> Def{有定義?}
+        Def -->|是| Link[link 節點]
+        Def -->|否| BackText2["還原為 [label][ref] 文字"]
     end
-    Inject --> Fonts[Material Symbols]
-    Inject --> MermaidLib[Mermaid 11.4.1]
-    Inject --> Prettify[code-prettify]
-    Inject --> CSS[NanoMD.css]
-    Dark --> Mode[style.mode auto]
+```
+
+## Module: HTML 輸出（AST.html）
+
+`AST` 繼承 `Array`，`html()` 掛在 prototype，依節點類型輸出，跳脫在輸出時進行。
+
+```mermaid
+graph TB
+    subgraph html
+        Node[BlockNode] --> Render[render]
+        Render --> Block[renderBlockquote／renderTable／renderList／renderFootnote]
+        Render --> CodeBlock[renderCodeBlock]
+        CodeBlock --> Wrap{lang}
+        Wrap -->|mermaid| MW[md-mermaid 外殼＋備用程式碼]
+        Wrap -->|math| LW[md-latex 外殼＋備用程式碼]
+        Wrap -->|chartjs| CW[md-chart canvas，設定不合法直接輸出程式碼]
+        Wrap -->|其他| Pre[prettyprint 程式碼區塊]
+        Render --> Inline[renderInline／renderLink]
+        Inline --> FileLink{有 fileEndpoint?}
+        FileLink -->|是| FileA[md-file-link 連結]
+        FileLink -->|否| FileText[純文字路徑]
+        Render --> Raw[raw HTML 清洗]
+    end
+    Escape[escapeHTML／escapeAttr] --> Inline
+    Escape --> Pre
+```
+
+## Module: 依賴與執行期（Init／Refresh）
+
+`Init` 只負責載入，`Refresh` 在已輸出的 DOM 上渲染；兩者都只讀取全域上已存在的依賴。
+
+```mermaid
+graph TB
+    subgraph Init
+        Opt[options.enable] --> Insert[insertHead 依網址去重]
+        Insert --> M[mermaid.min.js]
+        Insert --> K[katex.min.js＋katex.min.css]
+        Insert --> P[run_prettify.js]
+        Insert --> C[chart.umd.min.js]
+    end
+    subgraph Refresh
+        Guard{容器在頁面上?} -->|否| Skip[記錄 Invalid 並略過]
+        Guard -->|是| Copy[bindCopy → OnCopyClick 回呼]
+        File[bindFile → fetch fileEndpoint]
+        Chart[renderChart 失敗改顯示程式碼]
+        Latex[renderLatex 區塊失敗改顯示程式碼，行內還原為 $...$]
+        PR[PR.prettyPrint]
+        Mermaid[renderMermaid parse 預檢後以 mermaid.render 產生 SVG，失敗改顯示程式碼]
+        Done[成功者標上 data-rendered，隱藏備用程式碼]
+    end
+    Module[模組載入] --> URL[currentScript.src 或 import.meta.url]
+    URL --> CSS[同目錄 parser.css]
 ```
 
 ## 資料流
 
 ```mermaid
 sequenceDiagram
-    participant U as 使用者
-    participant E as MDEditor
-    participant V as MDViewer
-    participant T as transToHTML
-    participant R as PR / mermaid
-    U->>E: 輸入（keyup）
-    E->>E: unsave()，寫入 history
-    E->>V: init()
-    V->>V: 重設計時器，等待 sync.delay
-    V->>E: 讀取每一行 innerText
-    V->>T: transToHTML(text, hashtag)
-    T-->>V: HTML 字串
-    V->>V: replaceChildren()、綁定複製按鈕
-    loop 每 50ms
-        V->>R: 檢查 PR 是否存在
-    end
-    V->>R: PR.prettyPrint()、mermaid.run()
-```
-
-## 狀態機
-
-```mermaid
-stateDiagram-v2
-    [*] --> 已同步: 建構
-    已同步 --> 未同步: 輸入（data-saved=0）
-    未同步 --> 等待渲染: viewer.init()（data-saved=1）
-    等待渲染 --> 未同步: 延遲內再次輸入
-    等待渲染 --> 已同步: 計時結束並渲染
+    participant App as 使用端
+    participant P as MDParser
+    participant DOM as .nanomd 容器
+    participant CDN as 依賴 CDN
+    App->>P: 載入 parser.js
+    P->>DOM: 插入 parser.css
+    App->>P: Parse(markdown)
+    P-->>App: AST
+    App->>P: ast.html()
+    P-->>App: HTML 字串
+    App->>DOM: innerHTML = HTML
+    App->>P: Init({ enable })
+    P->>CDN: 載入啟用的依賴
+    CDN-->>P: 載入完成
+    App->>P: Refresh(container)
+    P->>DOM: 複製按鈕、圖表、數學式、上色、Mermaid
 ```
 
 ***

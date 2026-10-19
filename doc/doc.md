@@ -1,36 +1,41 @@
 # NanoMD - Documentation
 
+Last updated: 2026-10-20
+
 > Back to [README](../README.md)
 
 ## Prerequisites
 
-- A modern browser with ES2022 private class fields (`#field`): Chrome, Firefox, Safari, Edge
-- Network access to `cdn.jsdelivr.net`, `fonts.googleapis.com` and `fonts.gstatic.com`: on load the bundle inserts Material Symbols, Mermaid 11.4.1, code-prettify and `NanoMD.css`
-- Node.js only when building from source
+- A browser with ES2022, RegExp lookbehind and `\p{L}`: Chrome, Edge, Firefox, Safari 16.4+
+- Node.js 22 or higher to use the ESM build in Node; Node and Workers only need `Parse()` and `html()`, no DOM
+- Network access to `cdn.jsdelivr.net` when Mermaid, KaTeX, Chart.js or code-prettify is enabled (override the URLs through `Init()` to self-host)
+- Node.js 22 or higher to build from source
 
 ## Installation
 
-### CDN
+### CDN (IIFE)
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@latest/dist/NanoMD.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@2.0.0/dist/parser.js"></script>
 ```
 
-`NanoMD.js` inserts `NanoMD.css` into `<head>` by itself, so no extra `<link>` is required. The `MDEditor`, `MDViewer` and `MDParser` classes are attached to `window`.
+The script exposes a global `MDParser` and inserts `parser.css` from the same directory into `<head>`.
 
-### npm
+### npm (ESM)
 
 ```bash
 npm i @pardnchiu/nanomd
 ```
 
-### ESM
-
 ```javascript
-import { MDEditor, MDViewer, MDParser } from "@pardnchiu/nanomd";
+import { MDParser } from "@pardnchiu/nanomd";
 ```
 
-`dist/NanoMD.esm.js` is the same bundle with `export` statements appended, plus lowercase aliases `editor` (= `MDEditor`) and `viewer` (= `MDViewer`).
+`dist/parser.esm.js` also provides named exports (`Parse`, `Init`, `Refresh`, `OnCopyClick`...). Bundlers rewrite `import.meta.url`, so if the auto-loaded `parser.css` is not found, import it yourself:
+
+```javascript
+import "@pardnchiu/nanomd/parser.css";
+```
 
 ### From Source
 
@@ -41,220 +46,185 @@ npm install
 npm run build:once
 ```
 
-`build:once` produces `dist/NanoMD.debug.js`, `dist/NanoMD.js` (terser-minified) and `dist/NanoMD.esm.js`; `npm run build` watches `src/` and rebuilds, and `npm run sass` watches and compiles the SCSS.
+`build:once` type-checks, then produces `dist/parser.js` (minified IIFE), `dist/parser.debug.js` (unminified IIFE), `dist/parser.esm.js` (ESM), `dist/types/` (`.d.ts`) and `dist/parser.css`; `npm run build` watches `src/parser/*.ts` and `src/sass/*.scss` and rebuilds.
+
+## Configuration
+
+### Init Options
+
+`Init(options, endpoint)` sets the indent width and loads external dependencies; the returned Promise resolves once every dependency has loaded.
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `indent` | `number` | `4` | Column width of a tab, used for nested lists and code block alignment |
+| `fileEndpoint` | `string` | `""` | URL requested when a file path is clicked; `{filepath}` is replaced with the encoded path (such as `http://localhost:3000/v1/file/open?path={filepath}`); when unset or missing `{filepath}`, paths render as plain text |
+| `enable.mermaid` | `boolean` | `false` | Loads Mermaid to render ` ```mermaid ` blocks |
+| `enable.latex` | `boolean` | `false` | Loads KaTeX (JS and CSS) to render ` ```math ` and `$...$` |
+| `enable.highlight` | `boolean` | `false` | Loads code-prettify to highlight code blocks |
+| `enable.chartjs` | `boolean` | `false` | Loads Chart.js to render ` ```chartjs ` blocks |
+
+### Dependency URLs
+
+The second argument overrides any dependency URL; the rest fall back to `DEFAULT_ENDPOINT`:
+
+| Key | Default |
+|---|---|
+| `mermaidjs` | `https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js` |
+| `katexjs` | `https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js` |
+| `katexcss` | `https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css` |
+| `googleprettifyjs` | `https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js` |
+| `chartjs` | `https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js` |
+
+KaTeX references its fonts by relative path inside the CSS, so when self-hosting keep `fonts/` next to `katex.min.css`, and point `katexjs` and `katexcss` at the same version.
+
+### Styling
+
+| Item | Description |
+|---|---|
+| Container | Styles apply only inside an element with `class="nanomd"` |
+| Dark mode | Follows `prefers-color-scheme` by default; `data-mode="dark"` forces dark, `data-mode="light"` forces light |
+| Fill parent | `data-fill="1"` positions the container absolutely to fill the nearest positioned ancestor |
+| Dependency blocks | Mermaid / math / chartjs blocks show only the plain code block until `Refresh` renders them; on success the wrapper gets `data-rendered` and shows the diagram, formula or chart instead |
+| Theme variables | Override CSS variables such as `--text`, `--accent`, `--code-bg`, `--mark` and `--alert-note` on `.nanomd` |
 
 ## Usage
 
-### Basic: Render Markdown Only
+### Basic: Render Markdown
 
 ```html
-<section id="viewer"></section>
+<div id="preview" class="nanomd"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@latest/dist/NanoMD.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@2.0.0/dist/parser.js"></script>
 <script>
-const viewer = new MDViewer({
-    id: "viewer",
-    emptyContent: "# Hello\n\nThis is **NanoMD**.",
-    style: { mode: "auto", fill: false }
-});
+  const preview = document.getElementById("preview");
+  preview.innerHTML = MDParser.Parse("# Hello\n\nThis is **NanoMD**.").html();
 </script>
 ```
 
-### Basic: Editor and Viewer
-
-```html
-<div style="position: relative; height: 480px;"><section id="editor"></section></div>
-<div style="position: relative; height: 480px;"><section id="viewer"></section></div>
-
-<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@latest/dist/NanoMD.js"></script>
-<script>
-const editor = new MDEditor({
-    id: "editor",
-    defaultContent: "# Hello\n\nStart editing..."
-});
-
-const viewer = new MDViewer({
-    id: "viewer",
-    sync: { editor: editor, delay: 300, scroll: true }
-});
-</script>
-```
-
-`style.fill` defaults to `true`, which positions the container absolutely to fill its parent, so the parent needs a `position` and a height.
-
-### Advanced: Convert a String Only
+### Basic: Output HTML in Node.js (SSR)
 
 ```javascript
-const parser = new MDParser({ standard: false });
-const html = parser.parse("```js\nconst a = 1;\n```\n\n> [!TIP]\n> Extended syntax");
+import { MDParser } from "@pardnchiu/nanomd";
 
-document.querySelector("#out").innerHTML = html;
-if (typeof PR !== "undefined") {
-    PR.prettyPrint();
+const html = MDParser.Parse("## Title\n\n- [x] Done\n- [ ] Todo").html();
+console.log(html);
+```
+
+Node has no DOM, so `Init()` only sets `indent` and loads nothing, and `Refresh()` returns immediately.
+
+### Advanced: Enable Mermaid, KaTeX, Chart.js and Highlighting
+
+```javascript
+import { MDParser } from "@pardnchiu/nanomd";
+
+const preview = document.getElementById("preview");
+
+function render(markdown) {
+  preview.innerHTML = MDParser.Parse(markdown).html();
+  return MDParser.Refresh(preview);
 }
+
+render(source);
+MDParser.Init({ enable: { mermaid: true, latex: true, highlight: true, chartjs: true } })
+  .then(() => render(source))
+  .catch((err) => console.error(err.message));
 ```
 
-`MDParser` defaults to `standard: true`, which skips fenced code blocks, Mermaid, marker/sub/superscript and alerts; pass `standard: false` to match `MDViewer` output. The output is not sanitized, so filter untrusted content before writing it to `innerHTML`.
+When a dependency fails to load, the Promise rejects with `[Unavailable] <url>: failed to load`; blocks for dependencies that have not loaded show only the plain code block.
 
-### Advanced: Save and Image Upload
+### Advanced: Live Preview with Debounce
 
 ```javascript
-const editor = new MDEditor({
-    id: "editor",
-    event: {
-        save: async (text) => {
-            try {
-                const res = await fetch("/api/save", { method: "POST", body: text });
-                if (!res.ok) {
-                    throw new Error(`HTTP ${res.status}`);
-                }
-            } catch (err) {
-                console.error("save failed", err);
-            }
-        },
-        upload: async () => {
-            try {
-                const res = await fetch("/api/upload", { method: "POST" });
-                if (!res.ok) {
-                    throw new Error(`HTTP ${res.status}`);
-                }
-                const { url, name } = await res.json();
-                return { href: url, alt: name };
-            } catch (err) {
-                console.error("upload failed", err);
-                return { href: "", alt: "" };
-            }
-        }
-    }
+const input = document.querySelector("textarea");
+let timer;
+
+input.addEventListener("input", () => {
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    preview.innerHTML = MDParser.Parse(input.value).html();
+    MDParser.Refresh(preview).catch((err) => console.error(err.message));
+  }, 300);
 });
 ```
 
-`Cmd/Ctrl+S` triggers `save()`; setting `event.upload` adds an upload button to the toolbar. A rejected `upload()` is not caught, so handle errors yourself; an empty `href` inserts nothing.
-
-### Advanced: Follow the System Theme and Hashtags
+### Advanced: Hand the AST to Another Renderer
 
 ```javascript
-const viewer = new MDViewer({
-    id: "viewer",
-    sync: { editor: editor },
-    hashtag: { path: "/search?tag=", target: "_blank" }
-});
+const ast = MDParser.Parse(source);
+const json = JSON.stringify(ast);
+```
 
-matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
-    const mode = e.matches ? "dark" : "light";
-    editor.changeMode(mode);
-    viewer.changeMode(mode);
+`ast` is an array (it extends `Array`); `html()` lives on the prototype, so it never appears in the JSON.
+
+### Advanced: Copy Button Feedback
+
+```javascript
+MDParser.OnCopyClick((success, pre) => {
+  pre.classList.add(success ? "success" : "error");
+  setTimeout(() => pre.classList.remove("success", "error"), 1000);
 });
 ```
 
-`style.mode: "auto"` reads the system preference once when the bundle loads; to follow later changes, listen yourself and call `changeMode()` on both components.
-
-### Advanced: Import and Export
-
-```html
-<input type="file" accept=".md" onchange="editor.openfile(this.files[0])">
-<button onclick="editor.download('md')">Export Markdown</button>
-<button onclick="editor.download('html')">Export HTML</button>
-```
+`parser.css` changes the button label from `copy` to `copied` on the `success` class of `pre`, and both `success` and `error` switch the code background.
 
 ## API Reference
 
-### MDEditor Options
+### Exports
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `id` | `string` | None | Container element ID; if not found, a detached `<section>` is created; get it from `editor.body` and insert it yourself |
-| `defaultContent` | `string` | `""` | Initial Markdown |
-| `hotKey` | `boolean` | `true` | Enables formatting shortcuts; undo, save, Tab and other editing keys are unaffected |
-| `autosave` | `boolean` | `true` | Updates the preview after input; when `false`, only `save()` updates it |
-| `preventRefresh` | `boolean` | `false` | Registers `beforeunload` and blocks `F5` and `Cmd/Ctrl+R` |
-| `tabPin` | `boolean` | `false` | Keeps the toolbar visible |
-| `style.mode` | `string` | `"auto"` | `"auto"` / `"light"` / `"dark"` |
-| `style.fill` | `boolean` | `true` | Fills the parent element |
-| `style.fontFamily` | `string` | `"'Roboto Mono', monospace"` | Editor font |
-| `style.showRow` | `boolean` | `true` | Shows line numbers |
-| `style.placeholder.text` | `string` | `"Type here ..."` | Hint text for an empty row |
-| `style.placeholder.color` | `string` | `"#bfbfbf"` | Hint color |
-| `style.focus.backgroundColor` | `string` | `"#0000ff1a"` | Background of the current row |
-| `style.focus.color` | `string` | `"#0000ffff"` | Text and caret color of the current row |
-| `event.save` | `function(text)` | None | Save callback |
-| `event.upload` | `async function()` | None | Returns `{ href, alt }`; when set, the toolbar shows an upload button |
-
-### MDEditor Methods and Properties
-
-| Name | Description |
-|---|---|
-| `body` | The editor container (`contentEditable`); each row is a `<div>` |
-| `text` | Read-only; every row's text joined with `\n` |
-| `viewer` | The bound `MDViewer`, set automatically by the viewer's `sync.editor` |
-| `init(text?, withFocus = true, set = true)` | Rebuilds every row from `text`; does not update the preview |
-| `clear()` | Empties the editor and updates the preview |
-| `selectAll()` | Selects all content |
-| `save()` | Runs the save flow based on `autosave` and `event.save`; without `event.save` it opens the export dialog |
-| `unsave()` | Sets `data-saved` to `0` on the editor and the viewer |
-| `undo()` / `redo()` | Undo / redo |
-| `openfile(file)` | Reads a `File` with `FileReader` and updates the preview |
-| `download(type = "md")` | Exports an `"md"` or `"html"` file |
-| `changeMode(mode = "light")` | Writes `data-mode` directly |
-| `bold(event)`, `italic(event)`, `strikethrough(event)`, `underline(event)`, `marker(event)`, `sup(event)`, `sub(event)`, `code(event)` | Insert inline formatting; HTML tags when `event.metaKey` or `event.ctrlKey` is true, Markdown markers otherwise; pass `{}` from code |
-| `heading(event, num)` | `num` `1`-`6` inserts a heading, `0` removes an existing `#` |
-| `blockquote()`, `ul()`, `ol()` | Prefix every selected row with `> `, `- `, `1. ` |
-| `link(title, href)` | Inserts `[title](href)` |
-| `image(src, alt, title)` | Inserts `![title or alt](src)` |
-
-### MDViewer Options
-
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `id` | `string` | None | Container element ID; if not found, a detached `<section>` is created |
-| `emptyContent` | `string` | `""` | Markdown rendered when `init()` has no argument and the editor has no text |
-| `style.mode` | `string` | `"auto"` | `"auto"` / `"light"` / `"dark"` |
-| `style.fill` | `boolean` | `true` | Fills the parent element |
-| `style.fontFamily` | `string` | `"sans-serif"` | Preview font |
-| `sync.editor` | `MDEditor` | `null` | The editor to bind |
-| `sync.delay` | `number` | `300` | Render delay in milliseconds; `0` falls back to `300` |
-| `sync.scroll` | `boolean` | `false` | Editor wheel scrolls the viewer |
-| `hashtag.path` | `string` | `""` | `#tag` link prefix; an empty string disables conversion |
-| `hashtag.target` | `string` | `""` | `"_blank"` opens a new tab, anything else means `_self` |
-
-### MDViewer Methods and Properties
-
-| Name | Description |
-|---|---|
-| `body` | The viewer container |
-| `editor` | The bound editor; can be assigned after construction |
-| `init(txt = "")` | After `sync.delay`, renders `txt`, the editor text or `emptyContent`, then runs code highlighting and Mermaid |
-| `clear()` | Empties the container |
-| `unsave()` | Sets `data-saved` to `0` |
-| `changeMode(mode = "light")` | Writes `data-mode` directly |
-
-### MDParser
-
-| Name | Description |
-|---|---|
-| `new MDParser({ standard = true, text = "" })` | With `standard` true, only standard syntax is handled; `text` is the default for `parse()` without an argument |
-| `parse(text?)` | Returns an HTML string; creates no DOM container but still needs a browser environment |
-
-### Keyboard Shortcuts
-
-| Combo | Action | Controlled by `hotKey` |
+| Name | Signature | Description |
 |---|---|---|
-| `Cmd/Ctrl+B` / `I` / `U` / `M` / `K` | Bold / italic / underline / marker / code | Yes |
-| `Cmd/Ctrl+Shift+X` | Strikethrough | Yes |
-| `Cmd/Ctrl+↑` / `↓` | Superscript / subscript | Yes |
-| `Cmd/Ctrl+Z` / `Cmd/Ctrl+Shift+Z` | Undo / redo | No |
-| `Cmd/Ctrl+S` | `save()` | No |
-| `Cmd/Ctrl+A` | Selects the editor content only | No |
-| `Tab` / `Cmd/Ctrl+]` | Inserts 4 spaces / indents every selected row | No |
+| `MDParser` | Namespace | All of the exports below; the global name of the IIFE |
+| `Parse` | `(content: string) => AST` | Parses Markdown into an AST |
+| `AST.html` | `() => string` | Renders the AST to an HTML string with escaping and raw HTML sanitization |
+| `Init` | `(options?: InitOptions, endpoint?: DependencyEndpoint) => Promise<void[]>` | Sets `indent` and loads the enabled dependencies |
+| `Refresh` | `(container?: ParentNode) => Promise<void>` | Binds copy buttons and file link clicks, and renders Chart.js, KaTeX, prettify and Mermaid inside the container; without an argument it processes the whole `document`; a container not yet in the document is skipped with an `[Invalid]` log |
+| `OnCopyClick` | `(handler: (success: boolean, pre: HTMLElement) => void) => void` | Registers the copy button result callback; only the last registration is kept |
+| `DEFAULT_ENDPOINT` | `Required<DependencyEndpoint>` | Default dependency URLs |
+| `PARSE_OPTIONS` | `{ indent: number }` | Current parse settings |
+| `ParseLines` | `(lines: string[], nested?: boolean) => BlockNode[]` | The block parser itself; does not resolve footnotes or reference links |
 
-### Known Limitations (v1.11.6)
+### Block Nodes (BlockNode)
 
-| Symptom | Cause |
+| `type` | Fields | Syntax |
+|---|---|---|
+| `text` | `children: InlineNode[]` | Paragraph; adjacent lines are joined by a `text` node whose value is `"\n"` |
+| `heading` | `level`, `children` | `#` to `######`, Setext (`===` / `---`) |
+| `blockquote` | `tag?`, `children: BlockNode[]` | `>`; `tag` is `note` / `tip` / `important` / `warning` / `caution` |
+| `list` | `ordered`, `children: ListItem[]` | `-`, `*`, `1.`; `ListItem.checked` marks task items |
+| `table` | `align`, `children: TableRow[]` | GFM tables with `:---` / `:---:` / `---:` alignment |
+| `codeBlock` | `lang?`, `value` | ` ``` ` / `~~~` (3 or more, nestable); `mermaid` / `math` / `chartjs` get extra rendering |
+| `html` | `value` | Lines that start with an HTML tag |
+| `hr` | — | `***`, `---`, `___` |
+| `break` | — | Blank lines; consecutive ones merge into one |
+| `footnotes` | `children: Footnote[]` | Footnote section at the end, numbered by first reference |
+
+### Inline Nodes (InlineNode)
+
+| `type` | Fields | Syntax |
+|---|---|---|
+| `text` | `value` | Plain text |
+| `b`, `em`, `del`, `mark`, `sub`, `sup` | `children` | `**` / `__`, `*` / `_`, `~~`, `==`, `~x~`, `^x^`; `***` is `b` wrapping `em` |
+| `code` | `value` | Backtick runs of any length with matching open and close counts |
+| `math` | `value` | `$...$` |
+| `link` | `href`, `tag?`, `title?`, `width?`, `height?`, `children` | Inline and reference links, relative paths, bare URLs, file paths, `![]()` images and videos; `tag` is `image` / `video` / `youtube` / `vimeo` / `file` |
+| `footnoteRef` | `id`, `index` | `[^id]` |
+
+Image size goes after `![alt](src)`: `(300x200)`, `(50%x)`, `(x120)`, `(120)`; `.mp4` / `.mov` sources render as `<video>`.
+
+### Main CSS Classes
+
+| Class | Element |
 |---|---|
-| A `$` in the text is output as `@dollar@` | Wrong mapping in the pipeline's restore table |
-| `MDViewer` produces no YouTube/Vimeo preview cards without `hashtag.path` | `transToHTML()` passes the hashtag path into `setLink()`'s `isDefault` argument; `MDParser` is unaffected |
-| Rows built through `init(text)` (`defaultContent`, `openfile()`, `undo()` / `redo()`) may not render marker, sub/superscript or alerts in the preview | `init()` runs `escapeHTML()` and then writes the result as plain text, so rows hold literal `&nbsp;` strings |
-| Vimeo links block the main thread | Thumbnails are fetched with a synchronous XHR |
+| `md-line` | Paragraph |
+| `md-h1` to `md-h6` | Headings |
+| `md-bold` | Bold |
+| `md-quote`, `md-alert`, `md-alert-{tag}`, `md-alert-title` | Blockquotes and alerts |
+| `md-list`, `md-task` | Lists and task items |
+| `md-table-wrap`, `md-table` | Tables |
+| `md-link`, `md-file-link`, `md-img`, `md-embed` | Links, file links (`data-path`, only when `fileEndpoint` is set), images/videos, embedded players |
+| `md-mermaid`, `md-latex`, `md-math`, `md-math-inline`, `md-chart` | Dependency rendering wrappers |
+| `md-footnote-ref`, `md-footnotes` | Footnote references and section (anchor `#md-fn-{index}`) |
+| `prettyprint`, `copy` | Code blocks and the copy button |
 
 ***
 
