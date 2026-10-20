@@ -86,7 +86,7 @@ KaTeX references its fonts by relative path inside the CSS, so when self-hosting
 | Dark mode | Follows `prefers-color-scheme` by default; `data-mode="dark"` forces dark, `data-mode="light"` forces light |
 | Fill parent | `data-fill="1"` positions the container absolutely to fill the nearest positioned ancestor |
 | Dependency blocks | Mermaid / math / chartjs blocks show only the plain code block until `Refresh` renders them; on success the wrapper gets `data-rendered` and shows the diagram, formula or chart instead |
-| Tables | Tables size to their content without wrapping cells; a table wider than the container scrolls horizontally inside `md-table-wrap` |
+| Tables | Tables size to their content and a cell wraps once it reaches `32rem`; a table wider than the container scrolls horizontally inside `md-table-wrap` |
 | Theme variables | Override CSS variables such as `--text`, `--accent`, `--code-bg`, `--mark` and `--alert-note` on `.nanomd` |
 
 ## Usage
@@ -220,6 +220,7 @@ MDParser.OnCopyClick((success, pre) => {
 | `math` | `value` | `$...$` |
 | `link` | `href`, `tag?`, `title?`, `width?`, `height?`, `children` | Inline and reference links, relative paths, bare URLs, file paths, `![]()` images and videos, `#tag`; `tag` is `image` / `video` / `youtube` / `vimeo` / `file` / `hashtag` (`href` holds the tag without `#`) |
 | `footnoteRef` | `id`, `index` | `[^id]` |
+| `br` | — | `<br>`, `<br/>`, `<br />` inside a paragraph or table cell; renders as `<br class="md-br">` |
 
 Image size goes after `![alt](src)`: `(300x200)`, `(50%x)`, `(x120)`, `(120)`; `.mp4` / `.mov` sources render as `<video>`.
 
