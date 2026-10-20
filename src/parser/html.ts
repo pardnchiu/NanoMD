@@ -22,6 +22,9 @@ function render(node: BlockNode): string {
     case "break":
       return "<br>";
     case "heading":
+      if (PARSE_OPTIONS.parseHeading) {
+        return `<h${node.level} class="md-h${node.level}">${renderInlines(node.children)}</h${node.level}>`;
+      }
       return `<span class="md-h${node.level}">${renderInlines(node.children)}</span>`;
     case "blockquote":
       return renderBlockquote(node);

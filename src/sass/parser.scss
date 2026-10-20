@@ -32,6 +32,11 @@
   --code-border: #ffffff1a;
   --code-hover: #111;
   --mark: #8a6d00;
+  --alert-note: #4493f8;
+  --alert-tip: #3fb950;
+  --alert-important: #ab7df8;
+  --alert-warning: #d29922;
+  --alert-caution: #f85149;
 
   pre.prettyprint .pln {
     color: var(--text);
@@ -68,7 +73,7 @@
   margin: 0;
   padding: 1rem 1rem 5rem;
   color: var(--text);
-  line-height: 1.6;
+  line-height: 1.5;
   word-break: break-word;
   overflow-wrap: break-word;
 
@@ -116,6 +121,7 @@
 .nanomd .md-h5,
 .nanomd .md-h6 {
   display: block;
+  margin: 0;
   padding: 1rem 0 0.5rem;
   font-weight: bold;
 }
@@ -156,6 +162,10 @@
   line-height: 1.75;
 }
 
+.nanomd > * + * {
+  margin-top: 0.5rem;
+}
+
 .nanomd br:not(.md-br) {
   display: none;
 }
@@ -166,7 +176,7 @@
 
 .nanomd blockquote.md-quote {
   display: block;
-  margin: 0.25rem 0;
+  margin: 0.5rem 0;
   padding: 0.125rem 0 0.125rem 0.875rem;
   border-left: 0.25rem solid var(--accent);
   color: var(--gray-3);
@@ -203,7 +213,7 @@
 .nanomd .md-table-wrap {
   overflow-x: auto;
   max-width: 100%;
-  margin: 0.25rem 0;
+  margin: 0.5rem 0;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -219,16 +229,19 @@
 .nanomd table.md-table td {
   width: auto;
   min-width: 4rem;
-  max-width: 32rem;
-  height: 2.75rem;
+  max-width: 40rem;
   border: 1px solid var(--gray-2);
-  padding: 0.25rem 0.875rem;
+  padding: 0.5rem 0.875rem;
   text-align: left;
   color: var(--ink);
 }
 
 .nanomd table.md-table th {
   font-weight: bold;
+}
+
+.nanomd table.md-table code {
+  font-size: 0.75rem;
 }
 
 .nanomd table.md-table tbody tr:nth-child(2n-1) {
@@ -241,6 +254,11 @@
   margin: 0.25rem 0;
   padding-left: 1.5rem;
   white-space: normal;
+}
+
+.nanomd > ul.md-list,
+.nanomd > ol.md-list {
+  margin: 0.5rem 0;
 }
 
 .nanomd ul.md-list {
@@ -369,7 +387,7 @@
   background: var(--code-bg);
   border: none;
   border-radius: 0.25rem;
-  font-size: 0.875em;
+  font-size: 0.875rem;
   transition: 0.3s;
 }
 
@@ -517,7 +535,7 @@
 }
 
 .nanomd section.md-footnotes > ol {
-  padding-left: 1.5em;
+  padding-left: 1.5rem;
   list-style: decimal;
 }
 
@@ -545,7 +563,7 @@
   background: var(--gray);
   border: 0.5px solid var(--gray-2);
   border-radius: 0.25rem;
-  padding: 0.25rem 0.375rem;
+  padding: 0.125rem 0.375rem;
   font-family: "JetBrains Mono", monospace;
   font-size: 0.875rem;
 }
