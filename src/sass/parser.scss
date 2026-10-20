@@ -330,7 +330,7 @@
   display: block;
   padding: 0.75rem 1rem;
   background: var(--code-bg);
-  border: 0.5px solid var(--code-border);
+  border: none;
   border-radius: 0.25rem;
   font-size: 0.875em;
   transition: 0.3s;
@@ -369,16 +369,15 @@
 .nanomd pre.prettyprint code[name]:not([name=""])::before {
   content: attr(name);
   position: absolute;
-  left: -0.5px;
+  left: 0;
   top: -1.25rem;
-  padding: 0 0.5rem;
+  z-index: 1;
+  padding: 0 0.75rem;
   height: 1.25rem;
   line-height: 1.25rem;
   font-size: 0.75rem;
   background: var(--code-bg);
   color: var(--gray-3);
-  border: 0.5px solid var(--code-border);
-  border-bottom: none;
   border-radius: 0.25rem 0.25rem 0 0;
   transition: 0.3s;
 }
