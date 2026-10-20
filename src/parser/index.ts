@@ -25,9 +25,10 @@ export const DEFAULT_ENDPOINT: Required<DependencyEndpoint> = {
   chartjs: "https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js",
 };
 
-export const PARSE_OPTIONS: { indent: number; fileEndpoint: string } = {
+export const PARSE_OPTIONS: { indent: number; fileEndpoint: string; hashtagEndpoint: string } = {
   indent: 4,
   fileEndpoint: "",
+  hashtagEndpoint: "",
 };
 
 const insertedDependencies = new Map<string, Promise<void>>();
@@ -44,6 +45,14 @@ export function Init(options: InitOptions = {}, endpoint: DependencyEndpoint = {
       PARSE_OPTIONS.fileEndpoint = options.fileEndpoint;
     } else {
       console.error("[Invalid] fileEndpoint: must be a string containing {filepath}");
+    }
+  }
+  PARSE_OPTIONS.hashtagEndpoint = "";
+  if (options.hashtagEndpoint !== undefined) {
+    if (typeof options.hashtagEndpoint === "string" && options.hashtagEndpoint.includes("{tag}")) {
+      PARSE_OPTIONS.hashtagEndpoint = options.hashtagEndpoint;
+    } else {
+      console.error("[Invalid] hashtagEndpoint: must be a string containing {tag}");
     }
   }
   if (typeof document === "undefined") {

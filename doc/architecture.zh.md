@@ -105,6 +105,9 @@ graph TB
         Inline --> FileLink{有 fileEndpoint?}
         FileLink -->|是| FileA[md-file-link 連結]
         FileLink -->|否| FileText[純文字路徑]
+        Inline --> TagLink{有 hashtagEndpoint?}
+        TagLink -->|是| TagA[md-hashtag 連結]
+        TagLink -->|否| TagText[純文字 #tag]
         Render --> Raw[raw HTML 清洗]
     end
     Escape[escapeHTML／escapeAttr] --> Inline

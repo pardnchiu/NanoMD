@@ -30,6 +30,7 @@ interface Link {
   ref?: string;
   path?: string;
   url?: string;
+  hashtag?: string;
 }
 
 const linkMap = new Map<string, { href: string; title?: string }>();
@@ -105,6 +106,13 @@ function parseMeta(meta: Link): { node: InlineNode; trail: string } {
     return {
       node: { type: "link", href: filePath, tag: "file", children: [{ type: "text", value: filePath }] },
       trail,
+    };
+  }
+
+  if (meta.hashtag !== undefined) {
+    return {
+      node: { type: "link", href: meta.hashtag.slice(1), tag: "hashtag", children: [{ type: "text", value: meta.hashtag }] },
+      trail: "",
     };
   }
 

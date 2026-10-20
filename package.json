@@ -1,6 +1,6 @@
 {
   "name": "@pardnchiu/nanomd",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "A TypeScript Markdown parser with a JSON AST, on-demand Mermaid/KaTeX/Chart.js rendering, and sanitized HTML output",
   "type": "module",
   "main": "dist/parser.js",

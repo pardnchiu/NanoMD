@@ -57,8 +57,8 @@ var MDParser = (() => {
   var REGEX_MD_FILE_PATH_TRAILING = /[./]+$/;
   var REGEX_MD_URL_TRAILING = /[)\]}.,;:!?*_~、。，；：！？」』】》”）]+$/;
   var REGEX_MD_LINK = new RegExp(
-    `!\\[(?<alt>[^\\]\\n]*)\\]\\((?<src>[^)\\s]+)(?:[ \\t]+(?<q1>["'])(?<imgTitle>[^)\\n]*?)\\k<q1>)?\\)(?:\\((?:(?<size>[0-9]+%?)|(?<width>[0-9]+%?)?[ \\t*x]+(?<height>[0-9]+%?)?)\\))?|\\[(?<label>[^\\]]+)\\]\\((?<href>https?:\\/\\/[^\\s)]+|(?![A-Za-z][A-Za-z0-9+.\\-]*:)[^\\s)]+)(?:[ \\t]+(?<q2>["'])(?<linkTitle>[^)\\n]*?)\\k<q2>)?\\)|\\[(?<refLabel>[^\\]]+)\\]\\[(?<ref>[^\\]]+)\\]|(?<![\\w/])(?<path>${REGEX_FILE_PATH})|(?<url>${REGEX_URL})`,
-    // 5 https://example.com
+    `!\\[(?<alt>[^\\]\\n]*)\\]\\((?<src>[^)\\s]+)(?:[ \\t]+(?<q1>["'])(?<imgTitle>[^)\\n]*?)\\k<q1>)?\\)(?:\\((?:(?<size>[0-9]+%?)|(?<width>[0-9]+%?)?[ \\t*x]+(?<height>[0-9]+%?)?)\\))?|\\[(?<label>[^\\]]+)\\]\\((?<href>https?:\\/\\/[^\\s)]+|(?![A-Za-z][A-Za-z0-9+.\\-]*:)[^\\s)]+)(?:[ \\t]+(?<q2>["'])(?<linkTitle>[^)\\n]*?)\\k<q2>)?\\)|\\[(?<refLabel>[^\\]]+)\\]\\[(?<ref>[^\\]]+)\\]|(?<![\\w/])(?<path>${REGEX_FILE_PATH})|(?<url>${REGEX_URL})|(?<![\\p{L}\\p{M}\\p{N}_&#/])(?<hashtag>[#\uFF03][\\p{L}\\p{M}\\p{N}_]+)`,
+    // 6 #tag, prevent a#b and &#123;
     "gu"
   );
   var REGEX_MD_LINK_DEF = /^ {0,3}\[(?!\^)([^\]]+)\]:[ \t]*(https?:\/\/\S+|(?![A-Za-z][A-Za-z0-9+.\-]*:)\S+)(?:[ \t]+(["'])(.*)\3)?[ \t]*$/;
@@ -412,6 +412,12 @@ var MDParser = (() => {
         trail: trail2
       };
     }
+    if (meta.hashtag !== void 0) {
+      return {
+        node: { type: "link", href: meta.hashtag.slice(1), tag: "hashtag", children: [{ type: "text", value: meta.hashtag }] },
+        trail: ""
+      };
+    }
     const url = meta.url ?? "";
     const trail = url.match(REGEX_MD_URL_TRAILING)?.[0] ?? "";
     const bareURL = url.slice(0, url.length - trail.length);
@@ -537,6 +543,9 @@ var MDParser = (() => {
   // src/parser/html.ts
   AST.prototype.html = function() {
     return this.map(render).join("");
+  };
+  AST.prototype.json = function() {
+    return JSON.parse(JSON.stringify(this));
   };
   function render(node) {
     switch (node.type) {
@@ -665,6 +674,13 @@ var MDParser = (() => {
         return children;
       }
       return `<a class="md-link md-file-link" data-path="${escapeAttr(node.href)}">${children}</a>`;
+    }
+    if (node.tag === "hashtag") {
+      if (!PARSE_OPTIONS.hashtagEndpoint) {
+        return children;
+      }
+      const href = PARSE_OPTIONS.hashtagEndpoint.replaceAll("{tag}", encodeURIComponent(node.href));
+      return `<a href="${escapeAttr(href)}" target="_blank" rel="noopener" class="md-link md-hashtag">${children}</a>`;
     }
     const title = node.title ? ` title="${escapeAttr(node.title)}"` : "";
     if (node.tag === "image" || node.tag === "video") {
@@ -916,7 +932,8 @@ var MDParser = (() => {
   };
   var PARSE_OPTIONS = {
     indent: 4,
-    fileEndpoint: ""
+    fileEndpoint: "",
+    hashtagEndpoint: ""
   };
   var insertedDependencies = /* @__PURE__ */ new Map();
   if (typeof document !== "undefined" && SCRIPT_URL && SCRIPT_ELEMENT?.dataset.nanomdCss !== "off") {
@@ -930,6 +947,14 @@ var MDParser = (() => {
         PARSE_OPTIONS.fileEndpoint = options.fileEndpoint;
       } else {
         console.error("[Invalid] fileEndpoint: must be a string containing {filepath}");
+      }
+    }
+    PARSE_OPTIONS.hashtagEndpoint = "";
+    if (options.hashtagEndpoint !== void 0) {
+      if (typeof options.hashtagEndpoint === "string" && options.hashtagEndpoint.includes("{tag}")) {
+        PARSE_OPTIONS.hashtagEndpoint = options.hashtagEndpoint;
+      } else {
+        console.error("[Invalid] hashtagEndpoint: must be a string containing {tag}");
       }
     }
     if (typeof document === "undefined") {

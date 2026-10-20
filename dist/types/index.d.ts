@@ -7,6 +7,7 @@ export declare const DEFAULT_ENDPOINT: Required<DependencyEndpoint>;
 export declare const PARSE_OPTIONS: {
     indent: number;
     fileEndpoint: string;
+    hashtagEndpoint: string;
 };
 export declare function Init(options?: InitOptions, endpoint?: DependencyEndpoint): Promise<void[]>;
 export declare function Parse(content: string): AST;

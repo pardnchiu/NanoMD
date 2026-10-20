@@ -33,7 +33,8 @@ export const REGEX_MD_LINK = new RegExp(
     "\\[(?<label>[^\\]]+)\\]\\((?<href>https?:\\/\\/[^\\s)]+|(?![A-Za-z][A-Za-z0-9+.\\-]*:)[^\\s)]+)(?:[ \\t]+(?<q2>[\"'])(?<linkTitle>[^)\\n]*?)\\k<q2>)?\\)|" + // 2 [label](href "title")
     "\\[(?<refLabel>[^\\]]+)\\]\\[(?<ref>[^\\]]+)\\]|" + // 3 [label][ref]
     `(?<![\\w/])(?<path>${REGEX_FILE_PATH})|` + // 4 ~/a.md /Users/a/b.go, prevent a/b/c and http://a/b
-    `(?<url>${REGEX_URL})`, // 5 https://example.com
+    `(?<url>${REGEX_URL})|` + // 5 https://example.com
+    "(?<![\\p{L}\\p{M}\\p{N}_&#/])(?<hashtag>[#＃][\\p{L}\\p{M}\\p{N}_]+)", // 6 #tag, prevent a#b and &#123;
   "gu",
 );
 export const REGEX_MD_LINK_DEF = /^ {0,3}\[(?!\^)([^\]]+)\]:[ \t]*(https?:\/\/\S+|(?![A-Za-z][A-Za-z0-9+.\-]*:)\S+)(?:[ \t]+(["'])(.*)\3)?[ \t]*$/;
