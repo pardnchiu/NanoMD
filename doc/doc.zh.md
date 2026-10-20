@@ -58,6 +58,7 @@ npm run build:once
 |---|---|---|---|
 | `indent` | `number` | `4` | tab 換算的欄寬，影響巢狀清單與程式碼區塊縮排對齊 |
 | `fileEndpoint` | `string` | `""` | 點擊檔案路徑時呼叫的網址，`{filepath}` 會替換為編碼後的路徑（如 `http://localhost:3000/v1/file/open?path={filepath}`）；未設定或缺少 `{filepath}` 時，路徑輸出為純文字 |
+| `hashtagEndpoint` | `string` | `""` | `#tag` 的連結網址，`{tag}` 會替換為編碼後、不含 `#` 的標籤（如 `/tags/{tag}`）；未設定或缺少 `{tag}` 時，`#tag` 輸出為純文字 |
 | `enable.mermaid` | `boolean` | `false` | 載入 Mermaid，渲染 ` ```mermaid ` 區塊 |
 | `enable.latex` | `boolean` | `false` | 載入 KaTeX（JS＋CSS），渲染 ` ```math ` 與 `$...$` |
 | `enable.highlight` | `boolean` | `false` | 載入 code-prettify，為程式碼區塊上色 |
@@ -85,6 +86,7 @@ KaTeX 的字型以相對路徑寫在 CSS 內，自架時 `fonts/` 需與 `katex.
 | 深色模式 | 預設跟隨 `prefers-color-scheme`；`data-mode="dark"` 強制深色、`data-mode="light"` 強制淺色 |
 | 撐滿父元素 | `data-fill="1"` 讓容器絕對定位並填滿最近的定位祖先 |
 | 依賴區塊 | mermaid／math／chartjs 未經 `Refresh` 渲染時只顯示一般程式碼區塊；渲染成功後外殼標上 `data-rendered`，改顯示圖表、公式或圖形 |
+| 表格 | 表格依內容寬度顯示、儲存格不換行；超出容器時在 `md-table-wrap` 內水平捲動 |
 | 主題變數 | 在 `.nanomd` 上覆寫 `--text`、`--accent`、`--code-bg`、`--mark`、`--alert-note`... 等 CSS 變數 |
 
 ## 使用方式
@@ -110,7 +112,7 @@ const html = MDParser.Parse("## 標題\n\n- [x] 完成\n- [ ] 待辦").html();
 console.log(html);
 ```
 
-Node 沒有 DOM，`Init()` 只會設定 `indent`，不會載入任何依賴；`Refresh()` 直接回傳。
+Node 沒有 DOM，`Init()` 只會設定 `indent`、`fileEndpoint`、`hashtagEndpoint`，不會載入任何依賴；`Refresh()` 直接回傳。
 
 ### 進階：啟用 Mermaid、KaTeX、Chart.js 與上色
 
@@ -151,10 +153,20 @@ input.addEventListener("input", () => {
 
 ```javascript
 const ast = MDParser.Parse(source);
-const json = JSON.stringify(ast);
+const nodes = ast.json();
+await fetch("/render", { method: "POST", body: JSON.stringify(nodes) });
 ```
 
-`ast` 是陣列（繼承 `Array`），`html()` 掛在 prototype 上，不會出現在 JSON 內。
+`json()` 回傳深拷貝的一般 `BlockNode[]`：沒有 `html()`、`undefined` 欄位會被移除，修改它不影響 `ast`。
+
+### 進階：Hashtag 連結
+
+```javascript
+MDParser.Init({ hashtagEndpoint: "/tags/{tag}" });
+preview.innerHTML = MDParser.Parse("發版紀錄 #nanomd #中文").html();
+```
+
+`#tag` 與全形 `＃tag` 輸出為 `<a class="md-link md-hashtag" href="/tags/nanomd">#nanomd</a>`；標籤可包含任何語系的文字、數字、組合符號與 `_`。緊接在文字、數字、`_`、`&`、`#`、`/` 之後的 `#`（如 `a#b`、`&#123;`、網址錨點）不視為標籤，程式碼、數學式、連結文字內與跳脫的 `\#` 也不轉換。
 
 ### 進階：複製按鈕回饋
 
@@ -176,11 +188,12 @@ MDParser.OnCopyClick((success, pre) => {
 | `MDParser` | 命名空間 | 以下所有匯出的集合；IIFE 的全域名稱 |
 | `Parse` | `(content: string) => AST` | 解析 Markdown，回傳 AST |
 | `AST.html` | `() => string` | 將 AST 輸出為 HTML 字串，含跳脫與 raw HTML 清洗 |
-| `Init` | `(options?: InitOptions, endpoint?: DependencyEndpoint) => Promise<void[]>` | 設定 `indent` 並載入啟用的依賴 |
+| `AST.json` | `() => BlockNode[]` | 回傳節點的深拷貝，為不含 `AST` prototype 的純 JSON 資料 |
+| `Init` | `(options?: InitOptions, endpoint?: DependencyEndpoint) => Promise<void[]>` | 設定 `indent`、`fileEndpoint`、`hashtagEndpoint` 並載入啟用的依賴 |
 | `Refresh` | `(container?: ParentNode) => Promise<void>` | 在容器內綁定複製按鈕與檔案連結點擊、渲染 Chart.js、KaTeX、prettify、Mermaid；未傳入時處理整份 `document`；容器尚未放進頁面時不處理並記錄 `[Invalid]` |
 | `OnCopyClick` | `(handler: (success: boolean, pre: HTMLElement) => void) => void` | 註冊複製按鈕的結果回呼；只保留最後一次註冊 |
 | `DEFAULT_ENDPOINT` | `Required<DependencyEndpoint>` | 依賴的預設網址 |
-| `PARSE_OPTIONS` | `{ indent: number }` | 目前的解析設定 |
+| `PARSE_OPTIONS` | `{ indent: number; fileEndpoint: string; hashtagEndpoint: string }` | 目前的解析設定 |
 | `ParseLines` | `(lines: string[], nested?: boolean) => BlockNode[]` | 區塊解析器本體，不處理註腳與參照連結 |
 
 ### 區塊節點（BlockNode）
@@ -206,7 +219,7 @@ MDParser.OnCopyClick((success, pre) => {
 | `b`、`em`、`del`、`mark`、`sub`、`sup` | `children` | `**`／`__`、`*`／`_`、`~~`、`==`、`~x~`、`^x^`；`***` 為 `b` 包 `em` |
 | `code` | `value` | 任意長度反引號，開頭與結尾數量相同 |
 | `math` | `value` | `$...$` |
-| `link` | `href`、`tag?`、`title?`、`width?`、`height?`、`children` | 行內與參照式連結、相對路徑、裸網址、檔案路徑、`![]()` 圖片與影片；`tag` 為 `image`／`video`／`youtube`／`vimeo`／`file` |
+| `link` | `href`、`tag?`、`title?`、`width?`、`height?`、`children` | 行內與參照式連結、相對路徑、裸網址、檔案路徑、`![]()` 圖片與影片、`#tag`；`tag` 為 `image`／`video`／`youtube`／`vimeo`／`file`／`hashtag`（`href` 為不含 `#` 的標籤） |
 | `footnoteRef` | `id`、`index` | `[^id]` |
 
 圖片尺寸寫在 `![alt](src)` 後：`(300x200)`、`(50%x)`、`(x120)`、`(120)`；副檔名 `.mp4`／`.mov` 輸出為 `<video>`。
@@ -221,7 +234,7 @@ MDParser.OnCopyClick((success, pre) => {
 | `md-quote`、`md-alert`、`md-alert-{tag}`、`md-alert-title` | 引言與提示框 |
 | `md-list`、`md-task` | 清單與任務項目 |
 | `md-table-wrap`、`md-table` | 表格 |
-| `md-link`、`md-file-link`、`md-img`、`md-embed` | 連結、檔案連結（`data-path`，僅在設定 `fileEndpoint` 時輸出）、圖片／影片、內嵌播放器 |
+| `md-link`、`md-file-link`、`md-hashtag`、`md-img`、`md-embed` | 連結、檔案連結（`data-path`，僅在設定 `fileEndpoint` 時輸出）、hashtag（僅在設定 `hashtagEndpoint` 時輸出）、圖片／影片、內嵌播放器 |
 | `md-mermaid`、`md-latex`、`md-math`、`md-math-inline`、`md-chart` | 依賴渲染外殼 |
 | `md-footnote-ref`、`md-footnotes` | 註腳引用與註腳區（錨點 `#md-fn-{index}`） |
 | `prettyprint`、`copy` | 程式碼區塊與複製按鈕 |

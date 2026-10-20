@@ -32,8 +32,8 @@ Last updated: 2026-10-20
 > `npm i @pardnchiu/nanomd` · [Documentation](./doc/doc.md) · [v1 Deprecation](./doc/v1-deprecated.md) · [Docs Site](https://nanomd.pardn.io/)
 
 - **Single-Pass Line Parser** — Each line is scanned once to build the whole tree; a 4 MB document renders in about 150 ms, at least 7 times faster than v1 and more than 230 times faster at 1 MB.
-- **Renderer-Agnostic AST** — `Parse()` returns a node tree you can `JSON.stringify`; the web and SSR use `html()` directly, and native renderers for iOS or Flutter can be built on the same output.
-- **Extended Syntax Beyond GFM** — Footnotes, reference links, GitHub alerts, task lists, inline and block math, image sizing and video embeds are built in.
+- **Renderer-Agnostic AST** — `Parse()` returns a node tree and `json()` copies it out as plain data; the web and SSR use `html()` directly, and native renderers for iOS or Flutter can be built on the same output.
+- **Extended Syntax Beyond GFM** — Footnotes, reference links, GitHub alerts, task lists, inline and block math, image sizing, video embeds and `#tag` links are built in.
 - **On-Demand Dependencies with Fallbacks** — Only the enabled Mermaid, KaTeX, Chart.js and prettify load, and invalid blocks fall back to plain code blocks.
 - **Safe by Default** — Text and attributes are escaped at output, and raw HTML loses dangerous tags, event attributes and `javascript:` URLs.
 
@@ -61,6 +61,7 @@ graph LR
     Inline --> Post[Footnote and link-ref post-processing]
     Post --> AST[AST]
     AST --> HTML["AST.html()"]
+    AST --> JSON["AST.json()"]
     AST --> Native["Native rendering iOS/Flutter (build your own)"]
     HTML --> Refresh["Refresh() dependency rendering"]
     Init["Init() loads dependencies"] --> Refresh

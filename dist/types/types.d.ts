@@ -2,6 +2,7 @@ export interface InitOptions {
     enable?: DependencyEnable;
     indent?: number;
     fileEndpoint?: string;
+    hashtagEndpoint?: string;
 }
 export interface DependencyEndpoint {
     mermaidjs?: string;
@@ -132,10 +133,11 @@ export interface Footnote {
 }
 export type BlockquoteTag = "note" | "tip" | "important" | "warning" | "caution";
 export type TableAlign = "left" | "center" | "right";
-export type LinkTag = "youtube" | "vimeo" | "file" | "image" | "video";
+export type LinkTag = "youtube" | "vimeo" | "file" | "image" | "video" | "hashtag";
 export type MarkType = "b" | "em" | "del" | "mark" | "sub" | "sup";
 export interface AST {
     html(): string;
+    json(): BlockNode[];
 }
 export declare class AST extends Array<BlockNode> {
 }

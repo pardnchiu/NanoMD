@@ -29,7 +29,7 @@ Pin the exact version; `@latest` or an unversioned URL resolves to v2, where `MD
 | ESM exports `editor`, `viewer`, `MDViewer`, `MDEditor` | Removed; use `import { MDParser } from "@pardnchiu/nanomd"` |
 | `MDViewer` `sync.editor`, `sync.delay`, `sync.scroll` | Removed; listen for input and debounce yourself (see [Documentation](./doc.md#advanced-live-preview-with-debounce)) |
 | `MDViewer` `emptyContent` | Removed; the caller decides what to render for empty content |
-| `hashtag.path`, `hashtag.target` (`#tag` links) | Removed; `#tag` renders as plain text |
+| `hashtag.path`, `hashtag.target` (`#tag` links) | Replaced by `MDParser.Init({ hashtagEndpoint: "/tags/{tag}" })`; `{tag}` marks where the tag goes, and links open in a new tab |
 | `changeMode(mode)`, `style.mode` | Set `data-mode="dark"` / `"light"` on the `.nanomd` container; without it the system preference applies |
 | `style.fill` | Set `data-fill="1"` on the `.nanomd` container |
 | `download()`, `openfile()`, HTML export, deploy button | Removed with `MDEditor` |

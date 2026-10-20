@@ -58,6 +58,7 @@ npm run build:once
 |---|---|---|---|
 | `indent` | `number` | `4` | Column width of a tab, used for nested lists and code block alignment |
 | `fileEndpoint` | `string` | `""` | URL requested when a file path is clicked; `{filepath}` is replaced with the encoded path (such as `http://localhost:3000/v1/file/open?path={filepath}`); when unset or missing `{filepath}`, paths render as plain text |
+| `hashtagEndpoint` | `string` | `""` | Link target for `#tag`; `{tag}` is replaced with the encoded tag without `#` (such as `/tags/{tag}`); when unset or missing `{tag}`, `#tag` renders as plain text |
 | `enable.mermaid` | `boolean` | `false` | Loads Mermaid to render ` ```mermaid ` blocks |
 | `enable.latex` | `boolean` | `false` | Loads KaTeX (JS and CSS) to render ` ```math ` and `$...$` |
 | `enable.highlight` | `boolean` | `false` | Loads code-prettify to highlight code blocks |
@@ -85,6 +86,7 @@ KaTeX references its fonts by relative path inside the CSS, so when self-hosting
 | Dark mode | Follows `prefers-color-scheme` by default; `data-mode="dark"` forces dark, `data-mode="light"` forces light |
 | Fill parent | `data-fill="1"` positions the container absolutely to fill the nearest positioned ancestor |
 | Dependency blocks | Mermaid / math / chartjs blocks show only the plain code block until `Refresh` renders them; on success the wrapper gets `data-rendered` and shows the diagram, formula or chart instead |
+| Tables | Tables size to their content without wrapping cells; a table wider than the container scrolls horizontally inside `md-table-wrap` |
 | Theme variables | Override CSS variables such as `--text`, `--accent`, `--code-bg`, `--mark` and `--alert-note` on `.nanomd` |
 
 ## Usage
@@ -110,7 +112,7 @@ const html = MDParser.Parse("## Title\n\n- [x] Done\n- [ ] Todo").html();
 console.log(html);
 ```
 
-Node has no DOM, so `Init()` only sets `indent` and loads nothing, and `Refresh()` returns immediately.
+Node has no DOM, so `Init()` only sets `indent`, `fileEndpoint` and `hashtagEndpoint` and loads nothing, and `Refresh()` returns immediately.
 
 ### Advanced: Enable Mermaid, KaTeX, Chart.js and Highlighting
 
@@ -151,10 +153,20 @@ input.addEventListener("input", () => {
 
 ```javascript
 const ast = MDParser.Parse(source);
-const json = JSON.stringify(ast);
+const nodes = ast.json();
+await fetch("/render", { method: "POST", body: JSON.stringify(nodes) });
 ```
 
-`ast` is an array (it extends `Array`); `html()` lives on the prototype, so it never appears in the JSON.
+`json()` returns a deep copy as a plain `BlockNode[]`: it has no `html()`, `undefined` fields are dropped, and changing it does not affect `ast`.
+
+### Advanced: Link Hashtags
+
+```javascript
+MDParser.Init({ hashtagEndpoint: "/tags/{tag}" });
+preview.innerHTML = MDParser.Parse("Release notes #nanomd #中文").html();
+```
+
+`#tag` and full-width `＃tag` become `<a class="md-link md-hashtag" href="/tags/nanomd">#nanomd</a>`; tags accept letters, digits, marks and `_` in any script. `#` right after a letter, digit, `_`, `&`, `#` or `/` (such as `a#b`, `&#123;`, URL fragments) is not a tag, nor is `#` inside code, math, link text or escaped as `\#`.
 
 ### Advanced: Copy Button Feedback
 
@@ -176,11 +188,12 @@ MDParser.OnCopyClick((success, pre) => {
 | `MDParser` | Namespace | All of the exports below; the global name of the IIFE |
 | `Parse` | `(content: string) => AST` | Parses Markdown into an AST |
 | `AST.html` | `() => string` | Renders the AST to an HTML string with escaping and raw HTML sanitization |
-| `Init` | `(options?: InitOptions, endpoint?: DependencyEndpoint) => Promise<void[]>` | Sets `indent` and loads the enabled dependencies |
+| `AST.json` | `() => BlockNode[]` | Returns a deep copy of the nodes as plain JSON data, without the `AST` prototype |
+| `Init` | `(options?: InitOptions, endpoint?: DependencyEndpoint) => Promise<void[]>` | Sets `indent`, `fileEndpoint` and `hashtagEndpoint`, and loads the enabled dependencies |
 | `Refresh` | `(container?: ParentNode) => Promise<void>` | Binds copy buttons and file link clicks, and renders Chart.js, KaTeX, prettify and Mermaid inside the container; without an argument it processes the whole `document`; a container not yet in the document is skipped with an `[Invalid]` log |
 | `OnCopyClick` | `(handler: (success: boolean, pre: HTMLElement) => void) => void` | Registers the copy button result callback; only the last registration is kept |
 | `DEFAULT_ENDPOINT` | `Required<DependencyEndpoint>` | Default dependency URLs |
-| `PARSE_OPTIONS` | `{ indent: number }` | Current parse settings |
+| `PARSE_OPTIONS` | `{ indent: number; fileEndpoint: string; hashtagEndpoint: string }` | Current parse settings |
 | `ParseLines` | `(lines: string[], nested?: boolean) => BlockNode[]` | The block parser itself; does not resolve footnotes or reference links |
 
 ### Block Nodes (BlockNode)
@@ -206,7 +219,7 @@ MDParser.OnCopyClick((success, pre) => {
 | `b`, `em`, `del`, `mark`, `sub`, `sup` | `children` | `**` / `__`, `*` / `_`, `~~`, `==`, `~x~`, `^x^`; `***` is `b` wrapping `em` |
 | `code` | `value` | Backtick runs of any length with matching open and close counts |
 | `math` | `value` | `$...$` |
-| `link` | `href`, `tag?`, `title?`, `width?`, `height?`, `children` | Inline and reference links, relative paths, bare URLs, file paths, `![]()` images and videos; `tag` is `image` / `video` / `youtube` / `vimeo` / `file` |
+| `link` | `href`, `tag?`, `title?`, `width?`, `height?`, `children` | Inline and reference links, relative paths, bare URLs, file paths, `![]()` images and videos, `#tag`; `tag` is `image` / `video` / `youtube` / `vimeo` / `file` / `hashtag` (`href` holds the tag without `#`) |
 | `footnoteRef` | `id`, `index` | `[^id]` |
 
 Image size goes after `![alt](src)`: `(300x200)`, `(50%x)`, `(x120)`, `(120)`; `.mp4` / `.mov` sources render as `<video>`.
@@ -221,7 +234,7 @@ Image size goes after `![alt](src)`: `(300x200)`, `(50%x)`, `(x120)`, `(120)`; `
 | `md-quote`, `md-alert`, `md-alert-{tag}`, `md-alert-title` | Blockquotes and alerts |
 | `md-list`, `md-task` | Lists and task items |
 | `md-table-wrap`, `md-table` | Tables |
-| `md-link`, `md-file-link`, `md-img`, `md-embed` | Links, file links (`data-path`, only when `fileEndpoint` is set), images/videos, embedded players |
+| `md-link`, `md-file-link`, `md-hashtag`, `md-img`, `md-embed` | Links, file links (`data-path`, only when `fileEndpoint` is set), hashtags (only when `hashtagEndpoint` is set), images/videos, embedded players |
 | `md-mermaid`, `md-latex`, `md-math`, `md-math-inline`, `md-chart` | Dependency rendering wrappers |
 | `md-footnote-ref`, `md-footnotes` | Footnote references and section (anchor `#md-fn-{index}`) |
 | `prettyprint`, `copy` | Code blocks and the copy button |

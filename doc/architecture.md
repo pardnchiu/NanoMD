@@ -105,6 +105,9 @@ graph TB
         Inline --> FileLink{fileEndpoint set?}
         FileLink -->|Yes| FileA[md-file-link anchor]
         FileLink -->|No| FileText[Plain path text]
+        Inline --> TagLink{hashtagEndpoint set?}
+        TagLink -->|Yes| TagA[md-hashtag anchor]
+        TagLink -->|No| TagText[Plain #tag text]
         Render --> Raw[Raw HTML sanitization]
     end
     Escape[escapeHTML / escapeAttr] --> Inline

@@ -32,8 +32,8 @@
 > `npm i @pardnchiu/nanomd` · [完整文件](./doc.zh.md) · [v1 停用說明](./v1-deprecated.zh.md) · [文件站](https://nanomd.pardn.io/)
 
 - **單趟逐行解析** — 每行只掃描一次即建好整棵樹，4 MB 文件約 150 ms，比 v1 快 7 倍起，1 MB 文件差距超過 230 倍。
-- **與渲染無關的 AST** — `Parse()` 回傳可直接 `JSON.stringify` 的節點樹，Web 與 SSR 直接用 `html()`，iOS、Flutter 等原生渲染可依同一份結果自行開發。
-- **GFM 之外的擴充語法** — 註腳、參照式連結、GitHub 提示框、任務清單、行內與區塊數學式、圖片尺寸與影片嵌入皆內建。
+- **與渲染無關的 AST** — `Parse()` 回傳節點樹，`json()` 可複製成純資料，Web 與 SSR 直接用 `html()`，iOS、Flutter 等原生渲染可依同一份結果自行開發。
+- **GFM 之外的擴充語法** — 註腳、參照式連結、GitHub 提示框、任務清單、行內與區塊數學式、圖片尺寸、影片嵌入與 `#tag` 連結皆內建。
 - **依賴按需載入並自動退回** — 只載入啟用的 Mermaid、KaTeX、Chart.js、prettify；語法錯誤的區塊自動改顯示為一般程式碼區塊。
 - **輸出即安全** — 文字與屬性在輸出時跳脫，raw HTML 移除危險標籤、事件屬性與 `javascript:` 網址。
 
@@ -61,6 +61,7 @@ graph LR
     Inline --> Post[註腳與參照連結後處理]
     Post --> AST[AST]
     AST --> HTML["AST.html()"]
+    AST --> JSON["AST.json()"]
     AST --> Native[原生渲染 iOS／Flutter（自行開發）]
     HTML --> Refresh["Refresh() 依賴渲染"]
     Init["Init() 載入依賴"] --> Refresh

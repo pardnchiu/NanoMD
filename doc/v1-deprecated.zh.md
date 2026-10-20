@@ -29,7 +29,7 @@ npm i @pardnchiu/nanomd@1.11.6
 | ESM 匯出 `editor`、`viewer`、`MDViewer`、`MDEditor` | 移除；改為 `import { MDParser } from "@pardnchiu/nanomd"` |
 | `MDViewer` 的 `sync.editor`、`sync.delay`、`sync.scroll` | 移除；自行監聽輸入並防抖（見 [技術文件](./doc.zh.md#進階即時預覽防抖)） |
 | `MDViewer` 的 `emptyContent` | 移除；由呼叫端決定空內容時要渲染什麼 |
-| `hashtag.path`、`hashtag.target`（`#tag` 連結） | 移除，`#tag` 輸出為一般文字 |
+| `hashtag.path`、`hashtag.target`（`#tag` 連結） | 改用 `MDParser.Init({ hashtagEndpoint: "/tags/{tag}" })`，`{tag}` 標示標籤放入的位置，連結一律開新分頁 |
 | `changeMode(mode)`、`style.mode` | 在 `.nanomd` 容器設定 `data-mode="dark"`／`"light"`，未設定時跟隨系統 |
 | `style.fill` | 在 `.nanomd` 容器設定 `data-fill="1"` |
 | `download()`、`openfile()`、匯出 HTML、部署按鈕 | 隨 `MDEditor` 移除 |
