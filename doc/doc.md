@@ -170,14 +170,13 @@ preview.innerHTML = MDParser.Parse("Release notes #nanomd #中文").html();
 
 ### Advanced: Copy Button Feedback
 
+After a click, `Refresh()` adds `success` or `error` to the `pre` for one second; `parser.css` then changes the button label from `copy` to `copied` and switches the code background. Register `OnCopyClick` only to run your own code on top:
+
 ```javascript
 MDParser.OnCopyClick((success, pre) => {
-  pre.classList.add(success ? "success" : "error");
-  setTimeout(() => pre.classList.remove("success", "error"), 1000);
+  if (!success) showToast("Copy failed");
 });
 ```
-
-`parser.css` changes the button label from `copy` to `copied` on the `success` class of `pre`, and both `success` and `error` switch the code background.
 
 ## API Reference
 
@@ -191,7 +190,7 @@ MDParser.OnCopyClick((success, pre) => {
 | `AST.json` | `() => BlockNode[]` | Returns a deep copy of the nodes as plain JSON data, without the `AST` prototype |
 | `Init` | `(options?: InitOptions, endpoint?: DependencyEndpoint) => Promise<void[]>` | Sets `indent`, `fileEndpoint` and `hashtagEndpoint`, and loads the enabled dependencies |
 | `Refresh` | `(container?: ParentNode) => Promise<void>` | Binds copy buttons and file link clicks, and renders Chart.js, KaTeX, prettify and Mermaid inside the container; without an argument it processes the whole `document`; a container not yet in the document is skipped with an `[Invalid]` log |
-| `OnCopyClick` | `(handler: (success: boolean, pre: HTMLElement) => void) => void` | Registers the copy button result callback; only the last registration is kept |
+| `OnCopyClick` | `(handler: (success: boolean, pre: HTMLElement) => void) => void` | Registers a callback that runs after the built-in `success` / `error` feedback; only the last registration is kept |
 | `DEFAULT_ENDPOINT` | `Required<DependencyEndpoint>` | Default dependency URLs |
 | `PARSE_OPTIONS` | `{ indent: number; fileEndpoint: string; hashtagEndpoint: string }` | Current parse settings |
 | `ParseLines` | `(lines: string[], nested?: boolean) => BlockNode[]` | The block parser itself; does not resolve footnotes or reference links |

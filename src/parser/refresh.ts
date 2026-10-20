@@ -9,6 +9,8 @@ let mermaidCount = 0;
 
 let copyHandler: ((success: boolean, pre: HTMLElement) => void) | null = null;
 
+const copyTimers = new WeakMap<HTMLElement, ReturnType<typeof setTimeout>>();
+
 export function OnCopyClick(handler: (success: boolean, pre: HTMLElement) => void): void {
   copyHandler = handler;
 }
@@ -63,6 +65,10 @@ function bindCopy(root: ParentNode): void {
         console.error(`[Denied] clipboard: ${err instanceof Error ? err.message : err}`);
         success = false;
       }
+      clearTimeout(copyTimers.get(pre));
+      pre.classList.remove("success", "error");
+      pre.classList.add(success ? "success" : "error");
+      copyTimers.set(pre, setTimeout(() => pre.classList.remove("success", "error"), 1000));
       copyHandler?.(success, pre);
     };
   }
