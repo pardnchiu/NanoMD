@@ -79,6 +79,7 @@ export type InlineNode =
       children: InlineNode[];
     }
   | { type: "footnoteRef"; id: string; index: number }
+  | { type: "br" }
   | { type: "linkRef"; label: string; ref: string }
   | { type: MarkType; children: InlineNode[] };
 

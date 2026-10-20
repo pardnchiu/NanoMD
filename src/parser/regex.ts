@@ -59,6 +59,7 @@ export const REGEX_MD_INLINE = new RegExp(
   "g",
 );
 export const MD_INLINE_TYPES: (MarkType | "bem" | null)[] = [null, "bem", "bem", "b", "em", "b", "em", "del", "mark", "sub", "sup"];
+export const REGEX_MD_BR = /<br\s*\/?>/gi;
 export const REGEX_MD_ESCAPE = /\\([!-\/:-@\[-`{-~])/g; // \* => *, \` => `, \[ => [, \\ => \
 export const REGEX_HTML_SCRIPT =
   /<\s*(script|style|iframe|object|embed|form|link|meta|base)\b[\s\S]*?<\s*\/\s*\1\s*>|<\s*\/?\s*(script|style|iframe|object|embed|form|link|meta|base)\b[^>]*>/gi;

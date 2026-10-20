@@ -134,6 +134,8 @@ function renderInline(node: InlineNode): string {
     case "sub":
     case "sup":
       return `<${node.type}>${renderInlines(node.children)}</${node.type}>`;
+    case "br":
+      return `<br class="md-br">`;
     case "footnoteRef":
       return `<sup class="md-footnote-ref"><a href="#md-fn-${node.index}">${node.index}</a></sup>`;
     case "link":
