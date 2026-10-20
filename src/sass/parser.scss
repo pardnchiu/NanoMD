@@ -250,6 +250,44 @@
   list-style: decimal;
 }
 
+.nanomd :where(ul.md-list > li) {
+  list-style-type: disc;
+}
+.nanomd :where(ul.md-list > li > ul.md-list > li) {
+  list-style-type: circle;
+}
+.nanomd :where(ul.md-list > li > ul.md-list > li > ul.md-list > li) {
+  list-style-type: square;
+}
+.nanomd :where(ul.md-list > li > ul.md-list > li > ul.md-list > li > ul.md-list > li) {
+  list-style-type: "+ ";
+}
+.nanomd :where(ul.md-list > li > ul.md-list > li > ul.md-list > li > ul.md-list > li > ul.md-list > li) {
+  list-style-type: "- ";
+}
+.nanomd :where(ul.md-list > li > ul.md-list > li > ul.md-list > li > ul.md-list > li > ul.md-list > li > ul.md-list > li) {
+  list-style-type: "> ";
+}
+
+.nanomd :where(ol.md-list > li) {
+  list-style-type: decimal;
+}
+.nanomd :where(ol.md-list > li > ol.md-list > li) {
+  list-style-type: upper-alpha;
+}
+.nanomd :where(ol.md-list > li > ol.md-list > li > ol.md-list > li) {
+  list-style-type: lower-alpha;
+}
+.nanomd :where(ol.md-list > li > ol.md-list > li > ol.md-list > li > ol.md-list > li) {
+  list-style-type: upper-roman;
+}
+.nanomd :where(ol.md-list > li > ol.md-list > li > ol.md-list > li > ol.md-list > li > ol.md-list > li) {
+  list-style-type: lower-roman;
+}
+.nanomd :where(ol.md-list > li > ol.md-list > li > ol.md-list > li > ol.md-list > li > ol.md-list > li > ol.md-list > li) {
+  list-style-type: "> ";
+}
+
 .nanomd .md-list li {
   padding: 1px 0;
   overflow-wrap: anywhere;
