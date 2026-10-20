@@ -560,6 +560,9 @@ var MDParser = (() => {
       case "break":
         return "<br>";
       case "heading":
+        if (PARSE_OPTIONS.parseHeading) {
+          return `<h${node.level} class="md-h${node.level}">${renderInlines(node.children)}</h${node.level}>`;
+        }
         return `<span class="md-h${node.level}">${renderInlines(node.children)}</span>`;
       case "blockquote":
         return renderBlockquote(node);
@@ -944,7 +947,8 @@ var MDParser = (() => {
   var PARSE_OPTIONS = {
     indent: 4,
     fileEndpoint: "",
-    hashtagEndpoint: ""
+    hashtagEndpoint: "",
+    parseHeading: false
   };
   var insertedDependencies = /* @__PURE__ */ new Map();
   if (typeof document !== "undefined" && SCRIPT_URL && SCRIPT_ELEMENT?.dataset.nanomdCss !== "off") {
@@ -968,6 +972,7 @@ var MDParser = (() => {
         console.error("[Invalid] hashtagEndpoint: must be a string containing {tag}");
       }
     }
+    PARSE_OPTIONS.parseHeading = options.parseHeading === true;
     if (typeof document === "undefined") {
       return Promise.resolve([]);
     }

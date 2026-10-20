@@ -8,6 +8,7 @@ export declare const PARSE_OPTIONS: {
     indent: number;
     fileEndpoint: string;
     hashtagEndpoint: string;
+    parseHeading: boolean;
 };
 export declare function Init(options?: InitOptions, endpoint?: DependencyEndpoint): Promise<void[]>;
 export declare function Parse(content: string): AST;

@@ -3,6 +3,7 @@ export interface InitOptions {
     indent?: number;
     fileEndpoint?: string;
     hashtagEndpoint?: string;
+    parseHeading?: boolean;
 }
 export interface DependencyEndpoint {
     mermaidjs?: string;
