@@ -789,6 +789,7 @@ var MDParser = (() => {
   var mermaidReady = false;
   var mermaidCount = 0;
   var copyHandler = null;
+  var copyTimers = /* @__PURE__ */ new WeakMap();
   function OnCopyClick(handler) {
     copyHandler = handler;
   }
@@ -839,6 +840,10 @@ var MDParser = (() => {
           console.error(`[Denied] clipboard: ${err instanceof Error ? err.message : err}`);
           success = false;
         }
+        clearTimeout(copyTimers.get(pre));
+        pre.classList.remove("success", "error");
+        pre.classList.add(success ? "success" : "error");
+        copyTimers.set(pre, setTimeout(() => pre.classList.remove("success", "error"), 1e3));
         copyHandler?.(success, pre);
       };
     }

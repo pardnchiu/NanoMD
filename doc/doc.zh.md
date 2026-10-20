@@ -170,14 +170,13 @@ preview.innerHTML = MDParser.Parse("發版紀錄 #nanomd #中文").html();
 
 ### 進階：複製按鈕回饋
 
+點擊後 `Refresh()` 會在 `pre` 加上 `success` 或 `error` 一秒，`parser.css` 據此把按鈕文字從 `copy` 換成 `copied` 並切換程式碼底色。需要額外處理時再註冊 `OnCopyClick`：
+
 ```javascript
 MDParser.OnCopyClick((success, pre) => {
-  pre.classList.add(success ? "success" : "error");
-  setTimeout(() => pre.classList.remove("success", "error"), 1000);
+  if (!success) showToast("複製失敗");
 });
 ```
-
-`parser.css` 依 `pre` 上的 `success` class 把按鈕文字從 `copy` 換成 `copied`，`success`／`error` 也會切換程式碼底色。
 
 ## API 參考
 
@@ -191,7 +190,7 @@ MDParser.OnCopyClick((success, pre) => {
 | `AST.json` | `() => BlockNode[]` | 回傳節點的深拷貝，為不含 `AST` prototype 的純 JSON 資料 |
 | `Init` | `(options?: InitOptions, endpoint?: DependencyEndpoint) => Promise<void[]>` | 設定 `indent`、`fileEndpoint`、`hashtagEndpoint` 並載入啟用的依賴 |
 | `Refresh` | `(container?: ParentNode) => Promise<void>` | 在容器內綁定複製按鈕與檔案連結點擊、渲染 Chart.js、KaTeX、prettify、Mermaid；未傳入時處理整份 `document`；容器尚未放進頁面時不處理並記錄 `[Invalid]` |
-| `OnCopyClick` | `(handler: (success: boolean, pre: HTMLElement) => void) => void` | 註冊複製按鈕的結果回呼；只保留最後一次註冊 |
+| `OnCopyClick` | `(handler: (success: boolean, pre: HTMLElement) => void) => void` | 註冊在內建 `success`／`error` 回饋之後執行的回呼；只保留最後一次註冊 |
 | `DEFAULT_ENDPOINT` | `Required<DependencyEndpoint>` | 依賴的預設網址 |
 | `PARSE_OPTIONS` | `{ indent: number; fileEndpoint: string; hashtagEndpoint: string }` | 目前的解析設定 |
 | `ParseLines` | `(lines: string[], nested?: boolean) => BlockNode[]` | 區塊解析器本體，不處理註腳與參照連結 |
