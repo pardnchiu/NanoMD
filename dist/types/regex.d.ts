@@ -27,6 +27,7 @@ export declare const REGEX_YOUTUBE: RegExp;
 export declare const REGEX_VIMEO: RegExp;
 export declare const REGEX_MD_INLINE: RegExp;
 export declare const MD_INLINE_TYPES: (MarkType | "bem" | null)[];
+export declare const REGEX_MD_BR: RegExp;
 export declare const REGEX_MD_ESCAPE: RegExp;
 export declare const REGEX_HTML_SCRIPT: RegExp;
 export declare const REGEX_HTML_EVENT: RegExp;

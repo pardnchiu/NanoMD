@@ -104,6 +104,8 @@ export type InlineNode = {
     id: string;
     index: number;
 } | {
+    type: "br";
+} | {
     type: "linkRef";
     label: string;
     ref: string;

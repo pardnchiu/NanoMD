@@ -1,5 +1,6 @@
 import {
   REGEX_MD_FILE_PATH_TRAILING,
+  REGEX_MD_BR,
   REGEX_MD_ESCAPE,
   REGEX_MD_FOOTNOTE_REF,
   REGEX_MD_IMAGE_SIZE_PERCENT,
@@ -46,6 +47,10 @@ export function ParseLink(text: string): { mask: string; links: InlineNode[] } {
     })
     .replace(REGEX_MD_ESCAPE, (_, char: string) => {
       links.push({ type: "text", value: char });
+      return `\u0000${links.length - 1}\u0000`;
+    })
+    .replace(REGEX_MD_BR, () => {
+      links.push({ type: "br" });
       return `\u0000${links.length - 1}\u0000`;
     })
     .replace(REGEX_MD_FOOTNOTE_REF, (_, id: string) => {

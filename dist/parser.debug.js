@@ -93,6 +93,7 @@ var MDParser = (() => {
     "g"
   );
   var MD_INLINE_TYPES = [null, "bem", "bem", "b", "em", "b", "em", "del", "mark", "sub", "sup"];
+  var REGEX_MD_BR = /<br\s*\/?>/gi;
   var REGEX_MD_ESCAPE = /\\([!-\/:-@\[-`{-~])/g;
   var REGEX_HTML_SCRIPT = /<\s*(script|style|iframe|object|embed|form|link|meta|base)\b[\s\S]*?<\s*\/\s*\1\s*>|<\s*\/?\s*(script|style|iframe|object|embed|form|link|meta|base)\b[^>]*>/gi;
   var REGEX_HTML_EVENT = /\son[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi;
@@ -361,6 +362,9 @@ var MDParser = (() => {
       return `\0${links.length - 1}\0`;
     }).replace(REGEX_MD_ESCAPE, (_, char) => {
       links.push({ type: "text", value: char });
+      return `\0${links.length - 1}\0`;
+    }).replace(REGEX_MD_BR, () => {
+      links.push({ type: "br" });
       return `\0${links.length - 1}\0`;
     }).replace(REGEX_MD_FOOTNOTE_REF, (_, id) => {
       links.push({ type: "footnoteRef", id, index: 0 });
@@ -659,6 +663,8 @@ var MDParser = (() => {
       case "sub":
       case "sup":
         return `<${node.type}>${renderInlines(node.children)}</${node.type}>`;
+      case "br":
+        return `<br class="md-br">`;
       case "footnoteRef":
         return `<sup class="md-footnote-ref"><a href="#md-fn-${node.index}">${node.index}</a></sup>`;
       case "link":
