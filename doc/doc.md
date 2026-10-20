@@ -16,7 +16,7 @@ Last updated: 2026-10-20
 ### CDN (IIFE)
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@2.0.0/dist/parser.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@2.0.5/dist/parser.js"></script>
 ```
 
 The script exposes a global `MDParser` and inserts `parser.css` from the same directory into `<head>`.
@@ -87,6 +87,7 @@ KaTeX references its fonts by relative path inside the CSS, so when self-hosting
 | Fill parent | `data-fill="1"` positions the container absolutely to fill the nearest positioned ancestor |
 | Dependency blocks | Mermaid / math / chartjs blocks show only the plain code block until `Refresh` renders them; on success the wrapper gets `data-rendered` and shows the diagram, formula or chart instead |
 | Tables | Tables size to their content and a cell wraps once it reaches `32rem`; a table wider than the container scrolls horizontally inside `md-table-wrap` |
+| Lists | Nested list markers change with depth: `ul` uses disc, circle, square, `+`, `-`, `>`; `ol` uses decimal, upper-alpha, lower-alpha, upper-roman, lower-roman, `>`; task items show no marker |
 | Theme variables | Override CSS variables such as `--text`, `--accent`, `--code-bg`, `--mark` and `--alert-note` on `.nanomd` |
 
 ## Usage
@@ -96,7 +97,7 @@ KaTeX references its fonts by relative path inside the CSS, so when self-hosting
 ```html
 <div id="preview" class="nanomd"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@2.0.0/dist/parser.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@2.0.5/dist/parser.js"></script>
 <script>
   const preview = document.getElementById("preview");
   preview.innerHTML = MDParser.Parse("# Hello\n\nThis is **NanoMD**.").html();

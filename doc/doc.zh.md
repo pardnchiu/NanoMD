@@ -16,7 +16,7 @@
 ### CDN（IIFE）
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@2.0.0/dist/parser.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@2.0.5/dist/parser.js"></script>
 ```
 
 載入後提供全域 `MDParser`，並自動在 `<head>` 插入與 `parser.js` 同目錄的 `parser.css`。
@@ -87,6 +87,7 @@ KaTeX 的字型以相對路徑寫在 CSS 內，自架時 `fonts/` 需與 `katex.
 | 撐滿父元素 | `data-fill="1"` 讓容器絕對定位並填滿最近的定位祖先 |
 | 依賴區塊 | mermaid／math／chartjs 未經 `Refresh` 渲染時只顯示一般程式碼區塊；渲染成功後外殼標上 `data-rendered`，改顯示圖表、公式或圖形 |
 | 表格 | 表格依內容寬度顯示，儲存格超過 `32rem` 時換行；超出容器時在 `md-table-wrap` 內水平捲動 |
+| 清單 | 巢狀清單依層級切換符號：`ul` 依序為 disc、circle、square、`+`、`-`、`>`；`ol` 依序為 decimal、upper-alpha、lower-alpha、upper-roman、lower-roman、`>`；任務項目不顯示符號 |
 | 主題變數 | 在 `.nanomd` 上覆寫 `--text`、`--accent`、`--code-bg`、`--mark`、`--alert-note`... 等 CSS 變數 |
 
 ## 使用方式
@@ -96,7 +97,7 @@ KaTeX 的字型以相對路徑寫在 CSS 內，自架時 `fonts/` 需與 `katex.
 ```html
 <div id="preview" class="nanomd"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@2.0.0/dist/parser.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@2.0.5/dist/parser.js"></script>
 <script>
   const preview = document.getElementById("preview");
   preview.innerHTML = MDParser.Parse("# Hello\n\n這是 **NanoMD**。").html();
