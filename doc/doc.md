@@ -1,6 +1,6 @@
 # NanoMD - Documentation
 
-Last updated: 2026-10-20
+Last updated: 2026-10-21
 
 > Back to [README](../README.md)
 
@@ -52,13 +52,14 @@ npm run build:once
 
 ### Init Options
 
-`Init(options, endpoint)` sets the indent width and loads external dependencies; the returned Promise resolves once every dependency has loaded.
+`Init(options, endpoint)` sets the parse options and loads external dependencies; the returned Promise resolves once every dependency has loaded.
 
 | Option | Type | Default | Description |
 |---|---|---|---|
 | `indent` | `number` | `4` | Column width of a tab, used for nested lists and code block alignment |
 | `fileEndpoint` | `string` | `""` | URL requested when a file path is clicked; `{filepath}` is replaced with the encoded path (such as `http://localhost:3000/v1/file/open?path={filepath}`); when unset or missing `{filepath}`, paths render as plain text |
 | `hashtagEndpoint` | `string` | `""` | Link target for `#tag`; `{tag}` is replaced with the encoded tag without `#` (such as `/tags/{tag}`); when unset or missing `{tag}`, `#tag` renders as plain text |
+| `parseHeading` | `boolean` | `false` | When `true`, headings render as `<h1 class="md-h1">` to `<h6 class="md-h6">`; otherwise as `<span class="md-h1">` to `<span class="md-h6">`. Only the boolean `true` enables it |
 | `enable.mermaid` | `boolean` | `false` | Loads Mermaid to render ` ```mermaid ` blocks |
 | `enable.latex` | `boolean` | `false` | Loads KaTeX (JS and CSS) to render ` ```math ` and `$...$` |
 | `enable.highlight` | `boolean` | `false` | Loads code-prettify to highlight code blocks |
@@ -86,7 +87,7 @@ KaTeX references its fonts by relative path inside the CSS, so when self-hosting
 | Dark mode | Follows `prefers-color-scheme` by default; `data-mode="dark"` forces dark, `data-mode="light"` forces light |
 | Fill parent | `data-fill="1"` positions the container absolutely to fill the nearest positioned ancestor |
 | Dependency blocks | Mermaid / math / chartjs blocks show only the plain code block until `Refresh` renders them; on success the wrapper gets `data-rendered` and shows the diagram, formula or chart instead |
-| Tables | Tables size to their content and a cell wraps once it reaches `32rem`; a table wider than the container scrolls horizontally inside `md-table-wrap` |
+| Tables | Tables size to their content and a cell wraps once it reaches `40rem`; a table wider than the container scrolls horizontally inside `md-table-wrap` |
 | Lists | Nested list markers change with depth: `ul` uses disc, circle, square, `+`, `-`, `>`; `ol` uses decimal, upper-alpha, lower-alpha, upper-roman, lower-roman, `>`; task items show no marker |
 | Theme variables | Override CSS variables such as `--text`, `--accent`, `--code-bg`, `--mark` and `--alert-note` on `.nanomd` |
 
@@ -113,7 +114,7 @@ const html = MDParser.Parse("## Title\n\n- [x] Done\n- [ ] Todo").html();
 console.log(html);
 ```
 
-Node has no DOM, so `Init()` only sets `indent`, `fileEndpoint` and `hashtagEndpoint` and loads nothing, and `Refresh()` returns immediately.
+Node has no DOM, so `Init()` only sets `indent`, `fileEndpoint`, `hashtagEndpoint` and `parseHeading` and loads nothing, and `Refresh()` returns immediately.
 
 ### Advanced: Enable Mermaid, KaTeX, Chart.js and Highlighting
 
@@ -189,11 +190,11 @@ MDParser.OnCopyClick((success, pre) => {
 | `Parse` | `(content: string) => AST` | Parses Markdown into an AST |
 | `AST.html` | `() => string` | Renders the AST to an HTML string with escaping and raw HTML sanitization |
 | `AST.json` | `() => BlockNode[]` | Returns a deep copy of the nodes as plain JSON data, without the `AST` prototype |
-| `Init` | `(options?: InitOptions, endpoint?: DependencyEndpoint) => Promise<void[]>` | Sets `indent`, `fileEndpoint` and `hashtagEndpoint`, and loads the enabled dependencies |
+| `Init` | `(options?: InitOptions, endpoint?: DependencyEndpoint) => Promise<void[]>` | Sets `indent`, `fileEndpoint`, `hashtagEndpoint` and `parseHeading`, and loads the enabled dependencies |
 | `Refresh` | `(container?: ParentNode) => Promise<void>` | Binds copy buttons and file link clicks, and renders Chart.js, KaTeX, prettify and Mermaid inside the container; without an argument it processes the whole `document`; a container not yet in the document is skipped with an `[Invalid]` log |
 | `OnCopyClick` | `(handler: (success: boolean, pre: HTMLElement) => void) => void` | Registers a callback that runs after the built-in `success` / `error` feedback; only the last registration is kept |
 | `DEFAULT_ENDPOINT` | `Required<DependencyEndpoint>` | Default dependency URLs |
-| `PARSE_OPTIONS` | `{ indent: number; fileEndpoint: string; hashtagEndpoint: string }` | Current parse settings |
+| `PARSE_OPTIONS` | `{ indent: number; fileEndpoint: string; hashtagEndpoint: string; parseHeading: boolean }` | Current parse settings |
 | `ParseLines` | `(lines: string[], nested?: boolean) => BlockNode[]` | The block parser itself; does not resolve footnotes or reference links |
 
 ### Block Nodes (BlockNode)
@@ -230,7 +231,7 @@ Image size goes after `![alt](src)`: `(300x200)`, `(50%x)`, `(x120)`, `(120)`; `
 | Class | Element |
 |---|---|
 | `md-line` | Paragraph |
-| `md-h1` to `md-h6` | Headings |
+| `md-h1` to `md-h6` | Headings (on `<span>`, or on `<h1>` to `<h6>` when `parseHeading` is `true`) |
 | `md-bold` | Bold |
 | `md-quote`, `md-alert`, `md-alert-{tag}`, `md-alert-title` | Blockquotes and alerts |
 | `md-list`, `md-task` | Lists and task items |

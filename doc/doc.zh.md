@@ -1,6 +1,6 @@
 # NanoMD - 技術文件
 
-最後更新：2026-10-20
+最後更新：2026-10-21
 
 > 返回 [README](./README.zh.md)
 
@@ -52,13 +52,14 @@ npm run build:once
 
 ### Init 選項
 
-`Init(options, endpoint)` 設定縮排寬度並載入外部依賴，回傳的 Promise 在所有依賴載入完成後 resolve。
+`Init(options, endpoint)` 設定解析選項並載入外部依賴，回傳的 Promise 在所有依賴載入完成後 resolve。
 
 | 選項 | 型別 | 預設 | 說明 |
 |---|---|---|---|
 | `indent` | `number` | `4` | tab 換算的欄寬，影響巢狀清單與程式碼區塊縮排對齊 |
 | `fileEndpoint` | `string` | `""` | 點擊檔案路徑時呼叫的網址，`{filepath}` 會替換為編碼後的路徑（如 `http://localhost:3000/v1/file/open?path={filepath}`）；未設定或缺少 `{filepath}` 時，路徑輸出為純文字 |
 | `hashtagEndpoint` | `string` | `""` | `#tag` 的連結網址，`{tag}` 會替換為編碼後、不含 `#` 的標籤（如 `/tags/{tag}`）；未設定或缺少 `{tag}` 時，`#tag` 輸出為純文字 |
+| `parseHeading` | `boolean` | `false` | 為 `true` 時標題輸出為 `<h1 class="md-h1">`～`<h6 class="md-h6">`，否則輸出為 `<span class="md-h1">`～`<span class="md-h6">`；只有布林值 `true` 會啟用 |
 | `enable.mermaid` | `boolean` | `false` | 載入 Mermaid，渲染 ` ```mermaid ` 區塊 |
 | `enable.latex` | `boolean` | `false` | 載入 KaTeX（JS＋CSS），渲染 ` ```math ` 與 `$...$` |
 | `enable.highlight` | `boolean` | `false` | 載入 code-prettify，為程式碼區塊上色 |
@@ -86,7 +87,7 @@ KaTeX 的字型以相對路徑寫在 CSS 內，自架時 `fonts/` 需與 `katex.
 | 深色模式 | 預設跟隨 `prefers-color-scheme`；`data-mode="dark"` 強制深色、`data-mode="light"` 強制淺色 |
 | 撐滿父元素 | `data-fill="1"` 讓容器絕對定位並填滿最近的定位祖先 |
 | 依賴區塊 | mermaid／math／chartjs 未經 `Refresh` 渲染時只顯示一般程式碼區塊；渲染成功後外殼標上 `data-rendered`，改顯示圖表、公式或圖形 |
-| 表格 | 表格依內容寬度顯示，儲存格超過 `32rem` 時換行；超出容器時在 `md-table-wrap` 內水平捲動 |
+| 表格 | 表格依內容寬度顯示，儲存格超過 `40rem` 時換行；超出容器時在 `md-table-wrap` 內水平捲動 |
 | 清單 | 巢狀清單依層級切換符號：`ul` 依序為 disc、circle、square、`+`、`-`、`>`；`ol` 依序為 decimal、upper-alpha、lower-alpha、upper-roman、lower-roman、`>`；任務項目不顯示符號 |
 | 主題變數 | 在 `.nanomd` 上覆寫 `--text`、`--accent`、`--code-bg`、`--mark`、`--alert-note`... 等 CSS 變數 |
 
@@ -113,7 +114,7 @@ const html = MDParser.Parse("## 標題\n\n- [x] 完成\n- [ ] 待辦").html();
 console.log(html);
 ```
 
-Node 沒有 DOM，`Init()` 只會設定 `indent`、`fileEndpoint`、`hashtagEndpoint`，不會載入任何依賴；`Refresh()` 直接回傳。
+Node 沒有 DOM，`Init()` 只會設定 `indent`、`fileEndpoint`、`hashtagEndpoint`、`parseHeading`，不會載入任何依賴；`Refresh()` 直接回傳。
 
 ### 進階：啟用 Mermaid、KaTeX、Chart.js 與上色
 
@@ -189,11 +190,11 @@ MDParser.OnCopyClick((success, pre) => {
 | `Parse` | `(content: string) => AST` | 解析 Markdown，回傳 AST |
 | `AST.html` | `() => string` | 將 AST 輸出為 HTML 字串，含跳脫與 raw HTML 清洗 |
 | `AST.json` | `() => BlockNode[]` | 回傳節點的深拷貝，為不含 `AST` prototype 的純 JSON 資料 |
-| `Init` | `(options?: InitOptions, endpoint?: DependencyEndpoint) => Promise<void[]>` | 設定 `indent`、`fileEndpoint`、`hashtagEndpoint` 並載入啟用的依賴 |
+| `Init` | `(options?: InitOptions, endpoint?: DependencyEndpoint) => Promise<void[]>` | 設定 `indent`、`fileEndpoint`、`hashtagEndpoint`、`parseHeading` 並載入啟用的依賴 |
 | `Refresh` | `(container?: ParentNode) => Promise<void>` | 在容器內綁定複製按鈕與檔案連結點擊、渲染 Chart.js、KaTeX、prettify、Mermaid；未傳入時處理整份 `document`；容器尚未放進頁面時不處理並記錄 `[Invalid]` |
 | `OnCopyClick` | `(handler: (success: boolean, pre: HTMLElement) => void) => void` | 註冊在內建 `success`／`error` 回饋之後執行的回呼；只保留最後一次註冊 |
 | `DEFAULT_ENDPOINT` | `Required<DependencyEndpoint>` | 依賴的預設網址 |
-| `PARSE_OPTIONS` | `{ indent: number; fileEndpoint: string; hashtagEndpoint: string }` | 目前的解析設定 |
+| `PARSE_OPTIONS` | `{ indent: number; fileEndpoint: string; hashtagEndpoint: string; parseHeading: boolean }` | 目前的解析設定 |
 | `ParseLines` | `(lines: string[], nested?: boolean) => BlockNode[]` | 區塊解析器本體，不處理註腳與參照連結 |
 
 ### 區塊節點（BlockNode）
@@ -230,7 +231,7 @@ MDParser.OnCopyClick((success, pre) => {
 | class | 元素 |
 |---|---|
 | `md-line` | 段落 |
-| `md-h1`～`md-h6` | 標題 |
+| `md-h1`～`md-h6` | 標題（套在 `<span>` 上，`parseHeading` 為 `true` 時套在 `<h1>`～`<h6>` 上） |
 | `md-bold` | 粗體 |
 | `md-quote`、`md-alert`、`md-alert-{tag}`、`md-alert-title` | 引言與提示框 |
 | `md-list`、`md-task` | 清單與任務項目 |
