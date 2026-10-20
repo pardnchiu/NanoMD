@@ -4,9 +4,13 @@ import { CODE_TYPES, REGEX_HTML_EVENT, REGEX_HTML_SCRIPT, REGEX_HTML_URL, REGEX_
 import { AST } from "./types";
 import type { BlockNode, InlineNode, ListItem, TableRow } from "./types";
 
-// * split to 2 fn, Parse() => AST, Parse().hmtl() => html
+// * split to 2 fn, Parse().json() => record<>, Parse().hmtl() => string
 AST.prototype.html = function (this: AST): string {
   return this.map(render).join("");
+};
+
+AST.prototype.json = function (this: AST): BlockNode[] {
+  return JSON.parse(JSON.stringify(this));
 };
 
 function render(node: BlockNode): string {
@@ -146,6 +150,13 @@ function renderLink(node: Extract<InlineNode, { type: "link" }>): string {
       return children;
     }
     return `<a class="md-link md-file-link" data-path="${escapeAttr(node.href)}">${children}</a>`;
+  }
+  if (node.tag === "hashtag") {
+    if (!PARSE_OPTIONS.hashtagEndpoint) {
+      return children;
+    }
+    const href = PARSE_OPTIONS.hashtagEndpoint.replaceAll("{tag}", encodeURIComponent(node.href));
+    return `<a href="${escapeAttr(href)}" target="_blank" rel="noopener" class="md-link md-hashtag">${children}</a>`;
   }
   const title = node.title ? ` title="${escapeAttr(node.title)}"` : "";
   if (node.tag === "image" || node.tag === "video") {

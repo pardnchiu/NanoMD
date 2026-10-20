@@ -106,7 +106,7 @@
 
 .nanomd :where(img, video) {
   max-width: 100%;
-  padding-inline: 0.125em;
+  padding-inline: 0.125rem;
 }
 
 .nanomd .md-h1,
@@ -121,28 +121,28 @@
 }
 
 .nanomd .md-h1 {
-  font-size: 1.75em;
+  font-size: 1.75rem;
   padding-bottom: 0;
   margin-bottom: 0.5rem;
   border-bottom: 1px solid var(--gray-2);
 }
 .nanomd .md-h2 {
-  font-size: 1.5em;
+  font-size: 1.5rem;
   padding-bottom: 0;
   margin-bottom: 0.5rem;
   border-bottom: 1px solid var(--gray-2);
 }
 .nanomd .md-h3 {
-  font-size: 1.25em;
+  font-size: 1.25rem;
 }
 .nanomd .md-h4 {
-  font-size: 1.1em;
+  font-size: 1.125rem;
 }
 .nanomd .md-h5 {
-  font-size: 1em;
+  font-size: 1rem;
 }
 .nanomd .md-h6 {
-  font-size: 0.9em;
+  font-size: 0.875rem;
   color: var(--gray-3);
 }
 
@@ -153,7 +153,7 @@
 
 .nanomd .md-line {
   display: block;
-  line-height: 1.7;
+  line-height: 1.75;
 }
 
 .nanomd br {
@@ -161,14 +161,14 @@
 }
 
 .nanomd br + * {
-  margin-top: 0.5em;
+  margin-top: 0.5rem;
 }
 
 .nanomd blockquote.md-quote {
   display: block;
-  margin: 4px 0;
-  padding: 2px 0 2px 10px;
-  border-left: 3px solid var(--accent);
+  margin: 0.25rem 0;
+  padding: 0.125rem 0 0.125rem 0.875rem;
+  border-left: 0.25rem solid var(--accent);
   color: var(--gray-3);
 }
 
@@ -195,34 +195,35 @@
   width: auto;
   height: auto;
   max-width: 100%;
-  max-height: 320px;
-  border-radius: 4px;
-  margin-top: 4px;
+  max-height: 20rem;
+  border-radius: 0.25rem;
+  margin-top: 0.25rem;
 }
 
 .nanomd .md-table-wrap {
   overflow-x: auto;
   max-width: 100%;
-  margin: 4px 0;
+  margin: 0.25rem 0;
+  -webkit-overflow-scrolling: touch;
 }
 
 .nanomd table.md-table {
   border-collapse: collapse;
-  white-space: normal;
-  width: auto;
-  max-width: 100%;
+  width: max-content;
+  max-width: none;
   font-family: inherit;
-  font-size: 0.875em;
+  font-size: 0.875rem;
 }
 
 .nanomd table.md-table th,
 .nanomd table.md-table td {
   width: auto;
-  min-width: 4em;
+  min-width: 4rem;
   max-width: none;
-  height: 2.75em;
+  height: 2.75rem;
+  white-space: nowrap;
   border: 1px solid var(--gray-2);
-  padding: 3px 10px;
+  padding: 0.25rem 0.875rem;
   text-align: left;
   color: var(--ink);
 }
@@ -238,8 +239,8 @@
 .nanomd ul.md-list,
 .nanomd ol.md-list {
   display: block;
-  margin: 4px 0;
-  padding-left: 1.6em;
+  margin: 0.25rem 0;
+  padding-left: 1.5rem;
   white-space: normal;
 }
 
@@ -258,8 +259,8 @@
 .nanomd .md-list li.md-task {
   display: flex;
   align-items: baseline;
-  gap: 0.5em;
-  margin-left: -1.4em;
+  gap: 0.5rem;
+  margin-left: -1.5rem;
   list-style: none;
 }
 
@@ -293,7 +294,7 @@
 
 .nanomd .md-chart {
   position: relative;
-  width: 640px;
+  width: 40rem;
   max-width: 100%;
   margin: 1rem 0 0.5rem;
 }
@@ -437,9 +438,9 @@
 }
 
 .nanomd blockquote.md-alert {
-  padding: 8px 12px;
+  padding: 0.75rem 0.875rem;
   border-left-color: var(--alert-color);
-  border-radius: 0 6px 6px 0;
+  border-radius: 0 0.25rem 0.25rem 0;
   background: color-mix(in srgb, var(--alert-color) 10%, transparent);
   color: var(--text-color);
 }
@@ -473,14 +474,14 @@
 }
 
 .nanomd section.md-footnotes {
-  margin-top: 12px;
-  padding-top: 8px;
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
   border-top: 1px solid var(--gray-2);
   font-size: small;
 }
 
 .nanomd section.md-footnotes > ol {
-  padding-left: 1.6em;
+  padding-left: 1.5em;
   list-style: decimal;
 }
 
@@ -497,18 +498,18 @@
 
 .nanomd .md-embed {
   display: block;
-  width: 640px;
+  width: 40rem;
   max-width: 100%;
   aspect-ratio: 16 / 9;
-  margin-top: 4px;
+  margin-top: 0.25rem;
   border: 0;
 }
 
 .nanomd code {
   background: var(--gray);
-  border: 1px solid var(--gray-2);
-  border-radius: 3px;
-  padding: 1px 4px;
+  border: 0.5px solid var(--gray-2);
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.375rem;
   font-family: "JetBrains Mono", monospace;
-  font-size: 0.92em;
+  font-size: 0.875rem;
 }
