@@ -81,7 +81,7 @@ export type InlineNode =
     }
   | { type: "footnoteRef"; id: string; index: number }
   | { type: "br" }
-  | { type: "linkRef"; label: string; ref: string }
+  | { type: "linkRef"; label: string; ref: string; children: InlineNode[] }
   | { type: MarkType; children: InlineNode[] };
 
 export interface TableRow {
