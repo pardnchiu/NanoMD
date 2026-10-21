@@ -318,10 +318,16 @@
 
 .nanomd .md-list li.md-task {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.5rem;
+  gap: 0 0.5rem;
   margin-left: -1.5rem;
   list-style: none;
+}
+
+.nanomd .md-list li.md-task > .md-list {
+  flex-basis: 100%;
+  margin-left: 1.5rem;
 }
 
 .nanomd .md-list li.md-task > input[type="checkbox"] {
@@ -331,7 +337,7 @@
 }
 
 .nanomd .md-list li.md-task > .md-line {
-  flex: 1 1 auto;
+  flex: 1 1 0;
   min-width: 0;
 }
 

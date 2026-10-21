@@ -56,7 +56,7 @@ npm i @pardnchiu/nanomd@1.11.6
 | YouTube／Vimeo 預覽 | `MDViewer` 未設定 `hashtag.path` 時不產生 | 一律附上內嵌播放器 |
 | raw HTML 與文字跳脫 | 不清洗，寫入 `innerHTML` 前需自行過濾 | 輸出時跳脫文字與屬性，raw HTML 移除危險標籤、事件屬性與 `javascript:` 網址 |
 | Mermaid 語法錯誤 | 顯示 Mermaid 錯誤圖 | 改顯示為一般程式碼區塊 |
-| 轉換速度 | 443 KB 文件約 1.8 秒，1 MB 約 11 秒 | 443 KB 文件約 18 毫秒，1 MB 約 47 毫秒（見 [v1／v2 比較](./README.zh.md#v1v2-比較)） |
+| 轉換速度 | 405 KB 文件約 1.4 秒，1 MB 約 8.9 秒，2 MB 起超過 15 秒（超時） | 405 KB 文件約 9 毫秒，1 MB 約 23 毫秒，4 MB 約 88 毫秒（見[效能比較](./README.zh.md#效能比較)） |
 | 執行環境 | 需要瀏覽器 DOM | `Parse()`、`html()` 可在 Node.js、Worker 執行 |
 
 v2 新增的語法：註腳、參照式連結、行內數學式、` ```math `、` ```chartjs `、`~~~` 與巢狀程式碼區塊、多反引號行內程式碼，完整列表見 [技術文件](./doc.zh.md#api-參考)。

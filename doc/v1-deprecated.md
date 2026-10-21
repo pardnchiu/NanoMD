@@ -56,7 +56,7 @@ Pin the exact version; `@latest` or an unversioned URL resolves to v2, where `MD
 | YouTube/Vimeo previews | Not produced by `MDViewer` without `hashtag.path` | Embedded players are always added |
 | Raw HTML and text escaping | Not sanitized; filter before writing to `innerHTML` | Text and attributes are escaped, and raw HTML loses dangerous tags, event attributes and `javascript:` URLs |
 | Invalid Mermaid syntax | Shows Mermaid's error graphic | Falls back to a plain code block |
-| Render speed | About 1.8 s for 443 KB, about 11 s for 1 MB | About 18 ms for 443 KB, about 47 ms for 1 MB (see [v1 vs v2](../README.md#v1-vs-v2)) |
+| Render speed | About 1.4 s for 405 KB, about 8.9 s for 1 MB, over 15 s (timeout) from 2 MB | About 9 ms for 405 KB, about 23 ms for 1 MB, about 88 ms for 4 MB (see [Benchmark](../README.md#benchmark)) |
 | Runtime | Requires a browser DOM | `Parse()` and `html()` run in Node.js and Workers |
 
 New syntax in v2: footnotes, reference links, inline math, ` ```math `, ` ```chartjs `, `~~~` and nested fences, and multi-backtick code spans; see [Documentation](./doc.md#api-reference) for the full list.
