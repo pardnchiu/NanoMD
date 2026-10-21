@@ -57,11 +57,12 @@ var MDParser = (() => {
   var REGEX_MD_FILE_PATH_TRAILING = /[./]+$/;
   var REGEX_MD_URL_TRAILING = /[)\]}.,;:!?*_~、。，；：！？」』】》”）]+$/;
   var REGEX_MD_LINK = new RegExp(
-    `!\\[(?<alt>[^\\]\\n]*)\\]\\((?<src>[^)\\s]+)(?:[ \\t]+(?<q1>["'])(?<imgTitle>[^)\\n]*?)\\k<q1>)?\\)(?:\\((?:(?<size>[0-9]+%?)|(?<width>[0-9]+%?)?[ \\t*x]+(?<height>[0-9]+%?)?)\\))?|\\[(?<label>[^\\]]+)\\]\\((?<href>https?:\\/\\/[^\\s)]+|(?![A-Za-z][A-Za-z0-9+.\\-]*:)[^\\s)]+)(?:[ \\t]+(?<q2>["'])(?<linkTitle>[^)\\n]*?)\\k<q2>)?\\)|\\[(?<refLabel>[^\\]]+)\\]\\[(?<ref>[^\\]]+)\\]|(?<![\\w/])(?<path>${REGEX_FILE_PATH})|(?<url>${REGEX_URL})|(?<![\\p{L}\\p{M}\\p{N}_&#/])(?<hashtag>[#\uFF03][\\p{L}\\p{M}\\p{N}_]+)`,
+    `!\\[(?<alt>[^\\]\\n]*)\\]\\((?<src>[^)\\s]+)(?:[ \\t]+(?<q1>["'])(?<imgTitle>[^)\\n]*?)\\k<q1>)?\\)(?:\\((?:(?<size>[0-9]+%?)|(?<width>[0-9]+%?)?[ \\t*x]+(?<height>[0-9]+%?)?)\\))?|\\[(?<label>[^\\]]+)\\]\\((?<href>https?:\\/\\/[^\\s)]+|(?:mailto|tel):[^\\s)]+|(?![A-Za-z][A-Za-z0-9+.\\-]*:)[^\\s)]+)(?:[ \\t]+(?<q2>["'])(?<linkTitle>[^)\\n]*?)\\k<q2>)?\\)|\\[(?<refLabel>[^\\]]+)\\]\\[(?<ref>[^\\]]+)\\]|(?<![\\w/])(?<path>${REGEX_FILE_PATH})|(?<url>${REGEX_URL})|(?<![\\p{L}\\p{M}\\p{N}_&#/])(?<hashtag>[#\uFF03][\\p{L}\\p{M}\\p{N}_]+)`,
     // 6 #tag, prevent a#b and &#123;
     "gu"
   );
-  var REGEX_MD_LINK_DEF = /^ {0,3}\[(?!\^)([^\]]+)\]:[ \t]*(https?:\/\/\S+|(?![A-Za-z][A-Za-z0-9+.\-]*:)\S+)(?:[ \t]+(["'])(.*)\3)?[ \t]*$/;
+  var REGEX_MD_LINK_DEF = /^ {0,3}\[(?!\^)([^\]]+)\]:[ \t]*(https?:\/\/\S+|(?:mailto|tel):\S+|(?![A-Za-z][A-Za-z0-9+.\-]*:)\S+)(?:[ \t]+(["'])(.*)\3)?[ \t]*$/;
+  var REGEX_MD_SCHEME_SELF = /^(?:mailto|tel):/i;
   var REGEX_MD_VIDEO = /\.(mp4|mov)$/i;
   var REGEX_MD_IMAGE_SIZE_PERCENT = /%$/;
   var REGEX_MD_LINK_PLACEHOLDER = /\u0000(\d+)\u0000/;
@@ -357,7 +358,11 @@ var MDParser = (() => {
   var linkMap = /* @__PURE__ */ new Map();
   function ParseLink(text) {
     const links = [];
-    const mask = text.replace(/\u0000/g, "").replace(REGEX_MD_MATH_INLINE, (_, value) => {
+    const mask = text.replace(/\u0000/g, "").replace(REGEX_MD_CODE_INLINE, (_, __, value) => {
+      const code = value.startsWith(" ") && value.endsWith(" ") && /[^ ]/.test(value) ? value.slice(1, -1) : value;
+      links.push(REGEX_MD_FILE_PATH.test(code) ? { type: "link", href: code, tag: "file", children: [{ type: "text", value: code }] } : { type: "code", value: code });
+      return `\0${links.length - 1}\0`;
+    }).replace(REGEX_MD_MATH_INLINE, (_, value) => {
       links.push({ type: "math", value });
       return `\0${links.length - 1}\0`;
     }).replace(REGEX_MD_ESCAPE, (_, char) => {
@@ -480,26 +485,6 @@ var MDParser = (() => {
 
   // src/parser/inline.ts
   function ParseInline(text) {
-    const domMap = [];
-    let last = 0;
-    let match;
-    REGEX_MD_CODE_INLINE.lastIndex = 0;
-    while (match = REGEX_MD_CODE_INLINE.exec(text)) {
-      if (match.index > last) {
-        domMap.push(...parseInlineMarks(text.slice(last, match.index)));
-      }
-      const code = match[2].startsWith(" ") && match[2].endsWith(" ") && /[^ ]/.test(match[2]) ? match[2].slice(1, -1) : match[2];
-      domMap.push(
-        REGEX_MD_FILE_PATH.test(code) ? { type: "link", href: code, tag: "file", children: [{ type: "text", value: code }] } : { type: "code", value: code }
-      );
-      last = REGEX_MD_CODE_INLINE.lastIndex;
-    }
-    if (last < text.length) {
-      domMap.push(...parseInlineMarks(text.slice(last)));
-    }
-    return domMap;
-  }
-  function parseInlineMarks(text) {
     const { mask: masked, links } = ParseLink(text);
     const domMap = [];
     let last = 0;
@@ -702,7 +687,8 @@ var MDParser = (() => {
       const alt = node.children.map((child) => "value" in child ? child.value : "").join("");
       return `<img class="md-img" src="${escapeAttr(node.href)}" alt="${escapeAttr(alt)}"${title}${styleAttr}>`;
     }
-    const link = `<a href="${escapeAttr(node.href)}"${title} target="_blank" rel="noopener" class="md-link">${children}</a>`;
+    const target = REGEX_MD_SCHEME_SELF.test(node.href) ? "" : ` target="_blank" rel="noopener"`;
+    const link = `<a href="${escapeAttr(node.href)}"${title}${target} class="md-link">${children}</a>`;
     if (node.tag === "youtube") {
       return `${link}<iframe class="md-embed" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube.com/embed/${node.href.match(REGEX_YOUTUBE)[1]}" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
     }

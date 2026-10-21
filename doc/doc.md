@@ -218,9 +218,9 @@ MDParser.OnCopyClick((success, pre) => {
 |---|---|---|
 | `text` | `value` | Plain text |
 | `b`, `em`, `del`, `mark`, `sub`, `sup` | `children` | `**` / `__`, `*` / `_`, `~~`, `==`, `~x~`, `^x^`; `***` is `b` wrapping `em` |
-| `code` | `value` | Backtick runs of any length with matching open and close counts |
+| `code` | `value` | Backtick runs of any length with matching open and close counts; may sit inside styles (such as `` **bold `code`** ``) |
 | `math` | `value` | `$...$` |
-| `link` | `href`, `tag?`, `title?`, `width?`, `height?`, `children` | Inline and reference links, relative paths, bare URLs, file paths, `![]()` images and videos, `#tag`; `tag` is `image` / `video` / `youtube` / `vimeo` / `file` / `hashtag` (`href` holds the tag without `#`) |
+| `link` | `href`, `tag?`, `title?`, `width?`, `height?`, `children` | Inline and reference links (`http(s)`, `mailto:`, `tel:`, relative paths; other schemes such as `javascript:` stay as text), bare URLs, file paths, `![]()` images and videos, `#tag`; `tag` is `image` / `video` / `youtube` / `vimeo` / `file` / `hashtag` (`href` holds the tag without `#`) |
 | `footnoteRef` | `id`, `index` | `[^id]` |
 | `br` | — | `<br>`, `<br/>`, `<br />` inside a paragraph or table cell; renders as `<br class="md-br">` |
 
@@ -236,7 +236,7 @@ Image size goes after `![alt](src)`: `(300x200)`, `(50%x)`, `(x120)`, `(120)`; `
 | `md-quote`, `md-alert`, `md-alert-{tag}`, `md-alert-title` | Blockquotes and alerts |
 | `md-list`, `md-task` | Lists and task items |
 | `md-table-wrap`, `md-table` | Tables |
-| `md-link`, `md-file-link`, `md-hashtag`, `md-img`, `md-embed` | Links, file links (`data-path`, only when `fileEndpoint` is set), hashtags (only when `hashtagEndpoint` is set), images/videos, embedded players |
+| `md-link`, `md-file-link`, `md-hashtag`, `md-img`, `md-embed` | Links (`mailto:` / `tel:` open in the same page, others in a new tab), file links (`data-path`, only when `fileEndpoint` is set), hashtags (only when `hashtagEndpoint` is set), images/videos, embedded players |
 | `md-mermaid`, `md-latex`, `md-math`, `md-math-inline`, `md-chart` | Dependency rendering wrappers |
 | `md-footnote-ref`, `md-footnotes` | Footnote references and section (anchor `#md-fn-{index}`) |
 | `prettyprint`, `copy` | Code blocks and the copy button |

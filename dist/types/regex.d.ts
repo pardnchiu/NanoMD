@@ -20,6 +20,7 @@ export declare const REGEX_MD_FILE_PATH_TRAILING: RegExp;
 export declare const REGEX_MD_URL_TRAILING: RegExp;
 export declare const REGEX_MD_LINK: RegExp;
 export declare const REGEX_MD_LINK_DEF: RegExp;
+export declare const REGEX_MD_SCHEME_SELF: RegExp;
 export declare const REGEX_MD_VIDEO: RegExp;
 export declare const REGEX_MD_IMAGE_SIZE_PERCENT: RegExp;
 export declare const REGEX_MD_LINK_PLACEHOLDER: RegExp;
