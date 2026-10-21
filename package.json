@@ -1,6 +1,6 @@
 {
   "name": "@pardnchiu/nanomd",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "description": "A TypeScript Markdown parser with a JSON AST, on-demand Mermaid/KaTeX/Chart.js rendering, and sanitized HTML output",
   "type": "module",
   "main": "dist/parser.js",
@@ -44,14 +44,9 @@
     "markdown-to-html",
     "markdown-ast",
     "gfm",
-    "footnotes",
     "mermaid",
     "katex",
-    "chartjs",
-    "typescript",
-    "邱敬幃",
-    "Pardn Chiu",
-    "pardnchiu"
+    "typescript"
   ],
   "author": {
     "name": "邱敬幃 Pardn Chiu",

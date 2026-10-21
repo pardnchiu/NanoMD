@@ -1,6 +1,6 @@
 # NanoMD - 架構
 
-最後更新：2026-10-20
+最後更新：2026-10-21
 
 > 返回 [README](./README.zh.md)
 
@@ -50,16 +50,16 @@ graph TB
 
 ## Module: 行內解析（ParseInline）
 
-先切出行內程式碼，其餘片段以佔位符遮罩不可再被樣式比對的內容，再比對樣式。
+整行先以佔位符遮罩不可再被樣式比對的內容（含行內程式碼），再比對樣式，因此樣式可跨越行內程式碼。
 
 ```mermaid
 graph TB
     subgraph ParseInline
-        Seg[文字片段] --> CodeSpan[切出行內程式碼 任意長度反引號]
-        CodeSpan --> Path{內容為路徑?}
+        Seg[整行文字] --> Mask[ParseLink 遮罩]
+        Mask --> M0[行內程式碼 任意長度反引號]
+        M0 --> Path{內容為路徑?}
         Path -->|是| File[link tag=file]
         Path -->|否| CodeNode[code 節點]
-        CodeSpan --> Mask[ParseLink 遮罩]
         Mask --> M1[行內數學式 $...$]
         Mask --> M2[跳脫字元]
         Mask --> M3["註腳引用 [^id]"]

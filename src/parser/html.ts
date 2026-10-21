@@ -1,6 +1,6 @@
 import { PARSE_OPTIONS } from "./index";
 import { LeadingWhitespace, StripIndent } from "./list";
-import { CODE_TYPES, REGEX_HTML_EVENT, REGEX_HTML_SCRIPT, REGEX_HTML_URL, REGEX_MD_VIDEO_MOV, REGEX_VIMEO, REGEX_YOUTUBE } from "./regex";
+import { CODE_TYPES, REGEX_HTML_EVENT, REGEX_HTML_SCRIPT, REGEX_HTML_URL, REGEX_MD_SCHEME_SELF, REGEX_MD_VIDEO_MOV, REGEX_VIMEO, REGEX_YOUTUBE } from "./regex";
 import { AST } from "./types";
 import type { BlockNode, InlineNode, ListItem, TableRow } from "./types";
 
@@ -174,7 +174,8 @@ function renderLink(node: Extract<InlineNode, { type: "link" }>): string {
     const alt = node.children.map((child) => ("value" in child ? child.value : "")).join("");
     return `<img class="md-img" src="${escapeAttr(node.href)}" alt="${escapeAttr(alt)}"${title}${styleAttr}>`;
   }
-  const link = `<a href="${escapeAttr(node.href)}"${title} target="_blank" rel="noopener" class="md-link">${children}</a>`;
+  const target = REGEX_MD_SCHEME_SELF.test(node.href) ? "" : ` target="_blank" rel="noopener"`;
+  const link = `<a href="${escapeAttr(node.href)}"${title}${target} class="md-link">${children}</a>`;
   if (node.tag === "youtube") {
     return `${link}<iframe class="md-embed" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube.com/embed/${node.href.match(REGEX_YOUTUBE)![1]}" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
   }

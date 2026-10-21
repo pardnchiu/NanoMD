@@ -1,7 +1,9 @@
 import {
   REGEX_MD_FILE_PATH_TRAILING,
   REGEX_MD_BR,
+  REGEX_MD_CODE_INLINE,
   REGEX_MD_ESCAPE,
+  REGEX_MD_FILE_PATH,
   REGEX_MD_FOOTNOTE_REF,
   REGEX_MD_IMAGE_SIZE_PERCENT,
   REGEX_MD_LINK,
@@ -41,6 +43,11 @@ export function ParseLink(text: string): { mask: string; links: InlineNode[] } {
   // * mask links for later style parse, keep link's style be correct like ~~http://abc.de~~
   const mask = text
     .replace(/\u0000/g, "")
+    .replace(REGEX_MD_CODE_INLINE, (_, __: string, value: string) => {
+      const code = value.startsWith(" ") && value.endsWith(" ") && /[^ ]/.test(value) ? value.slice(1, -1) : value;
+      links.push(REGEX_MD_FILE_PATH.test(code) ? { type: "link", href: code, tag: "file", children: [{ type: "text", value: code }] } : { type: "code", value: code });
+      return `\u0000${links.length - 1}\u0000`;
+    })
     .replace(REGEX_MD_MATH_INLINE, (_, value: string) => {
       links.push({ type: "math", value });
       return `\u0000${links.length - 1}\u0000`;

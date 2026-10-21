@@ -1,6 +1,6 @@
 # NanoMD - Architecture
 
-Last updated: 2026-10-20
+Last updated: 2026-10-21
 
 > Back to [README](../README.md)
 
@@ -50,16 +50,16 @@ graph TB
 
 ## Module: Inline Parsing (ParseInline)
 
-Code spans are cut out first; the remaining segments mask content that must not be styled with placeholders, then styles are matched.
+The whole line first masks content that must not be styled (code spans included) with placeholders, then styles are matched, so styles can span code.
 
 ```mermaid
 graph TB
     subgraph ParseInline
-        Seg[Text segment] --> CodeSpan[Cut code spans, any backtick length]
-        CodeSpan --> Path{Content is a path?}
+        Seg[Whole line] --> Mask[ParseLink masking]
+        Mask --> M0[Code spans, any backtick length]
+        M0 --> Path{Content is a path?}
         Path -->|Yes| File[link tag=file]
         Path -->|No| CodeNode[code node]
-        CodeSpan --> Mask[ParseLink masking]
         Mask --> M1[Inline math $...$]
         Mask --> M2[Escapes]
         Mask --> M3["Footnote refs [^id]"]

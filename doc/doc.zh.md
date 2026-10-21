@@ -218,9 +218,9 @@ MDParser.OnCopyClick((success, pre) => {
 |---|---|---|
 | `text` | `value` | 純文字 |
 | `b`、`em`、`del`、`mark`、`sub`、`sup` | `children` | `**`／`__`、`*`／`_`、`~~`、`==`、`~x~`、`^x^`；`***` 為 `b` 包 `em` |
-| `code` | `value` | 任意長度反引號，開頭與結尾數量相同 |
+| `code` | `value` | 任意長度反引號，開頭與結尾數量相同；可放在樣式內（如 `` **粗體 `code`** ``） |
 | `math` | `value` | `$...$` |
-| `link` | `href`、`tag?`、`title?`、`width?`、`height?`、`children` | 行內與參照式連結、相對路徑、裸網址、檔案路徑、`![]()` 圖片與影片、`#tag`；`tag` 為 `image`／`video`／`youtube`／`vimeo`／`file`／`hashtag`（`href` 為不含 `#` 的標籤） |
+| `link` | `href`、`tag?`、`title?`、`width?`、`height?`、`children` | 行內與參照式連結（`http(s)`、`mailto:`、`tel:`、相對路徑；其他協定如 `javascript:` 維持原文）、裸網址、檔案路徑、`![]()` 圖片與影片、`#tag`；`tag` 為 `image`／`video`／`youtube`／`vimeo`／`file`／`hashtag`（`href` 為不含 `#` 的標籤） |
 | `footnoteRef` | `id`、`index` | `[^id]` |
 | `br` | — | 段落或表格儲存格內的 `<br>`、`<br/>`、`<br />`；輸出為 `<br class="md-br">` |
 
@@ -236,7 +236,7 @@ MDParser.OnCopyClick((success, pre) => {
 | `md-quote`、`md-alert`、`md-alert-{tag}`、`md-alert-title` | 引言與提示框 |
 | `md-list`、`md-task` | 清單與任務項目 |
 | `md-table-wrap`、`md-table` | 表格 |
-| `md-link`、`md-file-link`、`md-hashtag`、`md-img`、`md-embed` | 連結、檔案連結（`data-path`，僅在設定 `fileEndpoint` 時輸出）、hashtag（僅在設定 `hashtagEndpoint` 時輸出）、圖片／影片、內嵌播放器 |
+| `md-link`、`md-file-link`、`md-hashtag`、`md-img`、`md-embed` | 連結（`mailto:`／`tel:` 於原頁開啟，其餘開新分頁）、檔案連結（`data-path`，僅在設定 `fileEndpoint` 時輸出）、hashtag（僅在設定 `hashtagEndpoint` 時輸出）、圖片／影片、內嵌播放器 |
 | `md-mermaid`、`md-latex`、`md-math`、`md-math-inline`、`md-chart` | 依賴渲染外殼 |
 | `md-footnote-ref`、`md-footnotes` | 註腳引用與註腳區（錨點 `#md-fn-{index}`） |
 | `prettyprint`、`copy` | 程式碼區塊與複製按鈕 |
