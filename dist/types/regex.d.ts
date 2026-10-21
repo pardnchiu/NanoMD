@@ -18,6 +18,7 @@ export declare const REGEX_MD_FOOTNOTE_REF: RegExp;
 export declare const REGEX_MD_FILE_PATH: RegExp;
 export declare const REGEX_MD_FILE_PATH_TRAILING: RegExp;
 export declare const REGEX_MD_URL_TRAILING: RegExp;
+export declare const REGEX_MD_IMAGE: RegExp;
 export declare const REGEX_MD_LINK: RegExp;
 export declare const REGEX_MD_LINK_DEF: RegExp;
 export declare const REGEX_MD_SCHEME_SELF: RegExp;
