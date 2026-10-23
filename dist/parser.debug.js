@@ -56,9 +56,14 @@ var MDParser = (() => {
   var REGEX_MD_FILE_PATH = new RegExp(`^(?:${REGEX_FILE_PATH})$`, "u");
   var REGEX_MD_FILE_PATH_TRAILING = /[./]+$/;
   var REGEX_MD_URL_TRAILING = /[)\]}.,;:!?*_~、。，；：！？」』】》”）]+$/;
+  var REGEX_MD_IMAGE = new RegExp(
+    `!\\[(?<alt>[^\\]\\n]*)\\]\\((?<src>[^)\\s]+)(?:[ \\t]+(?<q1>["'])(?<imgTitle>[^)\\n]*?)\\k<q1>)?\\)(?:\\((?:(?<size>[0-9]+%?)|(?<width>[0-9]+%?)?[ \\t*x]+(?<height>[0-9]+%?)?)\\))?`,
+    // (300x200) (50%x) (x200) (300)
+    "gu"
+  );
   var REGEX_MD_LINK = new RegExp(
-    `!\\[(?<alt>[^\\]\\n]*)\\]\\((?<src>[^)\\s]+)(?:[ \\t]+(?<q1>["'])(?<imgTitle>[^)\\n]*?)\\k<q1>)?\\)(?:\\((?:(?<size>[0-9]+%?)|(?<width>[0-9]+%?)?[ \\t*x]+(?<height>[0-9]+%?)?)\\))?|\\[(?<label>[^\\]]+)\\]\\((?<href>https?:\\/\\/[^\\s)]+|(?:mailto|tel):[^\\s)]+|(?![A-Za-z][A-Za-z0-9+.\\-]*:)[^\\s)]+)(?:[ \\t]+(?<q2>["'])(?<linkTitle>[^)\\n]*?)\\k<q2>)?\\)|\\[(?<refLabel>[^\\]]+)\\]\\[(?<ref>[^\\]]+)\\]|(?<![\\w/])(?<path>${REGEX_FILE_PATH})|(?<url>${REGEX_URL})|(?<![\\p{L}\\p{M}\\p{N}_&#/])(?<hashtag>[#\uFF03][\\p{L}\\p{M}\\p{N}_]+)`,
-    // 6 #tag, prevent a#b and &#123;
+    `\\[(?<label>[^\\]]+)\\]\\((?<href>https?:\\/\\/[^\\s)]+|(?:mailto|tel):[^\\s)]+|(?![A-Za-z][A-Za-z0-9+.\\-]*:)[^\\s)]+)(?:[ \\t]+(?<q2>["'])(?<linkTitle>[^)\\n]*?)\\k<q2>)?\\)|\\[(?<refLabel>[^\\]]+)\\]\\[(?<ref>[^\\]]+)\\]|(?<![\\w/])(?<path>${REGEX_FILE_PATH})|(?<url>${REGEX_URL})|(?<![\\p{L}\\p{M}\\p{N}_&#/])(?<hashtag>[#\uFF03][\\p{L}\\p{M}\\p{N}_]+)`,
+    // 5 #tag, prevent a#b and &#123;
     "gu"
   );
   var REGEX_MD_LINK_DEF = /^ {0,3}\[(?!\^)([^\]]+)\]:[ \t]*(https?:\/\/\S+|(?:mailto|tel):\S+|(?![A-Za-z][A-Za-z0-9+.\-]*:)\S+)(?:[ \t]+(["'])(.*)\3)?[ \t]*$/;
@@ -374,14 +379,18 @@ var MDParser = (() => {
     }).replace(REGEX_MD_FOOTNOTE_REF, (_, id) => {
       links.push({ type: "footnoteRef", id, index: 0 });
       return `\0${links.length - 1}\0`;
+    }).replace(REGEX_MD_IMAGE, (...args) => {
+      const { node } = parseMeta(args[args.length - 1], links);
+      links.push(node);
+      return `\0${links.length - 1}\0`;
     }).replace(REGEX_MD_LINK, (...args) => {
-      const { node, trail } = parseMeta(args[args.length - 1]);
+      const { node, trail } = parseMeta(args[args.length - 1], links);
       links.push(node);
       return `\0${links.length - 1}\0${trail}`;
     });
     return { mask, links };
   }
-  function parseMeta(meta) {
+  function parseMeta(meta, links) {
     if (meta.src !== void 0) {
       const node = {
         type: "link",
@@ -405,11 +414,13 @@ var MDParser = (() => {
       return { node, trail: "" };
     }
     if (meta.ref !== void 0 && meta.refLabel !== void 0) {
-      return { node: { type: "linkRef", label: meta.refLabel, ref: meta.ref }, trail: "" };
+      const children = RestoreLinks(meta.refLabel, links);
+      const label = children.map((child) => "value" in child ? child.value : child.type === "link" ? child.children.map((c) => "value" in c ? c.value : "").join("") : "").join("");
+      return { node: { type: "linkRef", label, ref: meta.ref, children }, trail: "" };
     }
     if (meta.href !== void 0 && meta.label !== void 0) {
       return {
-        node: linkNode(meta.href, [{ type: "text", value: meta.label }], meta.linkTitle),
+        node: linkNode(meta.href, RestoreLinks(meta.label, links), meta.linkTitle),
         trail: ""
       };
     }
@@ -473,7 +484,13 @@ var MDParser = (() => {
       const node = nodes[k];
       if (node.type === "linkRef") {
         const definition = linkMap.get(node.ref.toLowerCase());
-        nodes[k] = definition ? linkNode(definition.href, [{ type: "text", value: node.label }], definition.title) : { type: "text", value: `[${node.label}][${node.ref}]` };
+        if (definition) {
+          nodes[k] = linkNode(definition.href, node.children, definition.title);
+        } else {
+          const fallback = [{ type: "text", value: "[" }, ...node.children, { type: "text", value: `][${node.ref}]` }];
+          nodes.splice(k, 1, ...fallback);
+          k += fallback.length - 1;
+        }
       } else if ("children" in node) {
         RestoreLinkRefs(node.children);
       }

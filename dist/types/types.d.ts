@@ -110,6 +110,7 @@ export type InlineNode = {
     type: "linkRef";
     label: string;
     ref: string;
+    children: InlineNode[];
 } | {
     type: MarkType;
     children: InlineNode[];

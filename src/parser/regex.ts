@@ -27,14 +27,17 @@ const REGEX_URL = "https?:\\/\\/[A-Za-z0-9\\-._~:/?#\\[\\]@!$&'()*+,;=%]+";
 export const REGEX_MD_FILE_PATH = new RegExp(`^(?:${REGEX_FILE_PATH})$`, "u");
 export const REGEX_MD_FILE_PATH_TRAILING = /[./]+$/;
 export const REGEX_MD_URL_TRAILING = /[)\]}.,;:!?*_~、。，；：！？」』】》”）]+$/;
+export const REGEX_MD_IMAGE = new RegExp(
+  "!\\[(?<alt>[^\\]\\n]*)\\]\\((?<src>[^)\\s]+)(?:[ \\t]+(?<q1>[\"'])(?<imgTitle>[^)\\n]*?)\\k<q1>)?\\)" + // ![alt](src "title")
+    "(?:\\((?:(?<size>[0-9]+%?)|(?<width>[0-9]+%?)?[ \\t*x]+(?<height>[0-9]+%?)?)\\))?", // (300x200) (50%x) (x200) (300)
+  "gu",
+);
 export const REGEX_MD_LINK = new RegExp(
-  "!\\[(?<alt>[^\\]\\n]*)\\]\\((?<src>[^)\\s]+)(?:[ \\t]+(?<q1>[\"'])(?<imgTitle>[^)\\n]*?)\\k<q1>)?\\)" + // 1 ![alt](src "title")
-    "(?:\\((?:(?<size>[0-9]+%?)|(?<width>[0-9]+%?)?[ \\t*x]+(?<height>[0-9]+%?)?)\\))?|" + // (300x200) (50%x) (x200) (300)
-    "\\[(?<label>[^\\]]+)\\]\\((?<href>https?:\\/\\/[^\\s)]+|(?:mailto|tel):[^\\s)]+|(?![A-Za-z][A-Za-z0-9+.\\-]*:)[^\\s)]+)(?:[ \\t]+(?<q2>[\"'])(?<linkTitle>[^)\\n]*?)\\k<q2>)?\\)|" + // 2 [label](href "title")
-    "\\[(?<refLabel>[^\\]]+)\\]\\[(?<ref>[^\\]]+)\\]|" + // 3 [label][ref]
-    `(?<![\\w/])(?<path>${REGEX_FILE_PATH})|` + // 4 ~/a.md /Users/a/b.go, prevent a/b/c and http://a/b
-    `(?<url>${REGEX_URL})|` + // 5 https://example.com
-    "(?<![\\p{L}\\p{M}\\p{N}_&#/])(?<hashtag>[#＃][\\p{L}\\p{M}\\p{N}_]+)", // 6 #tag, prevent a#b and &#123;
+  "\\[(?<label>[^\\]]+)\\]\\((?<href>https?:\\/\\/[^\\s)]+|(?:mailto|tel):[^\\s)]+|(?![A-Za-z][A-Za-z0-9+.\\-]*:)[^\\s)]+)(?:[ \\t]+(?<q2>[\"'])(?<linkTitle>[^)\\n]*?)\\k<q2>)?\\)|" + // 1 [label](href "title")
+    "\\[(?<refLabel>[^\\]]+)\\]\\[(?<ref>[^\\]]+)\\]|" + // 2 [label][ref]
+    `(?<![\\w/])(?<path>${REGEX_FILE_PATH})|` + // 3 ~/a.md /Users/a/b.go, prevent a/b/c and http://a/b
+    `(?<url>${REGEX_URL})|` + // 4 https://example.com
+    "(?<![\\p{L}\\p{M}\\p{N}_&#/])(?<hashtag>[#＃][\\p{L}\\p{M}\\p{N}_]+)", // 5 #tag, prevent a#b and &#123;
   "gu",
 );
 export const REGEX_MD_LINK_DEF = /^ {0,3}\[(?!\^)([^\]]+)\]:[ \t]*(https?:\/\/\S+|(?:mailto|tel):\S+|(?![A-Za-z][A-Za-z0-9+.\-]*:)\S+)(?:[ \t]+(["'])(.*)\3)?[ \t]*$/;

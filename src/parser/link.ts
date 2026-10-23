@@ -5,6 +5,7 @@ import {
   REGEX_MD_ESCAPE,
   REGEX_MD_FILE_PATH,
   REGEX_MD_FOOTNOTE_REF,
+  REGEX_MD_IMAGE,
   REGEX_MD_IMAGE_SIZE_PERCENT,
   REGEX_MD_LINK,
   REGEX_MD_LINK_DEF,
@@ -64,15 +65,20 @@ export function ParseLink(text: string): { mask: string; links: InlineNode[] } {
       links.push({ type: "footnoteRef", id, index: 0 });
       return `\u0000${links.length - 1}\u0000`;
     })
+    .replace(REGEX_MD_IMAGE, (...args) => {
+      const { node } = parseMeta(args[args.length - 1] as Link, links);
+      links.push(node);
+      return `\u0000${links.length - 1}\u0000`;
+    })
     .replace(REGEX_MD_LINK, (...args) => {
-      const { node, trail } = parseMeta(args[args.length - 1] as Link);
+      const { node, trail } = parseMeta(args[args.length - 1] as Link, links);
       links.push(node);
       return `\u0000${links.length - 1}\u0000${trail}`;
     });
   return { mask, links };
 }
 
-function parseMeta(meta: Link): { node: InlineNode; trail: string } {
+function parseMeta(meta: Link, links: InlineNode[]): { node: InlineNode; trail: string } {
   if (meta.src !== undefined) {
     const node: LinkNode = {
       type: "link",
@@ -101,13 +107,15 @@ function parseMeta(meta: Link): { node: InlineNode; trail: string } {
   }
 
   if (meta.ref !== undefined && meta.refLabel !== undefined) {
-    return { node: { type: "linkRef", label: meta.refLabel, ref: meta.ref }, trail: "" };
+    const children = RestoreLinks(meta.refLabel, links);
+    const label = children.map((child) => ("value" in child ? child.value : child.type === "link" ? child.children.map((c) => ("value" in c ? c.value : "")).join("") : "")).join("");
+    return { node: { type: "linkRef", label, ref: meta.ref, children }, trail: "" };
   }
 
   // * note: [](http://abc.de) fall back to bare link parse, not bug
   if (meta.href !== undefined && meta.label !== undefined) {
     return {
-      node: linkNode(meta.href, [{ type: "text", value: meta.label }], meta.linkTitle),
+      node: linkNode(meta.href, RestoreLinks(meta.label, links), meta.linkTitle),
       trail: "",
     };
   }
@@ -179,9 +187,13 @@ export function RestoreLinkRefs(nodes: (BlockNode | InlineNode | TableRow | Tabl
     const node = nodes[k];
     if (node.type === "linkRef") {
       const definition = linkMap.get(node.ref.toLowerCase());
-      nodes[k] = definition
-        ? linkNode(definition.href, [{ type: "text", value: node.label }], definition.title)
-        : { type: "text", value: `[${node.label}][${node.ref}]` };
+      if (definition) {
+        nodes[k] = linkNode(definition.href, node.children, definition.title);
+      } else {
+        const fallback: InlineNode[] = [{ type: "text", value: "[" }, ...node.children, { type: "text", value: `][${node.ref}]` }];
+        nodes.splice(k, 1, ...fallback);
+        k += fallback.length - 1;
+      }
     } else if ("children" in node) {
       RestoreLinkRefs(node.children);
     }
