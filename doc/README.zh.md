@@ -3,7 +3,7 @@
 > [!NOTE]
 > 此 README 由 [SKILL](https://github.com/agenvoy/skill-readme-generate) 生成，英文版請參閱 [這裡](../README.md)。
 
-***
+---
 
 <p align="center">
 <strong>FAST MARKDOWN TO AST AND HTML IN ONE PARSER!</strong>
@@ -15,7 +15,11 @@
 <a href="https://www.npmjs.com/package/@pardnchiu/nanomd"><img src="https://img.shields.io/npm/l/@pardnchiu/nanomd?include_prereleases&style=for-the-badge" alt="License"></a>
 </p>
 
-***
+<p align="center">
+<a href="https://chromewebstore.google.com/detail/nanomd/pdklinlfmpobpakengplkhbbneaamijd"><img src="./chrome_web_store.svg" alt="Available in the Chrome Web Store" height="48"></a>
+</p>
+
+---
 
 > TypeScript Markdown 解析器，具備 JSON AST、按需載入的 Mermaid／KaTeX／Chart.js 渲染與安全的 HTML 輸出
 
@@ -42,13 +46,13 @@
 將[文件站](https://nanomd.pardn.io/zh/)的文件頁合併成一份文件，重複放大到各尺寸後，在 macOS 的 headless Chrome 155 以 v1.11.6、v2 與 marked 18.1.1 量測轉成 HTML 的耗時。每個案例先暖機 5 次，再連續執行至少 1.5 秒取平均；單次超過 3 秒只量一次，超過 15 秒記為超時。並排渲染與瀏覽器現場測速見[與 marked 比較](https://nanomd.pardn.io/zh/vs-marked)。
 
 | 文件大小 | v1.11.6 `new MDParser().parse()` | v2 `Parse().html()` | marked `marked.parse()` | v1 / v2 | marked / v2 |
-|---|---|---|---|---|---|
-| 6.1 KB | 3.23 ms | 0.097 ms | 0.127 ms | 33× | 1.30× |
-| 42.2 KB | 26.9 ms | 0.87 ms | 1.08 ms | 31× | 1.24× |
-| 405.2 KB | 1,402 ms | 9.15 ms | 10.2 ms | 153× | 1.11× |
-| 1.00 MB | 8,853 ms | 23.1 ms | 26.3 ms | 383× | 1.14× |
-| 2.00 MB | 超時（超過 15 秒） | 44.6 ms | 53.9 ms | 超時 | 1.21× |
-| 4.00 MB | 超時（超過 15 秒） | 88.3 ms | 101.7 ms | 超時 | 1.15× |
+| -------- | -------------------------------- | ------------------- | ----------------------- | ------- | ----------- |
+| 6.1 KB   | 3.23 ms                          | 0.097 ms            | 0.127 ms                | 33×     | 1.30×       |
+| 42.2 KB  | 26.9 ms                          | 0.87 ms             | 1.08 ms                 | 31×     | 1.24×       |
+| 405.2 KB | 1,402 ms                         | 9.15 ms             | 10.2 ms                 | 153×    | 1.11×       |
+| 1.00 MB  | 8,853 ms                         | 23.1 ms             | 26.3 ms                 | 383×    | 1.14×       |
+| 2.00 MB  | 超時（超過 15 秒）               | 44.6 ms             | 53.9 ms                 | 超時    | 1.21×       |
+| 4.00 MB  | 超時（超過 15 秒）               | 88.3 ms             | 101.7 ms                | 超時    | 1.15×       |
 
 ## 架構
 
@@ -79,6 +83,6 @@ Just [open an issue](https://github.com/pardnchiu/NanoMD/issues/new) to share an
   <img src="https://contrib.rocks/image?repo=pardnchiu/NanoMD&cache_bust=2026-10-20" alt="NanoMD contributors" />
 </a>
 
-***
+---
 
 ©️ 2024 [邱敬幃 Pardn Chiu](https://www.linkedin.com/in/pardnchiu)
