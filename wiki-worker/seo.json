@@ -1,0 +1,143 @@
+{
+  "home_title": {
+    "en": "Markdown to HTML Parser with JSON AST and Mermaid | NanoMD",
+    "zh": "Markdown 解析與 Mermaid 渲染｜NanoMD"
+  },
+  "descriptions": {
+    "en": {
+      "home": "NanoMD by Pardn Chiu is a TypeScript Markdown parser that turns Markdown into sanitized HTML and a JSON AST, with on-demand Mermaid, KaTeX and Chart.js.",
+      "getting-started": "Install NanoMD from npm or jsDelivr, render Markdown to HTML in the browser or Node.js, and enable optional renderers.",
+      "v1-deprecated": "What v2 removed from NanoMD v1, how to keep using 1.11.6, the migration path from MDEditor and MDViewer, and v1 vs v2 benchmarks.",
+      "vs-marked": "Markdown to HTML with NanoMD and marked: one document rendered side by side, syntax and sanitizing differences, and parse speed in Chrome and your browser.",
+      "architecture": "How NanoMD splits block parsing, inline parsing, post-processing, HTML output and runtime rendering into separate layers.",
+      "parsing-pipeline": "The order NanoMD checks block types line by line, how inline masking protects links and math, and how footnotes and reference links resolve.",
+      "ast": "Every block and inline node type that Parse() returns, with fields and the Markdown that produces it.",
+      "syntax-blocks": "Headings, paragraphs and blank lines, blockquotes with GitHub alerts, horizontal rules and raw HTML lines in NanoMD.",
+      "syntax-inline": "Bold, italic, strikethrough, highlight, subscript, superscript, escapes, code spans and inline math in NanoMD.",
+      "syntax-code": "Fenced code blocks with backticks or tildes, nested fences, and Mermaid, math and Chart.js blocks with code-block fallback.",
+      "syntax-links-media": "Inline, reference and relative links, bare URLs, images with size, videos, and YouTube or Vimeo embeds in NanoMD.",
+      "syntax-lists-tables": "Unordered, ordered, nested and task lists with tab width control, and GFM tables with column alignment.",
+      "syntax-footnotes": "Footnote references and definitions, numbering by first reference, multi-line definitions and unresolved references.",
+      "html-output": "How AST.html() turns the tree into HTML, which classes it emits, and how it differs from the JSON AST.",
+      "runtime-dependencies": "Load Mermaid, KaTeX, Chart.js and code-prettify on demand with Init(), render them with Refresh(), and handle fallbacks.",
+      "file-links": "Turn local file paths into clickable links that call your own endpoint through the fileEndpoint option.",
+      "hashtag-links": "Turn #tag in Markdown into links to your own tag pages through the hashtagEndpoint option, with Unicode and full-width tags.",
+      "theming": "The nanomd container class, auto-loaded parser.css, dark mode attributes and the CSS variables you can override.",
+      "security": "How NanoMD escapes text and attributes and sanitizes raw HTML, links and URLs in its HTML output.",
+      "parser-api": "Every export of MDParser: Parse, AST.html, Init, Refresh, OnCopyClick, ParseLines and the option types.",
+      "chrome-extension": "NanoMD is a Markdown viewer for Chrome: open local .md files with a live Markdown preview, offline Mermaid and KaTeX, Cmd/Ctrl+S save and file URL access.",
+      "chrome-extension-privacy": "Privacy policy of the NanoMD Chrome extension: it renders local Markdown files and collects, stores or transmits no user data."
+    },
+    "zh": {
+      "home": "NanoMD：邱敬幃開發的 Markdown 解析器，將 Markdown 轉成安全 HTML 與 JSON AST，按需渲染 Mermaid、KaTeX。",
+      "getting-started": "從 npm 或 jsDelivr 安裝 NanoMD，在瀏覽器或 Node.js 把 Markdown 轉成 HTML，並啟用選用的渲染器。",
+      "v1-deprecated": "NanoMD v2 移除的 v1 功能、如何繼續使用 1.11.6、從 MDEditor 與 MDViewer 遷移的方式，以及 v1／v2 效能比較。",
+      "vs-marked": "NanoMD 與 marked 並排渲染同一份 Markdown：語法支援、HTML 消毒，以及在 headless Chrome 與你的瀏覽器中量測的解析速度。",
+      "architecture": "NanoMD 如何把區塊解析、行內解析、後處理、HTML 輸出與執行期渲染分成獨立的層。",
+      "parsing-pipeline": "NanoMD 逐行判斷區塊的順序、行內遮罩如何保護連結與數學式，以及註腳與參照連結如何解析。",
+      "ast": "Parse() 回傳的每種區塊與行內節點型別、欄位，以及產生它的 Markdown 語法。",
+      "syntax-blocks": "NanoMD 的標題、段落與空行、含 GitHub 提示框的引言、水平線與 raw HTML 行。",
+      "syntax-inline": "NanoMD 的粗體、斜體、刪除線、標記、上下標、跳脫字元、行內程式碼與行內數學式。",
+      "syntax-code": "以反引號或波浪號圍起的程式碼區塊、巢狀圍欄，以及會退回程式碼區塊的 Mermaid、數學式與 Chart.js。",
+      "syntax-links-media": "NanoMD 的行內、參照式與相對路徑連結、裸網址、可指定尺寸的圖片、影片與 YouTube／Vimeo 內嵌。",
+      "syntax-lists-tables": "無序、有序、巢狀與任務清單及 tab 寬度設定，以及可對齊欄位的 GFM 表格。",
+      "syntax-footnotes": "註腳引用與定義、依首次引用編號、多行定義與未定義引用的處理。",
+      "html-output": "AST.html() 如何把節點樹輸出成 HTML、會產生哪些 class，以及與 JSON AST 的差別。",
+      "runtime-dependencies": "以 Init() 按需載入 Mermaid、KaTeX、Chart.js、code-prettify，以 Refresh() 渲染並處理退回。",
+      "file-links": "透過 fileEndpoint 選項，把本機檔案路徑變成會呼叫自訂端點的可點擊連結。",
+      "hashtag-links": "透過 hashtagEndpoint 選項，把 Markdown 裡的 #tag 變成連到自訂標籤頁的連結，支援各語系與全形 ＃。",
+      "theming": "nanomd 容器 class、自動載入的 parser.css、深色模式屬性，以及可覆寫的 CSS 變數。",
+      "security": "NanoMD 如何在 HTML 輸出中跳脫文字與屬性，並清洗 raw HTML、連結與網址。",
+      "parser-api": "MDParser 的所有匯出：Parse、AST.html、Init、Refresh、OnCopyClick、ParseLines 與選項型別。",
+      "chrome-extension": "NanoMD Chrome 擴充功能：在 Chrome 開啟本機 Markdown 檔並即時預覽，離線渲染 Mermaid 與 KaTeX，Cmd/Ctrl+S 存檔，附允許存取檔案網址步驟。",
+      "chrome-extension-privacy": "NanoMD Chrome 擴充功能的隱私權政策：只在本機渲染 Markdown 檔案，不蒐集、儲存或傳送任何使用者資料。"
+    }
+  },
+  "keywords": {
+    "en": {
+      "home": "markdown to html, markdown html, mermaid markdown, markdown parser, typescript, markdown renderer",
+      "getting-started": "install, cdn, npm, esm, quick start",
+      "v1-deprecated": "migration, v1, deprecation, benchmark, MDEditor, MDViewer",
+      "vs-marked": "marked, marked.js, comparison, benchmark, markdown parser speed",
+      "architecture": "architecture, modules, layers",
+      "parsing-pipeline": "parser, line by line, block order, inline masking",
+      "ast": "ast, json, node types, BlockNode, InlineNode",
+      "syntax-blocks": "headings, blockquote, alerts, hr, raw html",
+      "syntax-inline": "bold, italic, strikethrough, mark, subscript, superscript, inline math",
+      "syntax-code": "code block, fence, mermaid, katex, chart.js",
+      "syntax-links-media": "links, reference links, images, video, youtube, vimeo",
+      "syntax-lists-tables": "lists, task list, nested list, tables, alignment",
+      "syntax-footnotes": "footnotes, references, numbering",
+      "html-output": "html output, AST.html, classes",
+      "runtime-dependencies": "Init, Refresh, mermaid, katex, chart.js, prettify",
+      "file-links": "file links, fileEndpoint, local files",
+      "hashtag-links": "hashtag, #tag, hashtagEndpoint, tag links",
+      "theming": "css, theme, dark mode, css variables",
+      "security": "xss, sanitize, escape, security",
+      "parser-api": "api, Parse, Init, Refresh, OnCopyClick, typescript types",
+      "chrome-extension": "markdown viewer, markdown preview, chrome markdown, chrome extension, local markdown files",
+      "chrome-extension-privacy": "privacy policy, chrome extension, markdown viewer, user data"
+    },
+    "zh": {
+      "home": "Markdown, Mermaid, Markdown 語法, TypeScript, AST",
+      "getting-started": "安裝, CDN, npm, ESM, 快速開始",
+      "v1-deprecated": "遷移, v1, 停用, 效能比較, MDEditor, MDViewer",
+      "vs-marked": "marked, marked.js, 比較, 效能比較, Markdown 解析速度",
+      "architecture": "架構, 模組, 分層",
+      "parsing-pipeline": "解析器, 逐行, 區塊順序, 行內遮罩",
+      "ast": "AST, JSON, 節點型別, BlockNode, InlineNode",
+      "syntax-blocks": "標題, 引言, 提示框, 水平線, raw HTML",
+      "syntax-inline": "粗體, 斜體, 刪除線, 標記, 上下標, 行內數學式",
+      "syntax-code": "程式碼區塊, 圍欄, Mermaid, KaTeX, Chart.js",
+      "syntax-links-media": "連結, 參照式連結, 圖片, 影片, YouTube, Vimeo",
+      "syntax-lists-tables": "清單, 任務清單, 巢狀清單, 表格, 對齊",
+      "syntax-footnotes": "註腳, 引用, 編號",
+      "html-output": "HTML 輸出, AST.html, class",
+      "runtime-dependencies": "Init, Refresh, Mermaid, KaTeX, Chart.js, prettify",
+      "file-links": "檔案連結, fileEndpoint, 本機檔案",
+      "hashtag-links": "hashtag, #tag, hashtagEndpoint, 標籤連結",
+      "theming": "CSS, 主題, 深色模式, CSS 變數",
+      "security": "XSS, 清洗, 跳脫, 安全性",
+      "parser-api": "API, Parse, Init, Refresh, OnCopyClick, TypeScript 型別",
+      "chrome-extension": "Markdown, Chrome 擴充功能, Mermaid, 本機 Markdown 檔案, 允許存取檔案網址",
+      "chrome-extension-privacy": "隱私權政策, Chrome 擴充功能, Markdown 檢視器, 使用者資料"
+    }
+  },
+  "brand_keywords": [],
+  "person": {
+    "id": "https://pardn.io/#pardnchiu",
+    "name": "Pardn Chiu",
+    "alt_names": [
+      "邱敬幃",
+      "Chiu Ching-Wei",
+      "pardnchiu"
+    ],
+    "same_as": [
+      "https://pardn.io/",
+      "https://www.linkedin.com/in/pardnchiu",
+      "https://github.com/pardnchiu",
+      "https://dev.to/pardnchiu",
+      "https://x.com/pardnchiu"
+    ]
+  },
+  "organization": {
+    "id": "https://pardn.io/#organization",
+    "url": "https://pardn.io/",
+    "name": "Pardn Co., Ltd",
+    "name_zh": "帕登國際有限公司",
+    "same_as": [
+      "https://github.com/pardnio"
+    ]
+  },
+  "tagline": "Taiwan · Infrastructure Engineering",
+  "og_image": "https://pardn.io/logo.jpg",
+  "favicon": "/favicon.png",
+  "x_default": "",
+  "ai_usage": {
+    "train": "y",
+    "input": "y",
+    "search": "y"
+  },
+  "programming_language": "TypeScript",
+  "license_url": "https://opensource.org/licenses/MIT"
+}

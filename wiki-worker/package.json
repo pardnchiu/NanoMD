@@ -1,0 +1,17 @@
+{
+  "name": "nanomd-wiki",
+  "private": true,
+  "scripts": {
+    "build": "node build.js",
+    "sync-tags": "node sync-tags.js",
+    "sync-nanomd": "node sync-nanomd.js",
+    "dev": "node build.js && wrangler dev",
+    "deploy": "node build.js && node indexnow.js --ensure-key && wrangler deploy && node indexnow.js"
+  },
+  "devDependencies": {
+    "wrangler": "^4.107.0"
+  },
+  "dependencies": {
+    "@pardnchiu/nanomd": "2.0.10"
+  }
+}

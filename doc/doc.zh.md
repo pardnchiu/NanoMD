@@ -180,6 +180,24 @@ MDParser.OnCopyClick((success, pre) => {
 });
 ```
 
+## Chrome 擴充功能
+
+[NanoMD 擴充功能](https://chromewebstore.google.com/detail/nanomd/pdklinlfmpobpakengplkhbbneaamijd)以本解析器在 Chrome 渲染本機 Markdown 檔案，不需寫程式。
+
+1. 從 Chrome 線上應用程式商店安裝。
+2. 開啟 `chrome://extensions`，在 NanoMD 點 **詳細資料**，開啟 **允許存取檔案網址**。未開啟前 Chrome 不讓擴充功能存取 `file://` 頁面，檔案只會以純文字顯示。
+3. 把 `.md` 或 `.markdown` 檔案拖進 Chrome，或直接開啟其 `file://` 路徑。
+
+<img src="./chrome_file_access.png" alt="NanoMD 擴充功能詳細資料中的「允許存取檔案網址」開關" width="600">
+
+| 操作 | 行為 |
+|---|---|
+| 編輯 | 左側為原始碼編輯區，停止輸入 200 ms 後右側預覽重新渲染 |
+| 渲染 | Mermaid、KaTeX、Chart.js 與 code-prettify 從擴充功能套件載入，不經 CDN |
+| `Cmd/Ctrl + S` | 第一次存檔會詢問寫入位置，同一分頁之後的存檔直接覆寫該檔；分頁標題出現 `●` 表示尚未存檔 |
+
+擴充功能本身不發出任何請求、不儲存任何資料，詳見[隱私權政策](https://nanomd.pardn.io/zh/chrome-extension-privacy)。
+
 ## API 參考
 
 ### 匯出

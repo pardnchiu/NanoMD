@@ -1,0 +1,12 @@
+node_modules/
+.wrangler/
+/public/*.html
+/public/*.md
+/public/zh/
+/public/released/
+/public/sitemap.xml
+/public/robots.txt
+/public/_headers
+/public/llms.txt
+/public/llms-full.txt
+/public/docs/tags/

@@ -27,6 +27,7 @@ Last updated: 2026-10-20
 
 - [Features](#features)
 - [Benchmark](#benchmark)
+- [Chrome Extension](#chrome-extension)
 - [Architecture](#architecture)
 - [License](#license)
 - [Author](#author)
@@ -53,6 +54,15 @@ The documentation pages of the [docs site](https://nanomd.pardn.io/) joined into
 | 1.00 MB  | 8,853 ms                         | 23.1 ms             | 26.3 ms                 | 383×    | 1.14×       |
 | 2.00 MB  | Timeout (over 15 s)              | 44.6 ms             | 53.9 ms                 | Timeout | 1.21×       |
 | 4.00 MB  | Timeout (over 15 s)              | 88.3 ms             | 101.7 ms                | Timeout | 1.15×       |
+
+## Chrome Extension
+
+> [Chrome Web Store](https://chromewebstore.google.com/detail/nanomd/pdklinlfmpobpakengplkhbbneaamijd) · [Guide](https://nanomd.pardn.io/chrome-extension) · [Privacy Policy](https://nanomd.pardn.io/chrome-extension-privacy)
+
+Open a local `.md` or `.markdown` file in Chrome and NanoMD renders it with this parser: the source sits in an editor on the left and the preview on the right updates as you type, with Mermaid, KaTeX, Chart.js and code highlighting bundled in the extension. `Cmd/Ctrl + S` writes the edited content back to a file you choose, and `●` in the tab title marks unsaved changes.
+
+> [!IMPORTANT]
+> Chrome keeps extensions off `file://` pages by default. After installing, open `chrome://extensions`, click **Details** on NanoMD and turn on **Allow access to file URLs**; otherwise the file stays plain text.
 
 ## Architecture
 
