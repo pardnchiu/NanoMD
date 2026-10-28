@@ -180,6 +180,22 @@ MDParser.OnCopyClick((success, pre) => {
 });
 ```
 
+## Chrome Extension
+
+The [NanoMD extension](https://chromewebstore.google.com/detail/nanomd/pdklinlfmpobpakengplkhbbneaamijd) renders local Markdown files in Chrome with this parser, no code needed.
+
+1. Install it from the Chrome Web Store.
+2. Open `chrome://extensions`, click **Details** on NanoMD and turn on **Allow access to file URLs**. Chrome keeps extensions off `file://` pages until this is on, and the file stays plain text.
+3. Drag a `.md` or `.markdown` file into Chrome, or open its `file://` path.
+
+| Action | Behavior |
+|---|---|
+| Edit | The source sits in an editor on the left; the preview on the right re-renders 200 ms after typing stops |
+| Render | Mermaid, KaTeX, Chart.js and code-prettify load from the extension package, not from a CDN |
+| `Cmd/Ctrl + S` | The first save asks where to write; later saves in the same tab overwrite that file. `●` in the tab title marks unsaved changes |
+
+The extension sends no requests of its own and stores no data; see the [privacy policy](https://nanomd.pardn.io/chrome-extension-privacy).
+
 ## API Reference
 
 ### Exports

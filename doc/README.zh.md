@@ -27,6 +27,7 @@
 
 - [功能特點](#功能特點)
 - [效能比較](#效能比較)
+- [Chrome 擴充功能](#chrome-擴充功能)
 - [架構](#架構)
 - [授權](#授權)
 - [Author](#author)
@@ -53,6 +54,17 @@
 | 1.00 MB  | 8,853 ms                         | 23.1 ms             | 26.3 ms                 | 383×    | 1.14×       |
 | 2.00 MB  | 超時（超過 15 秒）               | 44.6 ms             | 53.9 ms                 | 超時    | 1.21×       |
 | 4.00 MB  | 超時（超過 15 秒）               | 88.3 ms             | 101.7 ms                | 超時    | 1.15×       |
+
+## Chrome 擴充功能
+
+> [Chrome 線上應用程式商店](https://chromewebstore.google.com/detail/nanomd/pdklinlfmpobpakengplkhbbneaamijd) · [使用說明](https://nanomd.pardn.io/zh/chrome-extension) · [隱私權政策](https://nanomd.pardn.io/zh/chrome-extension-privacy)
+
+在 Chrome 開啟本機 `.md` 或 `.markdown` 檔案，NanoMD 會以本解析器渲染：左側是原始碼編輯區，右側預覽隨輸入即時更新，Mermaid、KaTeX、Chart.js 與程式碼高亮皆打包在擴充功能內。按 `Cmd/Ctrl + S` 把編輯內容寫回選定的檔案，分頁標題出現 `●` 表示尚未存檔。
+
+> [!IMPORTANT]
+> Chrome 預設不讓擴充功能存取 `file://` 頁面。安裝後開啟 `chrome://extensions`，在 NanoMD 點 **詳細資料**，開啟 **允許存取檔案網址**；未開啟時檔案只會以純文字顯示。
+
+<img src="./chrome_file_access.png" alt="NanoMD 擴充功能詳細資料中的「允許存取檔案網址」開關" width="600">
 
 ## 架構
 
