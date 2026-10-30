@@ -35,6 +35,8 @@
 
 以 HTML 標籤開頭的整行原樣保留為 `html` 節點，輸出時移除危險標籤、事件屬性與 `javascript:` 網址，見 [安全性](/zh/security)。
 
+raw HTML 內作者寫的換行（`<br>`、`<br/>`、`<br />`）會輸出為 `<br class="md-br">` 並正常顯示；解析器為空行輸出的 `<br>` 則由 `parser.css` 隱藏。v2.0.11 之前兩者都會被隱藏，兩個徽章之間的 `<br>` 不會換行。
+
 ## 範例
 
 ### 標題
@@ -130,6 +132,28 @@ Not alerts (marker only, text on the marker line, nested in a quote):
   const out = document.getElementById("out");
   out.innerHTML = MDParser.Parse(document.getElementById("md").textContent).html();
   MDParser.Refresh(out);
+</script>
+```
+
+### raw HTML 換行
+
+raw HTML 區塊內的 `<br>` 會換行，區塊之間的空行則不會產生可見的換行。
+
+```demo
+<div id="out" class="nanomd"></div>
+<script type="text/markdown" id="md">
+<p align="center">
+<a href="https://github.com/pardnchiu/NanoMD"><img src="https://img.shields.io/badge/NANOMD-PARSER-blue?style=for-the-badge" alt="NanoMD"></a><br>
+<a href="https://www.npmjs.com/package/@pardnchiu/nanomd"><img src="https://img.shields.io/npm/v/@pardnchiu/nanomd?style=for-the-badge" alt="npm"></a>
+</p>
+
+<div>line one<br/>line two<br />line three</div>
+</script>
+<script>
+  const out = document.getElementById("out");
+  out.innerHTML = MDParser.Parse(document.getElementById("md").textContent).html();
+  MDParser.Refresh(out);
+  console.log(out.querySelectorAll("br.md-br").length + " author <br> kept, " + out.querySelectorAll("br:not(.md-br)").length + " blank-line <br> hidden");
 </script>
 ```
 

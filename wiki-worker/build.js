@@ -3,10 +3,10 @@ const crypto = require("crypto");
 const path = require("path");
 const { Parse } = require("@pardnchiu/nanomd");
 
-const TEMPLATE_VERSION = "7.2.0"; // wiki-generate template version; see scripts/templates/CHANGELOG.md
+const TEMPLATE_VERSION = "7.2.3"; // wiki-generate template version; see scripts/templates/CHANGELOG.md
 
 // === Site config — filled in by wiki-generate when this template is copied into a project ===
-const SITE_NAME = "pardnchiu/NanoMD";
+const SITE_NAME = "NanoMD";
 const DOMAIN = "https://nanomd.pardn.io";
 const REPO = "pardnchiu/NanoMD"; // owner/repo
 const AUTHOR_NAME = "邱敬幃 Pardn Chiu";
@@ -15,10 +15,8 @@ const AUTHOR_HANDLE = "pardnchiu";
 const GTAG_ID = ""; // empty string disables analytics
 
 const DEMO_SCRIPT = "https://cdn.jsdelivr.net/npm/@pardnchiu/nanomd@{version}/dist/parser.js".replace("{version}", () => require("../package.json").version);
-const DEMO_SCRIPT_ATTRS = {
-};
-const DEMO_LOG_IGNORE = [
-];
+const DEMO_SCRIPT_ATTRS = {};
+const DEMO_LOG_IGNORE = [];
 const ZH_LANG = "zh-Hant-TW";
 
 const SEO_PATH = path.join(__dirname, "seo.json");
@@ -340,9 +338,9 @@ function renderPage(slug, title, description, keywords, sidebar, content, toc, l
   } else {
     fullTitle = isZh
       ? `${title}｜${SITE_NAME} 文件`
-      : `${title} - ${SITE_NAME} Docs`;
+      : `${title} | ${SITE_NAME} Docs`;
     if (titleTooLong(fullTitle)) {
-      fullTitle = isZh ? `${title}｜${SITE_NAME}` : `${title} - ${SITE_NAME}`;
+      fullTitle = isZh ? `${title}｜${SITE_NAME}` : `${title} | ${SITE_NAME}`;
     }
   }
 
@@ -486,7 +484,7 @@ function renderPage(slug, title, description, keywords, sidebar, content, toc, l
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="/docs.css" />
     <style>${NANOMD_CSS}</style>
-    ${DEMO_SCRIPT ? `<script src="${DEMO_SCRIPT}"${Object.entries(DEMO_SCRIPT_ATTRS).map(([k, v]) => ` ${k}="${v}"`).join("")}${DEMO_LOG_IGNORE.length ? ` data-demo-ignore='${JSON.stringify(DEMO_LOG_IGNORE).replace(/&/g, "&amp;").replace(/'/g, "&#39;")}'` : ""}${DEMO_SCRIPT === NANOMD_SCRIPT ? ' data-nanomd-css="off"' : ""} data-demo defer></script>
+    ${DEMO_SCRIPT ? `<script src="${DEMO_SCRIPT}"${Object.entries(DEMO_SCRIPT_ATTRS).map(([k, v]) => ` ${k}="${v}"`).join("")}${DEMO_LOG_IGNORE.length ? ` data-demo-ignore='${JSON.stringify(DEMO_LOG_IGNORE).replace(/&/g, "&amp;").replace(/'/g, "&#39;")}'` : ""}${DEMO_SCRIPT === NANOMD_SCRIPT ? ' data-nanomd-css="off"' : ' type="text/plain"'} data-demo defer></script>
     ` : ""}${NANOMD_SCRIPT !== DEMO_SCRIPT ? `<script src="${NANOMD_SCRIPT}" data-nanomd-css="off" defer></script>
     ` : ""}  </head>
   <body>

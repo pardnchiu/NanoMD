@@ -9,3 +9,6 @@ static/** linguist-vendored
 # 視文件為文檔類型，忽略語言統計
 *.md linguist-documentation
 *.json linguist-documentation
+
+doc/** linguist-documentation
+wiki-worker/** linguist-documentation

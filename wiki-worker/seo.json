@@ -7,7 +7,7 @@
     "en": {
       "home": "NanoMD by Pardn Chiu is a TypeScript Markdown parser that turns Markdown into sanitized HTML and a JSON AST, with on-demand Mermaid, KaTeX and Chart.js.",
       "getting-started": "Install NanoMD from npm or jsDelivr, render Markdown to HTML in the browser or Node.js, and enable optional renderers.",
-      "v1-deprecated": "What v2 removed from NanoMD v1, how to keep using 1.11.6, the migration path from MDEditor and MDViewer, and v1 vs v2 benchmarks.",
+      "v1-deprecated": "What v2 removed from NanoMD v1 (formerly PDMarkdownKit), how to keep using 1.11.6, the migration path from MDEditor and MDViewer, and v1 vs v2 benchmarks.",
       "vs-marked": "Markdown to HTML with NanoMD and marked: one document rendered side by side, syntax and sanitizing differences, and parse speed in Chrome and your browser.",
       "architecture": "How NanoMD splits block parsing, inline parsing, post-processing, HTML output and runtime rendering into separate layers.",
       "parsing-pipeline": "The order NanoMD checks block types line by line, how inline masking protects links and math, and how footnotes and reference links resolve.",
@@ -31,7 +31,7 @@
     "zh": {
       "home": "NanoMD：邱敬幃開發的 Markdown 解析器，將 Markdown 轉成安全 HTML 與 JSON AST，按需渲染 Mermaid、KaTeX。",
       "getting-started": "從 npm 或 jsDelivr 安裝 NanoMD，在瀏覽器或 Node.js 把 Markdown 轉成 HTML，並啟用選用的渲染器。",
-      "v1-deprecated": "NanoMD v2 移除的 v1 功能、如何繼續使用 1.11.6、從 MDEditor 與 MDViewer 遷移的方式，以及 v1／v2 效能比較。",
+      "v1-deprecated": "NanoMD（前身 PDMarkdownKit）v2 移除的 v1 功能、如何繼續使用 1.11.6、從 MDEditor 與 MDViewer 遷移的方式，以及 v1／v2 效能比較。",
       "vs-marked": "NanoMD 與 marked 並排渲染同一份 Markdown：語法支援、HTML 消毒，以及在 headless Chrome 與你的瀏覽器中量測的解析速度。",
       "architecture": "NanoMD 如何把區塊解析、行內解析、後處理、HTML 輸出與執行期渲染分成獨立的層。",
       "parsing-pipeline": "NanoMD 逐行判斷區塊的順序、行內遮罩如何保護連結與數學式，以及註腳與參照連結如何解析。",

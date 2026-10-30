@@ -2,6 +2,15 @@
 
 v2 只提供 Markdown 解析器 `MDParser`；本頁列出 v1 移除的 API、替代方式、遷移範例與 v1／v2 效能比較。
 
+## 舊名：PDMarkdownKit
+
+NanoMD 最早在 npm 上以 `pdmarkdownkit` 發佈。自 1.8.1（2024-11-29）起改以 `@pardnchiu/nanomd` 發佈；`pdmarkdownkit` 停在 1.8.2，之後的版本只用新名稱。仍在安裝 `pdmarkdownkit` 的專案拿到的是 v1 編輯器與檢視器，可依本頁遷移到 v2。
+
+```bash
+npm uninstall pdmarkdownkit
+npm i @pardnchiu/nanomd
+```
+
 ## 繼續使用 v1
 
 移除於 v2.0.0：v1 的 `MDEditor`、`MDViewer` 與 `MDParser` 類別只保留在 1.x，不再開發新功能。需要編輯器的專案固定使用 1.11.6：

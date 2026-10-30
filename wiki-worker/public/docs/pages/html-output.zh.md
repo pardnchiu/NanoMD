@@ -17,7 +17,8 @@ container.innerHTML = html;
 |---|---|
 | 段落 | `<span class="md-line">` |
 | 標題 | `<span class="md-h1">`～`<span class="md-h6">`；`parseHeading` 為 `true` 時為 `<h1 class="md-h1">`～`<h6 class="md-h6">` |
-| 空行 | `<br>` |
+| 空行 | `<br>`，由 `parser.css` 隱藏 |
+| raw HTML 內的換行 | `<br class="md-br">`（v2.0.11 起） |
 | 粗體 | `<span class="md-bold">`；其餘行內樣式使用 `<em>`、`<del>`、`<mark>`、`<sub>`、`<sup>` |
 | 引言／提示框 | `<blockquote class="md-quote">`；提示框加上 `md-alert md-alert-{tag}` 與 `md-alert-title` |
 | 清單 | `<ul class="md-list">`／`<ol class="md-list">`，任務項目為 `<li class="md-task">` |
