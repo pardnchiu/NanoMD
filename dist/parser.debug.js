@@ -571,7 +571,7 @@ var MDParser = (() => {
       case "codeBlock":
         return renderCodeBlock(node.value, node.lang ?? "");
       case "html":
-        return node.value.replace(REGEX_HTML_SCRIPT, "").replace(REGEX_HTML_EVENT, "").replace(REGEX_HTML_URL, "");
+        return node.value.replace(REGEX_HTML_SCRIPT, "").replace(REGEX_HTML_EVENT, "").replace(REGEX_HTML_URL, "").replace(REGEX_MD_BR, `<br class="md-br">`);
       case "table":
         return renderTable(node);
       case "list":
