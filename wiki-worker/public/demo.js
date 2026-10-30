@@ -2,7 +2,7 @@
   const tag = document.querySelector("script[data-demo]");
   const CDN = tag.src;
   const attrs = [...tag.attributes]
-    .filter((a) => !["src", "data-demo", "data-demo-ignore", "data-nanomd-css", "defer"].includes(a.name))
+    .filter((a) => !["src", "type", "data-demo", "data-demo-ignore", "data-nanomd-css", "defer"].includes(a.name))
     .map((a) => ` ${a.name}="${a.value.replace(/&/g, "&amp;").replace(/"/g, "&quot;")}"`)
     .join("");
 

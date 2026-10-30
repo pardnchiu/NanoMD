@@ -12,6 +12,6 @@
     "wrangler": "^4.107.0"
   },
   "dependencies": {
-    "@pardnchiu/nanomd": "2.0.10"
+    "@pardnchiu/nanomd": "2.0.11"
   }
 }

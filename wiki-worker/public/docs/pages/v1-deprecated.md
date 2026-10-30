@@ -2,6 +2,15 @@
 
 v2 ships only the Markdown parser `MDParser`; this page lists the v1 APIs that were removed, their replacements, a migration example and the v1 vs v2 benchmark.
 
+## Former Name: PDMarkdownKit
+
+NanoMD was first published on npm as `pdmarkdownkit`. From 1.8.1 (2024-11-29) it is published as `@pardnchiu/nanomd`; `pdmarkdownkit` stopped at 1.8.2, and every later release ships only under the new name. Projects still installing `pdmarkdownkit` get the v1 editor and viewer, so they can follow this page to migrate to v2.
+
+```bash
+npm uninstall pdmarkdownkit
+npm i @pardnchiu/nanomd
+```
+
 ## Keep Using v1
 
 Removed in v2.0.0: the v1 `MDEditor`, `MDViewer` and `MDParser` class stay only in 1.x and receive no new features. Projects that need the editor pin 1.11.6:

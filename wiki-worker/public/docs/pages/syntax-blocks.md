@@ -35,6 +35,8 @@ When the first line is only `[!NOTE]`, `[!TIP]`, `[!IMPORTANT]`, `[!WARNING]` or
 
 A whole line that starts with an HTML tag is kept as an `html` node; at output, dangerous tags, event attributes and `javascript:` URLs are removed. See [Security](/security).
 
+Line breaks written inside raw HTML (`<br>`, `<br/>`, `<br />`) are output as `<br class="md-br">` and stay visible; the bare `<br>` the parser emits for blank lines is hidden by `parser.css`. Before v2.0.11 both were hidden, so a `<br>` between two badges did not break the line.
+
 ## Examples
 
 ### Headings
@@ -130,6 +132,28 @@ Not alerts (marker only, text on the marker line, nested in a quote):
   const out = document.getElementById("out");
   out.innerHTML = MDParser.Parse(document.getElementById("md").textContent).html();
   MDParser.Refresh(out);
+</script>
+```
+
+### Raw HTML Line Breaks
+
+A `<br>` inside a raw HTML block breaks the line, while the blank line between blocks adds no visible break.
+
+```demo
+<div id="out" class="nanomd"></div>
+<script type="text/markdown" id="md">
+<p align="center">
+<a href="https://github.com/pardnchiu/NanoMD"><img src="https://img.shields.io/badge/NANOMD-PARSER-blue?style=for-the-badge" alt="NanoMD"></a><br>
+<a href="https://www.npmjs.com/package/@pardnchiu/nanomd"><img src="https://img.shields.io/npm/v/@pardnchiu/nanomd?style=for-the-badge" alt="npm"></a>
+</p>
+
+<div>line one<br/>line two<br />line three</div>
+</script>
+<script>
+  const out = document.getElementById("out");
+  out.innerHTML = MDParser.Parse(document.getElementById("md").textContent).html();
+  MDParser.Refresh(out);
+  console.log(out.querySelectorAll("br.md-br").length + " author <br> kept, " + out.querySelectorAll("br:not(.md-br)").length + " blank-line <br> hidden");
 </script>
 ```
 

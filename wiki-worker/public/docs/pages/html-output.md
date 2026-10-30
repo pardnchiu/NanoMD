@@ -17,7 +17,8 @@ container.innerHTML = html;
 |---|---|
 | Paragraph | `<span class="md-line">` |
 | Heading | `<span class="md-h1">` to `<span class="md-h6">`; `<h1 class="md-h1">` to `<h6 class="md-h6">` when `parseHeading` is `true` |
-| Blank lines | `<br>` |
+| Blank lines | `<br>`, hidden by `parser.css` |
+| Line breaks inside raw HTML | `<br class="md-br">` (since v2.0.11) |
 | Bold | `<span class="md-bold">`; other inline styles use `<em>`, `<del>`, `<mark>`, `<sub>`, `<sup>` |
 | Blockquote / alert | `<blockquote class="md-quote">`; alerts add `md-alert md-alert-{tag}` and `md-alert-title` |
 | Lists | `<ul class="md-list">` / `<ol class="md-list">`; task items are `<li class="md-task">` |
