@@ -1,6 +1,6 @@
 import { PARSE_OPTIONS } from "./index";
 import { LeadingWhitespace, StripIndent } from "./list";
-import { CODE_TYPES, REGEX_HTML_EVENT, REGEX_HTML_SCRIPT, REGEX_HTML_URL, REGEX_MD_SCHEME_SELF, REGEX_MD_VIDEO_MOV, REGEX_VIMEO, REGEX_YOUTUBE } from "./regex";
+import { CODE_TYPES, REGEX_HTML_EVENT, REGEX_HTML_SCRIPT, REGEX_HTML_URL, REGEX_MD_BR, REGEX_MD_SCHEME_SELF, REGEX_MD_VIDEO_MOV, REGEX_VIMEO, REGEX_YOUTUBE } from "./regex";
 import { AST } from "./types";
 import type { BlockNode, InlineNode, ListItem, TableRow } from "./types";
 
@@ -31,7 +31,7 @@ function render(node: BlockNode): string {
     case "codeBlock":
       return renderCodeBlock(node.value, node.lang ?? "");
     case "html":
-      return node.value.replace(REGEX_HTML_SCRIPT, "").replace(REGEX_HTML_EVENT, "").replace(REGEX_HTML_URL, "");
+      return node.value.replace(REGEX_HTML_SCRIPT, "").replace(REGEX_HTML_EVENT, "").replace(REGEX_HTML_URL, "").replace(REGEX_MD_BR, `<br class="md-br">`);
     case "table":
       return renderTable(node);
     case "list":
