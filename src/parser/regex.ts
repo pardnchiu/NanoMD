@@ -5,14 +5,14 @@ export const REGEX_MD_CODE_BLOCK = /^(`{3,}(?=[^`]*$)|~{3,})(\S*)$/; // * let 3+
 export const REGEX_MD_CODE_FENCE = /^\s*(```|~~~)/;
 export const REGEX_MD_CODE_INLINE = /(?<![\\`])(`+)(?!`)(.+?)(?<!`)\1(?!`)/g; // * prevent \` or ``a`, need same number of ` on start and close
 export const REGEX_MD_MATH_INLINE = /(?<![\\$])\$([^\s$](?:[^$\n]*[^\s$\\])?)\$(?![\d$])/g;
-export const REGEX_MD_H = /^(#{1,6})\s+(.+)$/;
+export const REGEX_MD_H = /^(#{1,6})\s+(.+?)(?:\s+#+)?\s*$/; // NOTE: 標題內的 # 也要能被解析
 export const REGEX_MD_H1 = /^ {0,3}=+[ \t]*$/;
 export const REGEX_MD_H2 = /^ {0,3}-+[ \t]*$/;
 export const REGEX_MD_HR = /^ {0,3}([-*_])( *\1){2,}$/;
 export const REGEX_MD_BLOCKQUOTE = /^ {0,3}>[ \t]?(.*)$/;
 export const REGEX_MD_BLOCKQUOTE_TAG = /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][ \t]*$/i;
 export const REGEX_MD_TABLE_ALIGN = /^(:)?-+(:)?$/;
-export const REGEX_MD_LIST = /^([-*]|\d+\.)([ \t]+)(.*)$/;
+export const REGEX_MD_LIST = /^([-*]|(\d+)\.)([ \t]+)(.*)$/;
 export const REGEX_MD_LIST_TASK = /^\[([ xX])\][ \t]+(.*)$/;
 export const REGEX_MD_FOOTNOTE_DEF = /^ {0,3}\[\^([^\]\s]+)\]:[ \t]*(.*)$/;
 export const REGEX_MD_FOOTNOTE_REF = /\[\^([^\]\s]+)\]/g;
@@ -35,12 +35,14 @@ export const REGEX_MD_IMAGE = new RegExp(
 export const REGEX_MD_LINK = new RegExp(
   "\\[(?<label>[^\\]]+)\\]\\((?<href>https?:\\/\\/[^\\s)]+|(?:mailto|tel):[^\\s)]+|(?![A-Za-z][A-Za-z0-9+.\\-]*:)[^\\s)]+)(?:[ \\t]+(?<q2>[\"'])(?<linkTitle>[^)\\n]*?)\\k<q2>)?\\)|" + // 1 [label](href "title")
     "\\[(?<refLabel>[^\\]]+)\\]\\[(?<ref>[^\\]]+)\\]|" + // 2 [label][ref]
+    "<(?<autolink>https?:\\/\\/[^\\s<>]+)>|" +
     `(?<![\\w/])(?<path>${REGEX_FILE_PATH})|` + // 3 ~/a.md /Users/a/b.go, prevent a/b/c and http://a/b
     `(?<url>${REGEX_URL})|` + // 4 https://example.com
     "(?<![\\p{L}\\p{M}\\p{N}_&#/])(?<hashtag>[#＃][\\p{L}\\p{M}\\p{N}_]+)", // 5 #tag, prevent a#b and &#123;
   "gu",
 );
-export const REGEX_MD_LINK_DEF = /^ {0,3}\[(?!\^)([^\]]+)\]:[ \t]*(https?:\/\/\S+|(?:mailto|tel):\S+|(?![A-Za-z][A-Za-z0-9+.\-]*:)\S+)(?:[ \t]+(["'])(.*)\3)?[ \t]*$/;
+export const REGEX_MD_LINK_DEF =
+  /^ {0,3}\[(?!\^)([^\]]+)\]:[ \t]*(https?:\/\/\S+|(?:mailto|tel):\S+|(?![A-Za-z][A-Za-z0-9+.\-]*:)\S+)(?:[ \t]+(["'])(.*)\3)?[ \t]*$/;
 export const REGEX_MD_SCHEME_SELF = /^(?:mailto|tel):/i;
 export const REGEX_MD_VIDEO = /\.(mp4|mov)$/i;
 export const REGEX_MD_IMAGE_SIZE_PERCENT = /%$/;

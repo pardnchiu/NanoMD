@@ -105,7 +105,7 @@ function renderTable(node: Extract<BlockNode, { type: "table" }>): string {
 
 function renderList(node: Extract<BlockNode, { type: "list" }>): string {
   const tag = node.ordered ? "ol" : "ul";
-  return `<${tag} class="md-list">${node.children.map(renderListItem).join("")}</${tag}>`;
+  return `<${tag} class="md-list"${node.start !== undefined ? ` start="${node.start}"` : ""}>${node.children.map(renderListItem).join("")}</${tag}>`;
 }
 
 function renderListItem(item: ListItem): string {
