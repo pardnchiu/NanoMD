@@ -75,6 +75,7 @@ export type BlockNode = {
 } | {
     type: "list";
     ordered: boolean;
+    start?: number;
     children: ListItem[];
 } | {
     type: "footnotes";

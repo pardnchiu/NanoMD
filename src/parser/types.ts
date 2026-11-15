@@ -47,7 +47,7 @@ export type BlockNode =
   | { type: "html"; value: string }
   | { type: "blockquote"; tag?: BlockquoteTag; children: BlockNode[] }
   | { type: "table"; align: (TableAlign | null)[]; children: TableRow[] }
-  | { type: "list"; ordered: boolean; children: ListItem[] }
+  | { type: "list"; ordered: boolean; start?: number; children: ListItem[] } // NOTE: 紀錄 ordered list 的起始數字
   | { type: "footnotes"; children: Footnote[] }
   | { type: "text"; children: InlineNode[] };
 

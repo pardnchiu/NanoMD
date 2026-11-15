@@ -32,6 +32,7 @@ interface Link {
   linkTitle?: string;
   refLabel?: string;
   ref?: string;
+  autolink?: string;
   path?: string;
   url?: string;
   hashtag?: string;
@@ -118,6 +119,10 @@ function parseMeta(meta: Link, links: InlineNode[]): { node: InlineNode; trail: 
       node: linkNode(meta.href, RestoreLinks(meta.label, links), meta.linkTitle),
       trail: "",
     };
+  }
+
+  if (meta.autolink !== undefined) {
+    return { node: linkNode(meta.autolink, [{ type: "text", value: meta.autolink }]), trail: "" };
   }
 
   if (meta.path !== undefined) {

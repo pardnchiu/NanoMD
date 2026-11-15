@@ -19,6 +19,7 @@ export function ParseListBlock(lines: string[], i: number): { node: Extract<Bloc
 
   const items: ListItem[] = [];
   let ordered: boolean | null = null;
+  let start: number | undefined;
   let j = i;
   while (j < lines.length) {
     if (j > i && lines[j].trim() === "") {
@@ -38,6 +39,7 @@ export function ParseListBlock(lines: string[], i: number): { node: Extract<Bloc
       break;
     }
     ordered = marker.ordered;
+    start ??= marker.start;
 
     const itemLines = [marker.content];
     j++;
@@ -86,10 +88,14 @@ export function ParseListBlock(lines: string[], i: number): { node: Extract<Bloc
     items.push(task ? { type: "listItem", checked: task[1] !== " ", children } : { type: "listItem", children });
   }
 
-  return { node: { type: "list", ordered: ordered ?? false, children: items }, next: j };
+  const node: Extract<BlockNode, { type: "list" }> = { type: "list", ordered: ordered ?? false, children: items };
+  if (start !== undefined && start !== 1) {
+    node.start = start;
+  }
+  return { node, next: j };
 }
 
-function matchMarker(line: string, baseIndent: number): { ordered: boolean; content: string; column: number } | null {
+function matchMarker(line: string, baseIndent: number): { ordered: boolean; start?: number; content: string; column: number } | null {
   const { width, chars } = LeadingWhitespace(line);
   if (width < baseIndent || width > baseIndent + 3) {
     return null;
@@ -99,10 +105,10 @@ function matchMarker(line: string, baseIndent: number): { ordered: boolean; cont
     return null;
   }
   let column = width + match[1].length;
-  for (const char of match[2]) {
+  for (const char of match[3]) {
     column += char === "\t" ? PARSE_OPTIONS.indent - (column % PARSE_OPTIONS.indent) : 1;
   }
-  return { ordered: match[1].endsWith("."), content: match[3], column };
+  return { ordered: match[2] !== undefined, start: match[2] !== undefined ? Number(match[2]) : undefined, content: match[4], column };
 }
 
 export function LeadingWhitespace(line: string): { width: number; chars: number } {

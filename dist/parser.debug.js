@@ -5,11 +5,10 @@ var MDParser = (() => {
   var __getOwnPropNames = Object.getOwnPropertyNames;
   var __hasOwnProp = Object.prototype.hasOwnProperty;
   var __export = (target, all) => {
-    for (var name in all)
-      __defProp(target, name, { get: all[name], enumerable: true });
+    for (var name in all) __defProp(target, name, { get: all[name], enumerable: true });
   };
   var __copyProps = (to, from, except, desc) => {
-    if (from && typeof from === "object" || typeof from === "function") {
+    if ((from && typeof from === "object") || typeof from === "function") {
       for (let key of __getOwnPropNames(from))
         if (!__hasOwnProp.call(to, key) && key !== except)
           __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
@@ -28,7 +27,7 @@ var MDParser = (() => {
     PARSE_OPTIONS: () => PARSE_OPTIONS,
     Parse: () => Parse,
     ParseLines: () => ParseLines,
-    Refresh: () => Refresh
+    Refresh: () => Refresh,
   });
 
   // src/parser/regex.ts
@@ -37,14 +36,14 @@ var MDParser = (() => {
   var REGEX_MD_CODE_FENCE = /^\s*(```|~~~)/;
   var REGEX_MD_CODE_INLINE = /(?<![\\`])(`+)(?!`)(.+?)(?<!`)\1(?!`)/g;
   var REGEX_MD_MATH_INLINE = /(?<![\\$])\$([^\s$](?:[^$\n]*[^\s$\\])?)\$(?![\d$])/g;
-  var REGEX_MD_H = /^(#{1,6})\s+(.+)$/;
+  var REGEX_MD_H = /^(#{1,6})\s+(.+?)(?:\s+#+)?\s*$/;
   var REGEX_MD_H1 = /^ {0,3}=+[ \t]*$/;
   var REGEX_MD_H2 = /^ {0,3}-+[ \t]*$/;
   var REGEX_MD_HR = /^ {0,3}([-*_])( *\1){2,}$/;
   var REGEX_MD_BLOCKQUOTE = /^ {0,3}>[ \t]?(.*)$/;
   var REGEX_MD_BLOCKQUOTE_TAG = /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][ \t]*$/i;
   var REGEX_MD_TABLE_ALIGN = /^(:)?-+(:)?$/;
-  var REGEX_MD_LIST = /^([-*]|\d+\.)([ \t]+)(.*)$/;
+  var REGEX_MD_LIST = /^([-*]|(\d+)\.)([ \t]+)(.*)$/;
   var REGEX_MD_LIST_TASK = /^\[([ xX])\][ \t]+(.*)$/;
   var REGEX_MD_FOOTNOTE_DEF = /^ {0,3}\[\^([^\]\s]+)\]:[ \t]*(.*)$/;
   var REGEX_MD_FOOTNOTE_REF = /\[\^([^\]\s]+)\]/g;
@@ -59,12 +58,12 @@ var MDParser = (() => {
   var REGEX_MD_IMAGE = new RegExp(
     `!\\[(?<alt>[^\\]\\n]*)\\]\\((?<src>[^)\\s]+)(?:[ \\t]+(?<q1>["'])(?<imgTitle>[^)\\n]*?)\\k<q1>)?\\)(?:\\((?:(?<size>[0-9]+%?)|(?<width>[0-9]+%?)?[ \\t*x]+(?<height>[0-9]+%?)?)\\))?`,
     // (300x200) (50%x) (x200) (300)
-    "gu"
+    "gu",
   );
   var REGEX_MD_LINK = new RegExp(
-    `\\[(?<label>[^\\]]+)\\]\\((?<href>https?:\\/\\/[^\\s)]+|(?:mailto|tel):[^\\s)]+|(?![A-Za-z][A-Za-z0-9+.\\-]*:)[^\\s)]+)(?:[ \\t]+(?<q2>["'])(?<linkTitle>[^)\\n]*?)\\k<q2>)?\\)|\\[(?<refLabel>[^\\]]+)\\]\\[(?<ref>[^\\]]+)\\]|(?<![\\w/])(?<path>${REGEX_FILE_PATH})|(?<url>${REGEX_URL})|(?<![\\p{L}\\p{M}\\p{N}_&#/])(?<hashtag>[#\uFF03][\\p{L}\\p{M}\\p{N}_]+)`,
+    `\\[(?<label>[^\\]]+)\\]\\((?<href>https?:\\/\\/[^\\s)]+|(?:mailto|tel):[^\\s)]+|(?![A-Za-z][A-Za-z0-9+.\\-]*:)[^\\s)]+)(?:[ \\t]+(?<q2>["'])(?<linkTitle>[^)\\n]*?)\\k<q2>)?\\)|\\[(?<refLabel>[^\\]]+)\\]\\[(?<ref>[^\\]]+)\\]|<(?<autolink>https?:\\/\\/[^\\s<>]+)>|(?<![\\w/])(?<path>${REGEX_FILE_PATH})|(?<url>${REGEX_URL})|(?<![\\p{L}\\p{M}\\p{N}_&#/])(?<hashtag>[#\uFF03][\\p{L}\\p{M}\\p{N}_]+)`,
     // 5 #tag, prevent a#b and &#123;
-    "gu"
+    "gu",
   );
   var REGEX_MD_LINK_DEF = /^ {0,3}\[(?!\^)([^\]]+)\]:[ \t]*(https?:\/\/\S+|(?:mailto|tel):\S+|(?![A-Za-z][A-Za-z0-9+.\-]*:)\S+)(?:[ \t]+(["'])(.*)\3)?[ \t]*$/;
   var REGEX_MD_SCHEME_SELF = /^(?:mailto|tel):/i;
@@ -93,17 +92,19 @@ var MDParser = (() => {
       // 8 ==mark==
       "~([^\\s~]+)~",
       // 9 ~sub~
-      "\\^([^\\s^]+)\\^"
+      "\\^([^\\s^]+)\\^",
       // 10 ^sup^
     ].join("|"),
-    "g"
+    "g",
   );
   var MD_INLINE_TYPES = [null, "bem", "bem", "b", "em", "b", "em", "del", "mark", "sub", "sup"];
   var REGEX_MD_BR = /<br\s*\/?>/gi;
   var REGEX_MD_ESCAPE = /\\([!-\/:-@\[-`{-~])/g;
-  var REGEX_HTML_SCRIPT = /<\s*(script|style|iframe|object|embed|form|link|meta|base)\b[\s\S]*?<\s*\/\s*\1\s*>|<\s*\/?\s*(script|style|iframe|object|embed|form|link|meta|base)\b[^>]*>/gi;
+  var REGEX_HTML_SCRIPT =
+    /<\s*(script|style|iframe|object|embed|form|link|meta|base)\b[\s\S]*?<\s*\/\s*\1\s*>|<\s*\/?\s*(script|style|iframe|object|embed|form|link|meta|base)\b[^>]*>/gi;
   var REGEX_HTML_EVENT = /\son[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi;
-  var REGEX_HTML_URL = /\s(href|src|xlink:href|action|formaction)\s*=\s*(?:"\s*(?:javascript|vbscript|data:text\/html)[^"]*"|'\s*(?:javascript|vbscript|data:text\/html)[^']*'|(?:javascript|vbscript|data:text\/html)[^\s>]*)/gi;
+  var REGEX_HTML_URL =
+    /\s(href|src|xlink:href|action|formaction)\s*=\s*(?:"\s*(?:javascript|vbscript|data:text\/html)[^"]*"|'\s*(?:javascript|vbscript|data:text\/html)[^']*'|(?:javascript|vbscript|data:text\/html)[^\s>]*)/gi;
   var REGEX_MD_VIDEO_MOV = /\.mov$/i;
   var CODE_TYPES = [
     "javascript",
@@ -126,7 +127,7 @@ var MDParser = (() => {
     "go",
     "rust",
     "perl",
-    "bash"
+    "bash",
   ];
 
   // src/parser/blockquote.ts
@@ -185,6 +186,7 @@ var MDParser = (() => {
     }
     const items = [];
     let ordered = null;
+    let start;
     let j = i;
     while (j < lines.length) {
       if (j > i && lines[j].trim() === "") {
@@ -199,10 +201,11 @@ var MDParser = (() => {
         }
       }
       const marker = matchMarker(lines[j], baseIndent);
-      if (!marker || ordered !== null && marker.ordered !== ordered) {
+      if (!marker || (ordered !== null && marker.ordered !== ordered)) {
         break;
       }
       ordered = marker.ordered;
+      start ??= marker.start;
       const itemLines = [marker.content];
       j++;
       while (j < lines.length) {
@@ -223,7 +226,18 @@ var MDParser = (() => {
           j++;
           continue;
         }
-        if (!matchMarker(lines[j], baseIndent) && !(REGEX_MD_H.test(lines[j]) || REGEX_MD_HR.test(lines[j]) || REGEX_MD_BLOCKQUOTE.test(lines[j]) || REGEX_MD_CODE_FENCE.test(lines[j]) || REGEX_MD_FOOTNOTE_DEF.test(lines[j]) || REGEX_HTML_DOM.test(lines[j]) || lines[j].includes("|"))) {
+        if (
+          !matchMarker(lines[j], baseIndent) &&
+          !(
+            REGEX_MD_H.test(lines[j]) ||
+            REGEX_MD_HR.test(lines[j]) ||
+            REGEX_MD_BLOCKQUOTE.test(lines[j]) ||
+            REGEX_MD_CODE_FENCE.test(lines[j]) ||
+            REGEX_MD_FOOTNOTE_DEF.test(lines[j]) ||
+            REGEX_HTML_DOM.test(lines[j]) ||
+            lines[j].includes("|")
+          )
+        ) {
           itemLines.push(lines[j]);
           j++;
           continue;
@@ -237,7 +251,11 @@ var MDParser = (() => {
       const children = ParseLines(itemLines, true);
       items.push(task ? { type: "listItem", checked: task[1] !== " ", children } : { type: "listItem", children });
     }
-    return { node: { type: "list", ordered: ordered ?? false, children: items }, next: j };
+    const node = { type: "list", ordered: ordered ?? false, children: items };
+    if (start !== void 0 && start !== 1) {
+      node.start = start;
+    }
+    return { node, next: j };
   }
   function matchMarker(line, baseIndent) {
     const { width, chars } = LeadingWhitespace(line);
@@ -249,10 +267,10 @@ var MDParser = (() => {
       return null;
     }
     let column = width + match[1].length;
-    for (const char of match[2]) {
-      column += char === "	" ? PARSE_OPTIONS.indent - column % PARSE_OPTIONS.indent : 1;
+    for (const char of match[3]) {
+      column += char === "	" ? PARSE_OPTIONS.indent - (column % PARSE_OPTIONS.indent) : 1;
     }
-    return { ordered: match[1].endsWith("."), content: match[3], column };
+    return { ordered: match[2] !== void 0, start: match[2] !== void 0 ? Number(match[2]) : void 0, content: match[4], column };
   }
   function LeadingWhitespace(line) {
     let width = 0;
@@ -261,7 +279,7 @@ var MDParser = (() => {
       if (line[chars] === " ") {
         width += 1;
       } else if (line[chars] === "	") {
-        width += PARSE_OPTIONS.indent - width % PARSE_OPTIONS.indent;
+        width += PARSE_OPTIONS.indent - (width % PARSE_OPTIONS.indent);
       } else {
         break;
       }
@@ -275,7 +293,7 @@ var MDParser = (() => {
       if (line[k] === " ") {
         width += 1;
       } else if (line[k] === "	") {
-        width += PARSE_OPTIONS.indent - width % PARSE_OPTIONS.indent;
+        width += PARSE_OPTIONS.indent - (width % PARSE_OPTIONS.indent);
       } else {
         break;
       }
@@ -311,7 +329,16 @@ var MDParser = (() => {
         j++;
         continue;
       }
-      if (!(REGEX_MD_FOOTNOTE_DEF.test(lines[j]) || REGEX_MD_LIST.test(lines[j].trimStart()) || REGEX_MD_H.test(lines[j]) || REGEX_MD_HR.test(lines[j]) || REGEX_MD_BLOCKQUOTE.test(lines[j]) || REGEX_MD_CODE_FENCE.test(lines[j]) || REGEX_HTML_DOM.test(lines[j]) || lines[j].includes("|"))) {
+      if (!(
+        REGEX_MD_FOOTNOTE_DEF.test(lines[j]) ||
+        REGEX_MD_LIST.test(lines[j].trimStart()) ||
+        REGEX_MD_H.test(lines[j]) ||
+        REGEX_MD_HR.test(lines[j]) ||
+        REGEX_MD_BLOCKQUOTE.test(lines[j]) ||
+        REGEX_MD_CODE_FENCE.test(lines[j]) ||
+        REGEX_HTML_DOM.test(lines[j]) ||
+        lines[j].includes("|")
+      )) {
         contentLines.push(lines[j]);
         j++;
         continue;
@@ -363,31 +390,41 @@ var MDParser = (() => {
   var linkMap = /* @__PURE__ */ new Map();
   function ParseLink(text) {
     const links = [];
-    const mask = text.replace(/\u0000/g, "").replace(REGEX_MD_CODE_INLINE, (_, __, value) => {
-      const code = value.startsWith(" ") && value.endsWith(" ") && /[^ ]/.test(value) ? value.slice(1, -1) : value;
-      links.push(REGEX_MD_FILE_PATH.test(code) ? { type: "link", href: code, tag: "file", children: [{ type: "text", value: code }] } : { type: "code", value: code });
-      return `\0${links.length - 1}\0`;
-    }).replace(REGEX_MD_MATH_INLINE, (_, value) => {
-      links.push({ type: "math", value });
-      return `\0${links.length - 1}\0`;
-    }).replace(REGEX_MD_ESCAPE, (_, char) => {
-      links.push({ type: "text", value: char });
-      return `\0${links.length - 1}\0`;
-    }).replace(REGEX_MD_BR, () => {
-      links.push({ type: "br" });
-      return `\0${links.length - 1}\0`;
-    }).replace(REGEX_MD_FOOTNOTE_REF, (_, id) => {
-      links.push({ type: "footnoteRef", id, index: 0 });
-      return `\0${links.length - 1}\0`;
-    }).replace(REGEX_MD_IMAGE, (...args) => {
-      const { node } = parseMeta(args[args.length - 1], links);
-      links.push(node);
-      return `\0${links.length - 1}\0`;
-    }).replace(REGEX_MD_LINK, (...args) => {
-      const { node, trail } = parseMeta(args[args.length - 1], links);
-      links.push(node);
-      return `\0${links.length - 1}\0${trail}`;
-    });
+    const mask = text
+      .replace(/\u0000/g, "")
+      .replace(REGEX_MD_CODE_INLINE, (_, __, value) => {
+        const code = value.startsWith(" ") && value.endsWith(" ") && /[^ ]/.test(value) ? value.slice(1, -1) : value;
+        links.push(
+          REGEX_MD_FILE_PATH.test(code) ? { type: "link", href: code, tag: "file", children: [{ type: "text", value: code }] } : { type: "code", value: code },
+        );
+        return `\0${links.length - 1}\0`;
+      })
+      .replace(REGEX_MD_MATH_INLINE, (_, value) => {
+        links.push({ type: "math", value });
+        return `\0${links.length - 1}\0`;
+      })
+      .replace(REGEX_MD_ESCAPE, (_, char) => {
+        links.push({ type: "text", value: char });
+        return `\0${links.length - 1}\0`;
+      })
+      .replace(REGEX_MD_BR, () => {
+        links.push({ type: "br" });
+        return `\0${links.length - 1}\0`;
+      })
+      .replace(REGEX_MD_FOOTNOTE_REF, (_, id) => {
+        links.push({ type: "footnoteRef", id, index: 0 });
+        return `\0${links.length - 1}\0`;
+      })
+      .replace(REGEX_MD_IMAGE, (...args) => {
+        const { node } = parseMeta(args[args.length - 1], links);
+        links.push(node);
+        return `\0${links.length - 1}\0`;
+      })
+      .replace(REGEX_MD_LINK, (...args) => {
+        const { node, trail } = parseMeta(args[args.length - 1], links);
+        links.push(node);
+        return `\0${links.length - 1}\0${trail}`;
+      });
     return { mask, links };
   }
   function parseMeta(meta, links) {
@@ -396,7 +433,7 @@ var MDParser = (() => {
         type: "link",
         href: meta.src,
         tag: REGEX_MD_VIDEO.test(meta.src) ? "video" : "image",
-        children: [{ type: "text", value: meta.alt ?? "" }]
+        children: [{ type: "text", value: meta.alt ?? "" }],
       };
       if (meta.imgTitle) {
         node.title = meta.imgTitle;
@@ -415,27 +452,32 @@ var MDParser = (() => {
     }
     if (meta.ref !== void 0 && meta.refLabel !== void 0) {
       const children = RestoreLinks(meta.refLabel, links);
-      const label = children.map((child) => "value" in child ? child.value : child.type === "link" ? child.children.map((c) => "value" in c ? c.value : "").join("") : "").join("");
+      const label = children
+        .map((child) => ("value" in child ? child.value : child.type === "link" ? child.children.map((c) => ("value" in c ? c.value : "")).join("") : ""))
+        .join("");
       return { node: { type: "linkRef", label, ref: meta.ref, children }, trail: "" };
     }
     if (meta.href !== void 0 && meta.label !== void 0) {
       return {
         node: linkNode(meta.href, RestoreLinks(meta.label, links), meta.linkTitle),
-        trail: ""
+        trail: "",
       };
+    }
+    if (meta.autolink !== void 0) {
+      return { node: linkNode(meta.autolink, [{ type: "text", value: meta.autolink }]), trail: "" };
     }
     if (meta.path !== void 0) {
       const trail2 = meta.path.match(REGEX_MD_FILE_PATH_TRAILING)?.[0] ?? "";
       const filePath = meta.path.slice(0, meta.path.length - trail2.length);
       return {
         node: { type: "link", href: filePath, tag: "file", children: [{ type: "text", value: filePath }] },
-        trail: trail2
+        trail: trail2,
       };
     }
     if (meta.hashtag !== void 0) {
       return {
         node: { type: "link", href: meta.hashtag.slice(1), tag: "hashtag", children: [{ type: "text", value: meta.hashtag }] },
-        trail: ""
+        trail: "",
       };
     }
     const url = meta.url ?? "";
@@ -507,7 +549,7 @@ var MDParser = (() => {
     let last = 0;
     let match;
     REGEX_MD_INLINE.lastIndex = 0;
-    while (match = REGEX_MD_INLINE.exec(masked)) {
+    while ((match = REGEX_MD_INLINE.exec(masked))) {
       if (match.index > last) {
         domMap.push(...RestoreLinks(masked.slice(last, match.index), links));
       }
@@ -543,14 +585,13 @@ var MDParser = (() => {
   }
 
   // src/parser/types.ts
-  var AST = class extends Array {
-  };
+  var AST = class extends Array {};
 
   // src/parser/html.ts
-  AST.prototype.html = function() {
+  AST.prototype.html = function () {
     return this.map(render).join("");
   };
-  AST.prototype.json = function() {
+  AST.prototype.json = function () {
     return JSON.parse(JSON.stringify(this));
   };
   function render(node) {
@@ -639,7 +680,7 @@ var MDParser = (() => {
   }
   function renderList(node) {
     const tag = node.ordered ? "ol" : "ul";
-    return `<${tag} class="md-list">${node.children.map(renderListItem).join("")}</${tag}>`;
+    return `<${tag} class="md-list"${node.start !== void 0 ? ` start="${node.start}"` : ""}>${node.children.map(renderListItem).join("")}</${tag}>`;
   }
   function renderListItem(item) {
     const children = item.children.map(render).join("\n");
@@ -701,7 +742,7 @@ var MDParser = (() => {
         const type = REGEX_MD_VIDEO_MOV.test(node.href) ? "video/quicktime" : "video/mp4";
         return `<video class="md-img" controls${title}${styleAttr}><source src="${escapeAttr(node.href)}" type="${type}"></video>`;
       }
-      const alt = node.children.map((child) => "value" in child ? child.value : "").join("");
+      const alt = node.children.map((child) => ("value" in child ? child.value : "")).join("");
       return `<img class="md-img" src="${escapeAttr(node.href)}" alt="${escapeAttr(alt)}"${title}${styleAttr}>`;
     }
     const target = REGEX_MD_SCHEME_SELF.test(node.href) ? "" : ` target="_blank" rel="noopener"`;
@@ -735,15 +776,15 @@ var MDParser = (() => {
       {
         type: "tableRow",
         header: true,
-        children: splitCells(line).map((cell) => ({ type: "tableCell", children: ParseInline(cell) }))
-      }
+        children: splitCells(line).map((cell) => ({ type: "tableCell", children: ParseInline(cell) })),
+      },
     ];
     let j = i + 2;
     while (j < lines.length && lines[j].includes("|") && !parseAlign(lines[j])) {
       rows.push({
         type: "tableRow",
         header: false,
-        children: splitCells(lines[j]).map((cell) => ({ type: "tableCell", children: ParseInline(cell) }))
+        children: splitCells(lines[j]).map((cell) => ({ type: "tableCell", children: ParseInline(cell) })),
       });
       j++;
     }
@@ -855,7 +896,10 @@ var MDParser = (() => {
         clearTimeout(copyTimers.get(pre));
         pre.classList.remove("success", "error");
         pre.classList.add(success ? "success" : "error");
-        copyTimers.set(pre, setTimeout(() => pre.classList.remove("success", "error"), 1e3));
+        copyTimers.set(
+          pre,
+          setTimeout(() => pre.classList.remove("success", "error"), 1e3),
+        );
         copyHandler?.(success, pre);
       };
     }
@@ -909,13 +953,13 @@ var MDParser = (() => {
     if (!mermaidReady) {
       mermaid.initialize({
         startOnLoad: false,
-        theme: matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "default"
+        theme: matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "default",
       });
       mermaidReady = true;
     }
     for (const pre of root.querySelectorAll(".md-mermaid:not([data-rendered]) > pre.mermaid")) {
       const text = pre.textContent ?? "";
-      if (!await mermaid.parse(text, { suppressErrors: true })) {
+      if (!(await mermaid.parse(text, { suppressErrors: true }))) {
         replaceWithCode(pre.parentElement, "pre.prettyprint");
         continue;
       }
@@ -945,13 +989,13 @@ var MDParser = (() => {
     katexjs: "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js",
     katexcss: "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css",
     googleprettifyjs: "https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js",
-    chartjs: "https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"
+    chartjs: "https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js",
   };
   var PARSE_OPTIONS = {
     indent: 4,
     fileEndpoint: "",
     hashtagEndpoint: "",
-    parseHeading: false
+    parseHeading: false,
   };
   var insertedDependencies = /* @__PURE__ */ new Map();
   if (typeof document !== "undefined" && SCRIPT_URL && SCRIPT_ELEMENT?.dataset.nanomdCss !== "off") {
