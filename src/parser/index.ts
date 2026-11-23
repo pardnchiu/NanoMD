@@ -21,7 +21,7 @@ export const DEFAULT_ENDPOINT: Required<DependencyEndpoint> = {
   mermaidjs: "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js",
   katexjs: "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js",
   katexcss: "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css",
-  googleprettifyjs: "https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js",
+  highlightjs: "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12.0/highlight.min.js",
   chartjs: "https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js",
 };
 
@@ -70,7 +70,7 @@ export function Init(options: InitOptions = {}, endpoint: DependencyEndpoint = {
     loads.push(insertHead("script", endpoint.katexjs ?? DEFAULT_ENDPOINT.katexjs));
   }
   if (enable.highlight) {
-    loads.push(insertHead("script", endpoint.googleprettifyjs ?? DEFAULT_ENDPOINT.googleprettifyjs));
+    loads.push(insertHead("script", endpoint.highlightjs ?? DEFAULT_ENDPOINT.highlightjs));
   }
   if (enable.chartjs) {
     loads.push(insertHead("script", endpoint.chartjs ?? DEFAULT_ENDPOINT.chartjs));
