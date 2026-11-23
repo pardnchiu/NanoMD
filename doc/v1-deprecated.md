@@ -46,7 +46,7 @@ Pin the exact version; `@latest` or an unversioned URL resolves to v2, where `MD
 | Container class `.pd-md-viewer` | `.nanomd` |
 | Container class `.pd-md-editor` | Removed |
 | Output elements (native `h1`, `strong`, `table` styling) | `md-*` classes (such as `.md-h1`, `.md-bold`, `.md-table`); see [Documentation](./doc.md#main-css-classes) for the full list |
-| Material Symbols, Mermaid and code-prettify injected on load | No longer injected; `MDParser.Init({ enable })` loads Mermaid, KaTeX, Chart.js and code-prettify on demand |
+| Material Symbols, Mermaid and code-prettify injected on load | No longer injected; `MDParser.Init({ enable })` loads Mermaid, KaTeX, Chart.js and highlight.js on demand |
 
 ## Behavior Changes
 

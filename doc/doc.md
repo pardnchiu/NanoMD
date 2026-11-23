@@ -8,7 +8,7 @@ Last updated: 2026-10-21
 
 - A browser with ES2022, RegExp lookbehind and `\p{L}`: Chrome, Edge, Firefox, Safari 16.4+
 - Node.js 22 or higher to use the ESM build in Node; Node and Workers only need `Parse()` and `html()`, no DOM
-- Network access to `cdn.jsdelivr.net` when Mermaid, KaTeX, Chart.js or code-prettify is enabled (override the URLs through `Init()` to self-host)
+- Network access to `cdn.jsdelivr.net` when Mermaid, KaTeX, Chart.js or highlight.js is enabled (override the URLs through `Init()` to self-host)
 - Node.js 22 or higher to build from source
 
 ## Installation
@@ -62,7 +62,7 @@ npm run build:once
 | `parseHeading` | `boolean` | `false` | When `true`, headings render as `<h1 class="md-h1">` to `<h6 class="md-h6">`; otherwise as `<span class="md-h1">` to `<span class="md-h6">`. Only the boolean `true` enables it |
 | `enable.mermaid` | `boolean` | `false` | Loads Mermaid to render ` ```mermaid ` blocks |
 | `enable.latex` | `boolean` | `false` | Loads KaTeX (JS and CSS) to render ` ```math ` and `$...$` |
-| `enable.highlight` | `boolean` | `false` | Loads code-prettify to highlight code blocks |
+| `enable.highlight` | `boolean` | `false` | Loads highlight.js to highlight code blocks |
 | `enable.chartjs` | `boolean` | `false` | Loads Chart.js to render ` ```chartjs ` blocks |
 
 ### Dependency URLs
@@ -74,7 +74,7 @@ The second argument overrides any dependency URL; the rest fall back to `DEFAULT
 | `mermaidjs` | `https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js` |
 | `katexjs` | `https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js` |
 | `katexcss` | `https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css` |
-| `googleprettifyjs` | `https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js` |
+| `highlightjs` | `https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12.0/highlight.min.js` |
 | `chartjs` | `https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js` |
 
 KaTeX references its fonts by relative path inside the CSS, so when self-hosting keep `fonts/` next to `katex.min.css`, and point `katexjs` and `katexcss` at the same version.
@@ -207,7 +207,7 @@ The extension sends no requests of its own and stores no data; see the [privacy 
 | `AST.html` | `() => string` | Renders the AST to an HTML string with escaping and raw HTML sanitization |
 | `AST.json` | `() => BlockNode[]` | Returns a deep copy of the nodes as plain JSON data, without the `AST` prototype |
 | `Init` | `(options?: InitOptions, endpoint?: DependencyEndpoint) => Promise<void[]>` | Sets `indent`, `fileEndpoint`, `hashtagEndpoint` and `parseHeading`, and loads the enabled dependencies |
-| `Refresh` | `(container?: ParentNode) => Promise<void>` | Binds copy buttons and file link clicks, and renders Chart.js, KaTeX, prettify and Mermaid inside the container; without an argument it processes the whole `document`; a container not yet in the document is skipped with an `[Invalid]` log |
+| `Refresh` | `(container?: ParentNode) => Promise<void>` | Binds copy buttons and file link clicks, and renders Chart.js, KaTeX, highlight.js and Mermaid inside the container; without an argument it processes the whole `document`; a container not yet in the document is skipped with an `[Invalid]` log |
 | `OnCopyClick` | `(handler: (success: boolean, pre: HTMLElement) => void) => void` | Registers a callback that runs after the built-in `success` / `error` feedback; only the last registration is kept |
 | `DEFAULT_ENDPOINT` | `Required<DependencyEndpoint>` | Default dependency URLs |
 | `PARSE_OPTIONS` | `{ indent: number; fileEndpoint: string; hashtagEndpoint: string; parseHeading: boolean }` | Current parse settings |
@@ -218,9 +218,9 @@ The extension sends no requests of its own and stores no data; see the [privacy 
 | `type` | Fields | Syntax |
 |---|---|---|
 | `text` | `children: InlineNode[]` | Paragraph; adjacent lines are joined by a `text` node whose value is `"\n"` |
-| `heading` | `level`, `children` | `#` to `######`, Setext (`===` / `---`) |
+| `heading` | `level`, `children` | `#` to `######` (an optional closing `#` sequence is stripped; `#` inside the text, such as `C#`, stays), Setext (`===` / `---`) |
 | `blockquote` | `tag?`, `children: BlockNode[]` | `>`; `tag` is `note` / `tip` / `important` / `warning` / `caution` |
-| `list` | `ordered`, `children: ListItem[]` | `-`, `*`, `1.`; `ListItem.checked` marks task items |
+| `list` | `ordered`, `start?`, `children: ListItem[]` | `-`, `*`, `1.`; `start` holds the first number of an ordered list not starting at 1 and renders as `<ol start="N">`; `ListItem.checked` marks task items |
 | `table` | `align`, `children: TableRow[]` | GFM tables with `:---` / `:---:` / `---:` alignment |
 | `codeBlock` | `lang?`, `value` | ` ``` ` / `~~~` (3 or more, nestable); `mermaid` / `math` / `chartjs` get extra rendering |
 | `html` | `value` | Lines that start with an HTML tag |
@@ -236,7 +236,7 @@ The extension sends no requests of its own and stores no data; see the [privacy 
 | `b`, `em`, `del`, `mark`, `sub`, `sup` | `children` | `**` / `__`, `*` / `_`, `~~`, `==`, `~x~`, `^x^`; `***` is `b` wrapping `em` |
 | `code` | `value` | Backtick runs of any length with matching open and close counts; may sit inside styles (such as `` **bold `code`** ``) |
 | `math` | `value` | `$...$` |
-| `link` | `href`, `tag?`, `title?`, `width?`, `height?`, `children` | Inline and reference links (`http(s)`, `mailto:`, `tel:`, relative paths; other schemes such as `javascript:` stay as text), bare URLs, file paths, `![]()` images and videos, `#tag`; `tag` is `image` / `video` / `youtube` / `vimeo` / `file` / `hashtag` (`href` holds the tag without `#`) |
+| `link` | `href`, `tag?`, `title?`, `width?`, `height?`, `children` | Inline and reference links (`http(s)`, `mailto:`, `tel:`, relative paths; other schemes such as `javascript:` stay as text), bare URLs, `<https://...>` autolinks (angle brackets are not rendered), file paths, `![]()` images and videos, `#tag`; `tag` is `image` / `video` / `youtube` / `vimeo` / `file` / `hashtag` (`href` holds the tag without `#`) |
 | `footnoteRef` | `id`, `index` | `[^id]` |
 | `br` | — | `<br>`, `<br/>`, `<br />` inside a paragraph or table cell; renders as `<br class="md-br">` |
 

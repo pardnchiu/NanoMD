@@ -8,7 +8,7 @@
 
 - 支援 ES2022 與 RegExp lookbehind、`\p{L}` 的瀏覽器：Chrome、Edge、Firefox、Safari 16.4+
 - 在 Node.js 使用 ESM 時需 Node.js 22 以上；Node／Worker 只需要 `Parse()` 與 `html()`，不需要 DOM
-- 啟用 Mermaid、KaTeX、Chart.js、code-prettify 時需可連線至 `cdn.jsdelivr.net`（可用 `Init()` 的 endpoint 改為自架網址）
+- 啟用 Mermaid、KaTeX、Chart.js、highlight.js 時需可連線至 `cdn.jsdelivr.net`（可用 `Init()` 的 endpoint 改為自架網址）
 - 從原始碼建置時需 Node.js 22 以上
 
 ## 安裝
@@ -62,7 +62,7 @@ npm run build:once
 | `parseHeading` | `boolean` | `false` | 為 `true` 時標題輸出為 `<h1 class="md-h1">`～`<h6 class="md-h6">`，否則輸出為 `<span class="md-h1">`～`<span class="md-h6">`；只有布林值 `true` 會啟用 |
 | `enable.mermaid` | `boolean` | `false` | 載入 Mermaid，渲染 ` ```mermaid ` 區塊 |
 | `enable.latex` | `boolean` | `false` | 載入 KaTeX（JS＋CSS），渲染 ` ```math ` 與 `$...$` |
-| `enable.highlight` | `boolean` | `false` | 載入 code-prettify，為程式碼區塊上色 |
+| `enable.highlight` | `boolean` | `false` | 載入 highlight.js，為程式碼區塊上色 |
 | `enable.chartjs` | `boolean` | `false` | 載入 Chart.js，渲染 ` ```chartjs ` 區塊 |
 
 ### 依賴網址
@@ -74,7 +74,7 @@ npm run build:once
 | `mermaidjs` | `https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js` |
 | `katexjs` | `https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js` |
 | `katexcss` | `https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css` |
-| `googleprettifyjs` | `https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js` |
+| `highlightjs` | `https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12.0/highlight.min.js` |
 | `chartjs` | `https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js` |
 
 KaTeX 的字型以相對路徑寫在 CSS 內，自架時 `fonts/` 需與 `katex.min.css` 放在同一層，且 `katexjs`、`katexcss` 應指向同一版本。
@@ -209,7 +209,7 @@ MDParser.OnCopyClick((success, pre) => {
 | `AST.html` | `() => string` | 將 AST 輸出為 HTML 字串，含跳脫與 raw HTML 清洗 |
 | `AST.json` | `() => BlockNode[]` | 回傳節點的深拷貝，為不含 `AST` prototype 的純 JSON 資料 |
 | `Init` | `(options?: InitOptions, endpoint?: DependencyEndpoint) => Promise<void[]>` | 設定 `indent`、`fileEndpoint`、`hashtagEndpoint`、`parseHeading` 並載入啟用的依賴 |
-| `Refresh` | `(container?: ParentNode) => Promise<void>` | 在容器內綁定複製按鈕與檔案連結點擊、渲染 Chart.js、KaTeX、prettify、Mermaid；未傳入時處理整份 `document`；容器尚未放進頁面時不處理並記錄 `[Invalid]` |
+| `Refresh` | `(container?: ParentNode) => Promise<void>` | 在容器內綁定複製按鈕與檔案連結點擊、渲染 Chart.js、KaTeX、highlight.js、Mermaid；未傳入時處理整份 `document`；容器尚未放進頁面時不處理並記錄 `[Invalid]` |
 | `OnCopyClick` | `(handler: (success: boolean, pre: HTMLElement) => void) => void` | 註冊在內建 `success`／`error` 回饋之後執行的回呼；只保留最後一次註冊 |
 | `DEFAULT_ENDPOINT` | `Required<DependencyEndpoint>` | 依賴的預設網址 |
 | `PARSE_OPTIONS` | `{ indent: number; fileEndpoint: string; hashtagEndpoint: string; parseHeading: boolean }` | 目前的解析設定 |
@@ -220,9 +220,9 @@ MDParser.OnCopyClick((success, pre) => {
 | `type` | 欄位 | 對應語法 |
 |---|---|---|
 | `text` | `children: InlineNode[]` | 一般段落；相鄰行以值為 `"\n"` 的 `text` 節點連接 |
-| `heading` | `level`、`children` | `#`～`######`、Setext（`===`／`---`） |
+| `heading` | `level`、`children` | `#`～`######`（結尾選用的 `#` 序列會移除；文字內的 `#`，如 `C#`，保留）、Setext（`===`／`---`） |
 | `blockquote` | `tag?`、`children: BlockNode[]` | `>`；`tag` 為 `note`／`tip`／`important`／`warning`／`caution` |
-| `list` | `ordered`、`children: ListItem[]` | `-`、`*`、`1.`；`ListItem.checked` 對應任務清單 |
+| `list` | `ordered`、`start?`、`children: ListItem[]` | `-`、`*`、`1.`；有序清單不從 1 開始時 `start` 記錄起始編號，輸出為 `<ol start="N">`；`ListItem.checked` 對應任務清單 |
 | `table` | `align`、`children: TableRow[]` | GFM 表格，含 `:---`／`:---:`／`---:` 對齊 |
 | `codeBlock` | `lang?`、`value` | ` ``` `／`~~~`（3 個以上、可巢狀）；`lang` 為 `mermaid`／`math`／`chartjs` 時另行渲染 |
 | `html` | `value` | 以 HTML 標籤開頭的行 |
@@ -238,7 +238,7 @@ MDParser.OnCopyClick((success, pre) => {
 | `b`、`em`、`del`、`mark`、`sub`、`sup` | `children` | `**`／`__`、`*`／`_`、`~~`、`==`、`~x~`、`^x^`；`***` 為 `b` 包 `em` |
 | `code` | `value` | 任意長度反引號，開頭與結尾數量相同；可放在樣式內（如 `` **粗體 `code`** ``） |
 | `math` | `value` | `$...$` |
-| `link` | `href`、`tag?`、`title?`、`width?`、`height?`、`children` | 行內與參照式連結（`http(s)`、`mailto:`、`tel:`、相對路徑；其他協定如 `javascript:` 維持原文）、裸網址、檔案路徑、`![]()` 圖片與影片、`#tag`；`tag` 為 `image`／`video`／`youtube`／`vimeo`／`file`／`hashtag`（`href` 為不含 `#` 的標籤） |
+| `link` | `href`、`tag?`、`title?`、`width?`、`height?`、`children` | 行內與參照式連結（`http(s)`、`mailto:`、`tel:`、相對路徑；其他協定如 `javascript:` 維持原文）、裸網址、`<https://...>` 自動連結（角括號不會輸出）、檔案路徑、`![]()` 圖片與影片、`#tag`；`tag` 為 `image`／`video`／`youtube`／`vimeo`／`file`／`hashtag`（`href` 為不含 `#` 的標籤） |
 | `footnoteRef` | `id`、`index` | `[^id]` |
 | `br` | — | 段落或表格儲存格內的 `<br>`、`<br/>`、`<br />`；輸出為 `<br class="md-br">` |
 

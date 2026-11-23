@@ -63,7 +63,7 @@ graph TB
         Mask --> M1[行內數學式 $...$]
         Mask --> M2[跳脫字元]
         Mask --> M3["註腳引用 [^id]"]
-        Mask --> M4[連結／圖片／參照連結／路徑／裸網址]
+        Mask --> M4[連結／圖片／參照連結／自動連結／路徑／裸網址]
         M4 --> Marks[樣式比對 粗斜體 刪除 標記 上下標]
         Marks --> Restore[RestoreLinks 還原佔位符]
     end
@@ -124,7 +124,7 @@ graph TB
         Opt[options.enable] --> Insert[insertHead 依網址去重]
         Insert --> M[mermaid.min.js]
         Insert --> K[katex.min.js＋katex.min.css]
-        Insert --> P[run_prettify.js]
+        Insert --> P[highlight.min.js]
         Insert --> C[chart.umd.min.js]
     end
     subgraph Refresh
@@ -133,7 +133,7 @@ graph TB
         File[bindFile → fetch fileEndpoint]
         Chart[renderChart 失敗改顯示程式碼]
         Latex[renderLatex 區塊失敗改顯示程式碼，行內還原為 $...$]
-        PR[PR.prettyPrint]
+        Highlight[renderHighlight，只為 hljs 認得 name 的程式碼區塊上色]
         Mermaid[renderMermaid parse 預檢後以 mermaid.render 產生 SVG，失敗改顯示程式碼]
         Done[成功者標上 data-rendered，隱藏備用程式碼]
     end

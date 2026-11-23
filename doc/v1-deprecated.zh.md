@@ -46,7 +46,7 @@ npm i @pardnchiu/nanomd@1.11.6
 | 容器 class `.pd-md-viewer` | `.nanomd` |
 | 容器 class `.pd-md-editor` | 移除 |
 | 輸出元素（`h1`、`strong`、`table` 等原生標籤樣式） | `md-*` class（如 `.md-h1`、`.md-bold`、`.md-table`），完整列表見 [技術文件](./doc.zh.md#主要-css-class) |
-| 載入時自動插入 Material Symbols、Mermaid、code-prettify | 不再自動載入；以 `MDParser.Init({ enable })` 按需載入 Mermaid、KaTeX、Chart.js、code-prettify |
+| 載入時自動插入 Material Symbols、Mermaid、code-prettify | 不再自動載入；以 `MDParser.Init({ enable })` 按需載入 Mermaid、KaTeX、Chart.js、highlight.js |
 
 ## 行為差異
 

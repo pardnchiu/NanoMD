@@ -63,7 +63,7 @@ graph TB
         Mask --> M1[Inline math $...$]
         Mask --> M2[Escapes]
         Mask --> M3["Footnote refs [^id]"]
-        Mask --> M4[Links / images / reference links / paths / bare URLs]
+        Mask --> M4[Links / images / reference links / autolinks / paths / bare URLs]
         M4 --> Marks[Style matching bold italic strike mark sub sup]
         Marks --> Restore[RestoreLinks restores placeholders]
     end
@@ -124,7 +124,7 @@ graph TB
         Opt[options.enable] --> Insert[insertHead deduplicated by URL]
         Insert --> M[mermaid.min.js]
         Insert --> K[katex.min.js and katex.min.css]
-        Insert --> P[run_prettify.js]
+        Insert --> P[highlight.min.js]
         Insert --> C[chart.umd.min.js]
     end
     subgraph Refresh
@@ -133,7 +133,7 @@ graph TB
         File[bindFile → fetch fileEndpoint]
         Chart[renderChart, falls back to code]
         Latex[renderLatex, block falls back to code, inline restores $...$]
-        PR[PR.prettyPrint]
+        Highlight[renderHighlight, colors code blocks whose name hljs recognizes]
         Mermaid[renderMermaid, parse precheck then mermaid.render to SVG, falls back to code]
         Done[Successful wrappers get data-rendered, hiding the fallback code]
     end
