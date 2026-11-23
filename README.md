@@ -39,7 +39,7 @@ Last updated: 2026-10-20
 - **Single-Pass Line Parser** — Each line is scanned once to build the whole tree; a 4 MB document renders in about 90 ms, over 30 times faster than v1 and more than 380 times faster at 1 MB.
 - **Renderer-Agnostic AST** — `Parse()` returns a node tree and `json()` copies it out as plain data; the web and SSR use `html()` directly, and native renderers for iOS or Flutter can be built on the same output.
 - **Extended Syntax Beyond GFM** — Footnotes, reference links, GitHub alerts, task lists, inline and block math, image sizing, video embeds and `#tag` links are built in.
-- **On-Demand Dependencies with Fallbacks** — Only the enabled Mermaid, KaTeX, Chart.js and prettify load, and invalid blocks fall back to plain code blocks.
+- **On-Demand Dependencies with Fallbacks** — Only the enabled Mermaid, KaTeX, Chart.js and highlight.js load, and invalid blocks fall back to plain code blocks.
 - **Safe by Default** — Text and attributes are escaped at output, and raw HTML loses dangerous tags, event attributes and `javascript:` URLs.
 
 ## Benchmark

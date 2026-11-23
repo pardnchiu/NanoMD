@@ -29,7 +29,7 @@ export function Refresh(container?: ParentNode): Promise<void> {
   bindFile(root);
   renderChart(root);
   renderLatex(root);
-  deps.PR?.prettyPrint();
+  renderHighlight(root);
   return renderMermaid(root);
 }
 
@@ -71,6 +71,36 @@ function bindCopy(root: ParentNode): void {
       copyTimers.set(pre, setTimeout(() => pre.classList.remove("success", "error"), 1000));
       copyHandler?.(success, pre);
     };
+  }
+}
+
+function renderHighlight(root: ParentNode): void {
+  const hljs = deps.hljs;
+  if (!hljs) {
+    return;
+  }
+  for (const code of root.querySelectorAll<HTMLElement>("pre.prettyprint > code[name]:not([data-highlighted])")) {
+    const language = code.getAttribute("name") ?? "";
+    if (!hljs.getLanguage(language)) {
+      continue;
+    }
+    const rows = [...code.querySelectorAll("li")];
+    const html = hljs.highlight(rows.map((li) => li.textContent).join("\n"), { language, ignoreIllegals: true }).value;
+    const open: string[] = [];
+    html.split("\n").forEach((line, i) => {
+      const prefix = open.join("");
+      for (const [tag] of line.matchAll(/<span[^>]*>|<\/span>/g)) {
+        if (tag === "</span>") {
+          open.pop();
+        } else {
+          open.push(tag);
+        }
+      }
+      if (rows[i]) {
+        rows[i].innerHTML = prefix + line + "</span>".repeat(open.length);
+      }
+    });
+    code.setAttribute("data-highlighted", "");
   }
 }
 

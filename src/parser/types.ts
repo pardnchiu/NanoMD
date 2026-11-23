@@ -10,7 +10,7 @@ export interface DependencyEndpoint {
   mermaidjs?: string;
   katexjs?: string;
   katexcss?: string;
-  googleprettifyjs?: string;
+  highlightjs?: string;
   chartjs?: string;
 }
 
@@ -29,8 +29,9 @@ export interface Dependency {
   katex?: {
     render(tex: string, element: HTMLElement, options: { displayMode: boolean; throwOnError: boolean }): void;
   };
-  PR?: {
-    prettyPrint(): void;
+  hljs?: {
+    getLanguage(name: string): unknown;
+    highlight(code: string, options: { language: string; ignoreIllegals: boolean }): { value: string };
   };
   mermaid?: {
     initialize(config: { startOnLoad: boolean; theme: string }): void;

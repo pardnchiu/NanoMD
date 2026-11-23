@@ -18,6 +18,42 @@
   --alert-important: #8250df;
   --alert-warning: #9a6700;
   --alert-caution: #d1242f;
+
+  pre.prettyprint .hljs-keyword,
+  pre.prettyprint .hljs-tag,
+  pre.prettyprint .hljs-name,
+  pre.prettyprint .hljs-selector-tag {
+    color: #cf222e;
+  }
+  pre.prettyprint .hljs-string,
+  pre.prettyprint .hljs-regexp,
+  pre.prettyprint .hljs-addition {
+    color: #0a3069;
+  }
+  pre.prettyprint .hljs-comment,
+  pre.prettyprint .hljs-quote {
+    color: #6e7781;
+  }
+  pre.prettyprint .hljs-type,
+  pre.prettyprint .hljs-title,
+  pre.prettyprint .hljs-built_in,
+  pre.prettyprint .hljs-attr,
+  pre.prettyprint .hljs-attribute,
+  pre.prettyprint .hljs-selector-class,
+  pre.prettyprint .hljs-selector-id {
+    color: #8250df;
+  }
+  pre.prettyprint .hljs-literal,
+  pre.prettyprint .hljs-number,
+  pre.prettyprint .hljs-symbol,
+  pre.prettyprint .hljs-meta,
+  pre.prettyprint .hljs-deletion {
+    color: #0550ae;
+  }
+  pre.prettyprint .hljs-punctuation,
+  pre.prettyprint .hljs-operator {
+    color: #953800;
+  }
 }
 
 @mixin nanomd-dark {
@@ -38,31 +74,39 @@
   --alert-warning: #d29922;
   --alert-caution: #f85149;
 
-  pre.prettyprint .pln {
-    color: var(--text);
-  }
-  pre.prettyprint .kwd,
-  pre.prettyprint .tag {
+  pre.prettyprint .hljs-keyword,
+  pre.prettyprint .hljs-tag,
+  pre.prettyprint .hljs-name,
+  pre.prettyprint .hljs-selector-tag {
     color: #7aa2f7;
   }
-  pre.prettyprint .str,
-  pre.prettyprint .atv {
+  pre.prettyprint .hljs-string,
+  pre.prettyprint .hljs-regexp,
+  pre.prettyprint .hljs-addition {
     color: #9ece6a;
   }
-  pre.prettyprint .com {
+  pre.prettyprint .hljs-comment,
+  pre.prettyprint .hljs-quote {
     color: #8d98a2;
   }
-  pre.prettyprint .typ,
-  pre.prettyprint .atn {
+  pre.prettyprint .hljs-type,
+  pre.prettyprint .hljs-title,
+  pre.prettyprint .hljs-built_in,
+  pre.prettyprint .hljs-attr,
+  pre.prettyprint .hljs-attribute,
+  pre.prettyprint .hljs-selector-class,
+  pre.prettyprint .hljs-selector-id {
     color: #c0a3f5;
   }
-  pre.prettyprint .lit,
-  pre.prettyprint .dec {
+  pre.prettyprint .hljs-literal,
+  pre.prettyprint .hljs-number,
+  pre.prettyprint .hljs-symbol,
+  pre.prettyprint .hljs-meta,
+  pre.prettyprint .hljs-deletion {
     color: #f7a26a;
   }
-  pre.prettyprint .pun,
-  pre.prettyprint .opn,
-  pre.prettyprint .clo {
+  pre.prettyprint .hljs-punctuation,
+  pre.prettyprint .hljs-operator {
     color: #c8b26a;
   }
 }
@@ -413,10 +457,6 @@
   line-height: 1.75rem;
   min-height: 1.75rem;
   white-space: pre;
-}
-
-.nanomd pre.prettyprint .pln {
-  color: inherit;
 }
 
 .nanomd pre.prettyprint[name]:not([name=""]) {
