@@ -442,7 +442,8 @@
   background: var(--code-bg);
   border: none;
   border-radius: 0.25rem;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
   transition: 0.3s;
 }
 
@@ -454,8 +455,8 @@
 }
 
 .nanomd pre.prettyprint li {
-  line-height: 1.75rem;
-  min-height: 1.75rem;
+  line-height: 1.25rem;
+  min-height: 1.25rem;
   white-space: pre;
 }
 
